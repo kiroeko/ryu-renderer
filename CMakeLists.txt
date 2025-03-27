@@ -31,7 +31,7 @@ endmacro()
 cmake_minimum_required(VERSION 3.26 FATAL_ERROR)
 
 # Define project
-project(opengl-renderer
+project(ryu-renderer
         LANGUAGES C CXX)
 
 # Check environment
@@ -79,6 +79,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${PROJECT_SOURCE_DIR}/third-party/cmake-module)
 find_package(OpenGL REQUIRED)
 find_package(Glad REQUIRED)
 find_package(GLFW REQUIRED)
+find_package(STB REQUIRED)
 find_package(GLM REQUIRED)
 
 # Set definitions
@@ -123,6 +124,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     OpenGL::GL
     Glad
     GLFW
+    STB
     GLM)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
