@@ -17,14 +17,14 @@ namespace OGLRenderer::Common
     class Factory
     {
     template <typename T, typename... Args>
-    static constexpr bool HasBeforeCreate = requires(T t, Args&&... args) {
+    static constexpr bool hasBeforeCreate = requires(T t, Args&&... args) {
         { t.BeforeCreate(std::forward<Args>(args)...) } -> std::same_as<bool>;
     };
     public:
         template <typename... Args>
         requires std::constructible_from<P, Args...> &&
                  std::derived_from<F, Factory<P, F>> &&
-                 HasBeforeCreate<F, Args...>
+                 hasBeforeCreate<F, Args...>
         std::shared_ptr<P> Create(Args&&... args)
         {
             std::unique_lock<std::shared_mutex> lock(mutex);
