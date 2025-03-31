@@ -45,9 +45,16 @@ namespace OGLRenderer::Common
         }
 
         template <typename Pred>
-        void RemoveIf(Pred pred)
+        void RemoveAll(Pred pred)
         {
             products.remove_if(pred);
+        }
+
+        template <typename Pred>
+        std::shared_ptr<P> FindAny(Pred pred)
+        {
+            auto it = std::find_if(products.begin(), products.end(), pred);
+            return (it != products.end()) ? *it : nullptr;
         }
 
         template <typename Pred>
