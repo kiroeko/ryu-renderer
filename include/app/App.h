@@ -35,7 +35,7 @@ namespace OGLRenderer::App
             glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
             
-            // ÑİÊ¾´úÂë½ûÖ¹´°¿Ú±ä»¯
+            // æ¼”ç¤ºä»£ç ç¦æ­¢çª—å£å˜åŒ–
             glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
             
             window = glfwCreateWindow(initWidth, initHeight, name.c_str(), NULL, NULL);
@@ -107,18 +107,18 @@ namespace OGLRenderer::App
             return windowHeight;
         }
     private:
-        // ÕâÀïÎÒÃÇ¼òµ¥µØÈ¥½ÓÊÜÒ»ÏÂ¼üÅÌºÍÊó±êµÄÊı¾İ£¬²¢¸ù¾İÊó±êÎ»ÖÃµ÷Õû Shader ²ÎÊıÀ´ÈÃ»æÖÆÍ¼ĞÎ¸ù¾İÊó±êÑÕÉ«¶ø²»Í¬£¬
-        //     Èç¹ûÒª·â×°µÃºÍÓÎÏ·ÒıÇæÒ»Ñù£¬ÄÇÎÒÃÇÓ¦¸Ã½ÓÊÜËùÓĞµÄÊäÈëÊÂ¼şºÍÓÎÏ·ÒıÇæÄÚ²¿¶¨ÒåµÄÊÂ¼ş£¬°ÑÊÂ¼şÃÇ·Åµ½ÊÂ¼ş¶ÓÁĞÀï£¬ÔÙÓÉÎÒÃÇ×Ô¼º¶¨ÒåµÄÊÂ¼şÀàĞÍÓĞ¹Ø»Øµ÷Öğ¸ö´¦Àí¡£
+        // è¿™é‡Œæˆ‘ä»¬ç®€å•åœ°å»æ¥å—ä¸€ä¸‹é”®ç›˜å’Œé¼ æ ‡çš„æ•°æ®ï¼Œå¹¶æ ¹æ®é¼ æ ‡ä½ç½®è°ƒæ•´ Shader å‚æ•°æ¥è®©ç»˜åˆ¶å›¾å½¢æ ¹æ®é¼ æ ‡é¢œè‰²è€Œä¸åŒï¼Œ
+        //     å¦‚æœè¦å°è£…å¾—å’Œæ¸¸æˆå¼•æ“ä¸€æ ·ï¼Œé‚£æˆ‘ä»¬åº”è¯¥æ¥å—æ‰€æœ‰çš„è¾“å…¥äº‹ä»¶å’Œæ¸¸æˆå¼•æ“å†…éƒ¨å®šä¹‰çš„äº‹ä»¶ï¼ŒæŠŠäº‹ä»¶ä»¬æ”¾åˆ°äº‹ä»¶é˜Ÿåˆ—é‡Œï¼Œå†ç”±æˆ‘ä»¬è‡ªå·±å®šä¹‰çš„äº‹ä»¶ç±»å‹æœ‰å…³å›è°ƒé€ä¸ªå¤„ç†ã€‚
         void processInput(GLFWwindow* window)
         {
-            // ESC ÍË³ö
+            // ESC é€€å‡º
             if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
                 glfwSetWindowShouldClose(window, true);
         }
 
-        // ÕâÀïÎÒÃÇ¼òµ¥ÊÖ¶¯ÌîĞ´Ò»ÏÂËùĞèµÄ mesh ºÍËüÃÇÓĞ¹ØµÄ±ä»»¾ØÕóµÄÊı¾İ£¬
-        //     Êµ¼ÊÉÏ mesh Ò»°ãÓÉ fbx ÎÄ¼ş¶ÁÈë£¬
-        //     ±ä»»¾ØÕóÒ»°ãÊÇÍ¨¹ıÓÎÏ·³¡¾°±à¼­Æ÷ÉèÖÃµÄÊıÖµ¡£
+        // è¿™é‡Œæˆ‘ä»¬ç®€å•æ‰‹åŠ¨å¡«å†™ä¸€ä¸‹æ‰€éœ€çš„ mesh å’Œå®ƒä»¬æœ‰å…³çš„å˜æ¢çŸ©é˜µçš„æ•°æ®ï¼Œ
+        //     å®é™…ä¸Š mesh ä¸€èˆ¬ç”± fbx æ–‡ä»¶è¯»å…¥ï¼Œ
+        //     å˜æ¢çŸ©é˜µä¸€èˆ¬æ˜¯é€šè¿‡æ¸¸æˆåœºæ™¯ç¼–è¾‘å™¨è®¾ç½®çš„æ•°å€¼ã€‚
         void initScene()
         {
             initMainScene();
@@ -132,8 +132,8 @@ namespace OGLRenderer::App
 
         void initMainScene()
         {
-            // ³¡¾°±¾Éí£¬ÕâÀïÇ¡ºÃÊÇ´øÎÆÀíÍ¼°¸µÄ¾ØĞÎ
-            // °ó¶¨ mesh µ½ VAO
+            // åœºæ™¯æœ¬èº«ï¼Œè¿™é‡Œæ°å¥½æ˜¯å¸¦çº¹ç†å›¾æ¡ˆçš„çŸ©å½¢
+            // ç»‘å®š mesh åˆ° VAO
             GLfloat vertices[] = {
                 // Position   // TexCoord
                 -1.0f,  1.0f, 0.0f, 1.0f,
@@ -171,16 +171,16 @@ namespace OGLRenderer::App
 
             glBindVertexArray(0);
 
-            // ¼ÓÔØ³¡¾°ÌùÍ¼
+            // åŠ è½½åœºæ™¯è´´å›¾
             glActiveTexture(GL_TEXTURE0);
             glGenTextures(1, &SceneTexture);
             glBindTexture(GL_TEXTURE_2D, SceneTexture);
-            // Îªµ±Ç°°ó¶¨µÄÎÆÀí¶ÔÏóÉèÖÃ»·ÈÆ¡¢¹ıÂË·½Ê½
+            // ä¸ºå½“å‰ç»‘å®šçš„çº¹ç†å¯¹è±¡è®¾ç½®ç¯ç»•ã€è¿‡æ»¤æ–¹å¼
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            // ¼ÓÔØ²¢Éú³ÉÎÆÀí
+            // åŠ è½½å¹¶ç”Ÿæˆçº¹ç†
             int textureWidth = 0, textureHeight = 0, textureNRChannels = 0;
             stbi_set_flip_vertically_on_load(true);
             unsigned char* textureData = stbi_load("res/textures/test.jpg", &textureWidth, &textureHeight, &textureNRChannels, 0);
@@ -199,8 +199,8 @@ namespace OGLRenderer::App
 
         void initQuad()
         {
-            // äÖÈ¾Ä£ºıÓÃµÄÄ£ĞÍ£¬ÕâÀïÊÇÒ»¸ö´øÎÆÀíµÄ£¬ºÍÆÁÄ»´óĞ¡Ò»ÖÂµÄ¾ØĞÎ
-            // °ó¶¨ mesh µ½ VAO
+            // æ¸²æŸ“æ¨¡ç³Šç”¨çš„æ¨¡å‹ï¼Œè¿™é‡Œæ˜¯ä¸€ä¸ªå¸¦çº¹ç†çš„ï¼Œå’Œå±å¹•å¤§å°ä¸€è‡´çš„çŸ©å½¢
+            // ç»‘å®š mesh åˆ° VAO
             GLfloat vertices[] = {
                 // Position   // TexCoord
                 -1.0f,  1.0f, 0.0f, 1.0f,
@@ -241,13 +241,13 @@ namespace OGLRenderer::App
 
         void initShader()
         {
-            // ¼ÓÔØ ³¡¾°ÓÃµÄ shader
+            // åŠ è½½ åœºæ™¯ç”¨çš„ shader
             simpleShader = OGLRenderer::Graphics::Shader("res/shaders/simple.vs", "res/shaders/simple.fs");
             simpleShader.Use();
-            // 0 ´ú±í GL_TEXTURE0
+            // 0 ä»£è¡¨ GL_TEXTURE0
             simpleShader.SetUniformWithInt("mainTexture", 0);
 
-            // ¼ÓÔØ ¸ßË¹Ä£ºıµÄ shader
+            // åŠ è½½ é«˜æ–¯æ¨¡ç³Šçš„ shader
             blurShader = OGLRenderer::Graphics::Shader("res/shaders/blur.vs", "res/shaders/blur.fs");
             blurShader.Use();
             blurShader.SetUniformWithInt("mainTexture", 0);
@@ -275,41 +275,41 @@ namespace OGLRenderer::App
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
-        // ÕâÀïÎÒÃÇ¼òµ¥ºÏÅúäÖÈ¾Ò»ÏÂÓÉ²»Í¬²ÄÖÊ²ÎÊıµÄ¶à¸öÎï¼ş£¬
-        //     Êµ¼ÊÉÏ¿ÉÒÔÊ¹ÓÃ¸´ÔÓµÄ³¡¾°ÎïÌåÔ¤ÌŞ³ı¡¢LODÒÔ¼°ºÏÅúµÄ²ßÂÔ£¬ÓÅ»¯ÕâÒ»²½µÄĞÔÄÜ£¬µ«ÆäÊµ¶ÔÓÚ¼¸¸ö³¡¾°ÎïÌå£¬Ò²Ã»É¶ÓÅ»¯¿Õ¼ä¡£
+        // è¿™é‡Œæˆ‘ä»¬ç®€å•åˆæ‰¹æ¸²æŸ“ä¸€ä¸‹ç”±ä¸åŒæè´¨å‚æ•°çš„å¤šä¸ªç‰©ä»¶ï¼Œ
+        //     å®é™…ä¸Šå¯ä»¥ä½¿ç”¨å¤æ‚çš„åœºæ™¯ç‰©ä½“é¢„å‰”é™¤ã€LODä»¥åŠåˆæ‰¹çš„ç­–ç•¥ï¼Œä¼˜åŒ–è¿™ä¸€æ­¥çš„æ€§èƒ½ï¼Œä½†å…¶å®å¯¹äºå‡ ä¸ªåœºæ™¯ç‰©ä½“ï¼Œä¹Ÿæ²¡å•¥ä¼˜åŒ–ç©ºé—´ã€‚
         void renderScene()
         {
-            // ÏÈ°ó¶¨ fbo0
+            // å…ˆç»‘å®š fbo0
             glBindFramebuffer(GL_FRAMEBUFFER, fbo[0]);
 
-            // äÖÈ¾³¡¾°±¾Éíµ½ fbo ÀïÃæ
+            // æ¸²æŸ“åœºæ™¯æœ¬èº«åˆ° fbo é‡Œé¢
             simpleShader.Use();
             glBindTexture(GL_TEXTURE_2D, SceneTexture);
             glBindVertexArray(SceneVAO);
             glDrawElements(GL_TRIANGLES, SceneElementCount, GL_UNSIGNED_INT, 0);
 
-            // ½øĞĞ¸ßË¹Ä£ºı£¬Ë®Æ½+´¹Ö±¹²µü´ú 5 ´Î
+            // è¿›è¡Œé«˜æ–¯æ¨¡ç³Šï¼Œæ°´å¹³+å‚ç›´å…±è¿­ä»£ 5 æ¬¡
             blurShader.Use();
             bool horizontal = true, firstIteration = true;
-            constexpr int amount = 10; // Ä£ºıµü´ú´ÎÊı
+            constexpr int amount = 30; // æ¨¡ç³Šè¿­ä»£æ¬¡æ•°
             for (unsigned int i = 0; i < amount; ++i)
             {
                 glBindFramebuffer(GL_FRAMEBUFFER, fbo[horizontal]);
                 glBindTexture(GL_TEXTURE_2D, firstIteration ? SceneTexture : fboTextures[!horizontal]);
                 blurShader.SetUniformWithInt("isHorizontal", (int)horizontal);
 
-                // äÖÈ¾È«ÆÁËÄ±ßĞÎµ½ fbo Àï
+                // æ¸²æŸ“å…¨å±å››è¾¹å½¢åˆ° fbo é‡Œ
                 glBindVertexArray(QuadVAO);
                 glDrawElements(GL_TRIANGLES, QuadElementCount, GL_UNSIGNED_INT, 0);
 
-                // ×´Ì¬¹ÜÀí
+                // çŠ¶æ€ç®¡ç†
                 horizontal = !horizontal;
                 if (firstIteration)
                     firstIteration = false;
             }
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-            // °Ñ×îºóÒ»´ÎäÖÈ¾³öµÄ fbo ÎÆÀí×÷Îª½á¹ûÊä³öµ½ OpenGl »­²¼ÉÏ
+            // æŠŠæœ€åä¸€æ¬¡æ¸²æŸ“å‡ºçš„ fbo çº¹ç†ä½œä¸ºç»“æœè¾“å‡ºåˆ° OpenGl ç”»å¸ƒä¸Š
             simpleShader.Use();
             glBindTexture(GL_TEXTURE_2D, fboTextures[!horizontal]);
             glBindVertexArray(QuadVAO);
