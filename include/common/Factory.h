@@ -7,6 +7,7 @@
 #include <iostream>
 #include <list>
 #include <memory>
+#include <shared_mutex>
 #include <utility>
 
 namespace OGLRenderer::Common
@@ -26,6 +27,8 @@ namespace OGLRenderer::Common
                  HasBeforeCreate<F, Args...>
         std::shared_ptr<P> Create(Args&&... args)
         {
+            std::unique_lock<std::shared_mutex> lock(mutex);
+
             if (!static_cast<F*>(this)->BeforeCreate(std::forward<Args>(args)...))
                 return nullptr;
 
@@ -41,18 +44,24 @@ namespace OGLRenderer::Common
 
         void Remove(const std::shared_ptr<P>& p)
         {
+            std::unique_lock<std::shared_mutex> lock(mutex);
+
             products.remove(p);
         }
 
         template <typename Pred>
         void RemoveAll(Pred pred)
         {
+            std::unique_lock<std::shared_mutex> lock(mutex);
+
             products.remove_if(pred);
         }
 
         template <typename Pred>
         std::shared_ptr<P> FindAny(Pred pred)
         {
+            std::shared_lock<std::shared_mutex> lock(mutex);
+
             auto it = std::find_if(products.begin(), products.end(), pred);
             return (it != products.end()) ? *it : nullptr;
         }
@@ -60,6 +69,8 @@ namespace OGLRenderer::Common
         template <typename Pred>
         std::list<std::shared_ptr<P>> FindAll(Pred pred)
         {
+            std::shared_lock<std::shared_mutex> lock(mutex);
+
             std::vector<std::shared_ptr<P>> matched;
             std::copy_if(
                 products.begin(),
@@ -72,6 +83,8 @@ namespace OGLRenderer::Common
         
         void Clear()
         {
+            std::unique_lock<std::shared_mutex> lock(mutex);
+
             products.clear();
         }
         
@@ -86,6 +99,7 @@ namespace OGLRenderer::Common
         // bool BeforeCreate(Args&&... args) { /* do judgement */ }
 
         std::list<std::shared_ptr<P>> products;
+        mutable std::shared_mutex mutex;
     };
 }
 
