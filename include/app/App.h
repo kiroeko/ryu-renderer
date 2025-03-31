@@ -8,6 +8,8 @@
 #include "common/Singleton.h"
 #include "graphics/Shader.h"
 
+#include "common/Factory.h"
+
 #include <iostream>
 #include <iterator>
 #include <string>
