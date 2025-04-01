@@ -27,15 +27,15 @@ namespace OGLRenderer::Common
                  hasBeforeCreate<F, Args...>
         std::shared_ptr<P> Create(Args&&... args)
         {
-            std::unique_lock<std::shared_mutex> lock(mutex);
-
             if (!static_cast<F*>(this)->BeforeCreate(std::forward<Args>(args)...))
                 return nullptr;
 
             std::shared_ptr<P> p = std::make_shared<P>(std::forward<Args>(args)...);
             if (p)
             {
+                std::unique_lock<std::shared_mutex> lock(mutex);
                 products.emplace_back(p);
+                lock.unlock();
                 AfterCreate(p);
             }
 
@@ -45,11 +45,10 @@ namespace OGLRenderer::Common
         template <typename Pred>
         bool Remove(Pred pred)
         {
-            std::shared_lock<std::shared_mutex> lock(mutex);
-
             auto it = std::find_if(products.begin(), products.end(), pred);
             if (it != products.end())
             {
+                std::unique_lock<std::shared_mutex> lock(mutex);
                 products.erase(it);
                 return true;
             }

@@ -244,10 +244,11 @@ namespace OGLRenderer::App
         void initShader()
         {
             // 加载 场景用的 shader
-            simpleShader = OGLRenderer::Graphics::Shader("res/shaders/simple.vs", "res/shaders/simple.fs");
-            simpleShader.Use();
+            ShaderManager sm;
+            simpleShader = sm.Create("res/shaders/simple.vs", "res/shaders/simple.fs");
+            simpleShader->Use();
             // 0 代表 GL_TEXTURE0
-            simpleShader.SetUniformWithInt("mainTexture", 0);
+            simpleShader->SetUniformWithInt("mainTexture", 0);
 
             // 加载 高斯模糊的 shader
             blurShader = OGLRenderer::Graphics::Shader("res/shaders/blur.vs", "res/shaders/blur.fs");
@@ -285,7 +286,7 @@ namespace OGLRenderer::App
             glBindFramebuffer(GL_FRAMEBUFFER, fbo[0]);
 
             // 渲染场景本身到 fbo 里面
-            simpleShader.Use();
+            simpleShader->Use();
             glBindTexture(GL_TEXTURE_2D, SceneTexture);
             glBindVertexArray(SceneVAO);
             glDrawElements(GL_TRIANGLES, SceneElementCount, GL_UNSIGNED_INT, 0);
@@ -312,7 +313,7 @@ namespace OGLRenderer::App
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             // 把最后一次渲染出的 fbo 纹理作为结果输出到 OpenGl 画布上
-            simpleShader.Use();
+            simpleShader->Use();
             glBindTexture(GL_TEXTURE_2D, fboTextures[!horizontal]);
             glBindVertexArray(QuadVAO);
             glDrawElements(GL_TRIANGLES, QuadElementCount, GL_UNSIGNED_INT, 0);
@@ -354,7 +355,7 @@ namespace OGLRenderer::App
         GLuint QuadVAO = 0;
         size_t QuadElementCount = 0;
 
-        OGLRenderer::Graphics::Shader simpleShader;
+        std::shared_ptr<OGLRenderer::Graphics::Shader> simpleShader;
         OGLRenderer::Graphics::Shader blurShader;
 
         GLuint fbo[2] = { 0 };
