@@ -30,10 +30,10 @@ namespace OGLRenderer::Common
             if (!static_cast<F*>(this)->BeforeCreate(std::forward<Args>(args)...))
                 return nullptr;
 
+            std::unique_lock<std::shared_mutex> lock(mutex);
             std::shared_ptr<P> p = std::make_shared<P>(std::forward<Args>(args)...);
             if (p)
             {
-                std::unique_lock<std::shared_mutex> lock(mutex);
                 products.emplace_back(p);
                 lock.unlock();
                 AfterCreate(p);
