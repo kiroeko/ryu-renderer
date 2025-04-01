@@ -15,6 +15,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <cstddef>
 
 namespace OGLRenderer::Graphics
 {
@@ -67,12 +68,23 @@ namespace OGLRenderer::Graphics
                     "ERROR: shader program (vs: \"" <<vertexShaderFilePath <<
                     "\",fs: \"" << fragmentShaderFilePath << "\") linking failed!\n" <<
                     errLog << std::endl;
+
+                glDeleteProgram(shaderProgram);
+                shaderProgram = 0;
             }
 
             glDeleteShader(vs);
             glDeleteShader(fs);
             vertexShaderSource = vs;
             fragmentShaderSource = fs;
+        }
+
+        Shader(const std::string& localGPUBinaryFilePath)
+        {
+            if (!LoadShaderByLocalGPUBinaryFile(localGPUBinaryFilePath, shaderProgram))
+                return;
+
+            binarySource = localGPUBinaryFilePath;
         }
 
         Shader(const Shader& other) = delete;
@@ -95,6 +107,7 @@ namespace OGLRenderer::Graphics
 
             vertexShaderSource.clear();
             fragmentShaderSource.clear();
+            binarySource.clear();
         }
 
         Shader& operator=(Shader& other) = delete;
@@ -265,8 +278,35 @@ namespace OGLRenderer::Graphics
             return true;
         }
 
+        bool SaveBinaryToFile(const std::string& localGPUBinaryFilePath)
+        {
+            if (!IsValid())
+                return false;
+
+            GLint bufferSize = 0;
+            glGetProgramiv(shaderProgram, GL_PROGRAM_BINARY_LENGTH, &bufferSize);
+            if (bufferSize <= 0)
+                return false;
+
+            GLenum format = 0;
+            std::vector<std::byte> buffer(bufferSize);
+            glGetProgramBinary(shaderProgram, bufferSize, nullptr, &format, buffer.data());
+            
+            std::ofstream file(localGPUBinaryFilePath, std::ios::binary);
+            if (!file.is_open())
+            {
+                return false;
+            }
+            file.write(reinterpret_cast<char*>(&format), sizeof(format));
+            file.write(reinterpret_cast<char*>(buffer.data()), buffer.size());
+            file.close();
+
+            return file.good();
+        }
+
         const std::string& GetVertexShaderSource() const { return vertexShaderSource; }
         const std::string& GetFragmentShaderSource() const { return fragmentShaderSource; }
+        const std::string& GetBinarySource() const { return binarySource; }
     private:
         bool LoadShaderBySourceCodeFile(
             const std::string& shaderSourceCodeFilePath,
@@ -333,6 +373,54 @@ namespace OGLRenderer::Graphics
             return true;
         }
 
+        bool LoadShaderByLocalGPUBinaryFile(
+            const std::string& spvFilePath,
+            GLuint& shaderProgram
+        )
+        {
+            shaderProgram = 0;
+
+            std::ifstream file(spvFilePath, std::ios::binary | std::ios::ate);
+            if (!file.is_open())
+            {
+                return false;
+            }
+
+            auto fileSize = file.tellg();
+            file.seekg(0, std::ios::beg);
+
+            GLenum format = 0;
+            file.read(reinterpret_cast<char*>(&format), sizeof(format));
+
+            auto bufferSize = fileSize - std::streamoff(sizeof(format));
+            std::vector<std::byte> buffer = std::vector<std::byte>(bufferSize);
+            file.read(reinterpret_cast<char*>(buffer.data()), bufferSize);
+
+            file.close();
+
+            shaderProgram = glCreateProgram();
+            glProgramBinary(shaderProgram, format, buffer.data(), buffer.size());
+
+            int success = 0;
+            glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+            if (!success)
+            {
+                constexpr int errlogLen = 4096;
+                char errLog[errlogLen];
+                glGetProgramInfoLog(shaderProgram, 4096, NULL, errLog);
+                std::cerr <<
+                    "ERROR: shader program binary file: \"" << spvFilePath <<
+                    "\" linking failed!\n" <<
+                    errLog << std::endl;
+
+                glDeleteProgram(shaderProgram);
+                shaderProgram = 0;
+                return false;
+            }
+
+            return true;
+        }
+
         bool IsValid()
         {
             return shaderProgram != 0;
@@ -361,6 +449,7 @@ namespace OGLRenderer::Graphics
 
         std::string vertexShaderSource;
         std::string fragmentShaderSource;
+        std::string binarySource;
     };
 }
 

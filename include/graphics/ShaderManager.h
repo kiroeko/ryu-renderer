@@ -21,9 +21,28 @@ public:
         return Create(vertexShaderFilePath, fragmentShaderFilePath);
     }
 
+    std::shared_ptr<OGLRenderer::Graphics::Shader> FindOrCreate(
+        const std::string& localGPUBinaryFilePath
+    )
+    {
+        auto p = Find(localGPUBinaryFilePath);
+        if (p)
+            return p;
+
+        return Create(localGPUBinaryFilePath);
+    }
+
     bool BeforeCreate(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath)
     {
         auto p = Find(vertexShaderFilePath, fragmentShaderFilePath);
+        if (p)
+            return false;
+        return true;
+    }
+
+    bool BeforeCreate(const std::string& localGPUBinaryFilePath)
+    {
+        auto p = Find(localGPUBinaryFilePath);
         if (p)
             return false;
         return true;
@@ -35,10 +54,23 @@ public:
     )
     {
         auto predicate = std::bind(
-            &CompareShader,
+            &CompareShaderBySource,
             std::placeholders::_1,
             vertexShaderFilePath,
             fragmentShaderFilePath
+        );
+
+        return base::Find(predicate);
+    }
+
+    std::shared_ptr<OGLRenderer::Graphics::Shader> Find(
+        const std::string& localGPUBinaryFilePath
+    )
+    {
+        auto predicate = std::bind(
+            &CompareShaderByBinarySource,
+            std::placeholders::_1,
+            localGPUBinaryFilePath
         );
 
         return base::Find(predicate);
@@ -50,10 +82,23 @@ public:
     )
     {
         auto predicate = std::bind(
-            &CompareShader,
+            &CompareShaderBySource,
             std::placeholders::_1,
             vertexShaderFilePath,
             fragmentShaderFilePath
+        );
+
+        return base::FindAll(predicate);
+    }
+
+    std::list<std::shared_ptr<OGLRenderer::Graphics::Shader>> FindAll(
+        const std::string& localGPUBinaryFilePath
+    )
+    {
+        auto predicate = std::bind(
+            &CompareShaderByBinarySource,
+            std::placeholders::_1,
+            localGPUBinaryFilePath
         );
 
         return base::FindAll(predicate);
@@ -65,10 +110,23 @@ public:
     )
     {
         auto predicate = std::bind(
-            &CompareShader,
+            &CompareShaderBySource,
             std::placeholders::_1,
             vertexShaderFilePath,
             fragmentShaderFilePath
+        );
+
+        return base::Remove(predicate);
+    }
+
+    bool Remove(
+        const std::string& localGPUBinaryFilePath
+    )
+    {
+        auto predicate = std::bind(
+            &CompareShaderByBinarySource,
+            std::placeholders::_1,
+            localGPUBinaryFilePath
         );
 
         return base::Remove(predicate);
@@ -80,7 +138,7 @@ public:
     )
     {
         auto predicate = std::bind(
-            &CompareShader,
+            &CompareShaderBySource,
             std::placeholders::_1,
             vertexShaderFilePath,
             fragmentShaderFilePath
@@ -88,8 +146,21 @@ public:
 
         return base::RemoveAll(predicate);
     }
+    
+    size_t RemoveAll(
+        const std::string& localGPUBinaryFilePath
+    )
+    {
+        auto predicate = std::bind(
+            &CompareShaderByBinarySource,
+            std::placeholders::_1,
+            localGPUBinaryFilePath
+        );
+
+        return base::RemoveAll(predicate);
+    }
 private:
-    static bool CompareShader(
+    static bool CompareShaderBySource(
         const std::shared_ptr<OGLRenderer::Graphics::Shader>& p,
         const std::string& vertexShaderFilePath,
         const std::string& fragmentShaderFilePath
@@ -98,6 +169,15 @@ private:
             return false;
         return p->GetVertexShaderSource() == vertexShaderFilePath &&
                p->GetFragmentShaderSource() == fragmentShaderFilePath;
+    }
+
+    static bool CompareShaderByBinarySource(
+        const std::shared_ptr<OGLRenderer::Graphics::Shader>& p,
+        const std::string& localGPUBinaryFilePath
+    ) {
+        if (!p)
+            return false;
+        return p->GetBinarySource() == localGPUBinaryFilePath;
     }
 
 using base = OGLRenderer::Common::Factory<OGLRenderer::Graphics::Shader, ShaderManager>;
