@@ -26,17 +26,36 @@ namespace OGLRenderer::Graphics
         Shader(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath)
         {
             GLuint vs = 0;
-            if (!CreateAndComplieShader(vertexShaderFilePath, GL_VERTEX_SHADER, vs))
-                return;
-
             GLuint fs = 0;
-            if (!CreateAndComplieShader(fragmentShaderFilePath, GL_FRAGMENT_SHADER, fs))
+
+            if (vertexShaderFilePath.ends_with(".vert") &&
+                fragmentShaderFilePath.ends_with(".frag"))
+            {
+                if (!LoadShaderBySourceCodeFile(vertexShaderFilePath, GL_VERTEX_SHADER, vs))
+                    return;
+
+                if (!LoadShaderBySourceCodeFile(fragmentShaderFilePath, GL_FRAGMENT_SHADER, fs))
+                    return;
+            }
+            else if (vertexShaderFilePath.ends_with(".spv") &&
+                     fragmentShaderFilePath.ends_with(".spv"))
+            {
+                if (!LoadShaderBySpvFile(vertexShaderFilePath, GL_VERTEX_SHADER, vs))
+                    return;
+
+                if (!LoadShaderBySpvFile(fragmentShaderFilePath, GL_FRAGMENT_SHADER, fs))
+                    return;
+            }
+            else
+            {
                 return;
+            }
 
             shaderProgram = glCreateProgram();
             glAttachShader(shaderProgram, vs);
             glAttachShader(shaderProgram, fs);
             glLinkProgram(shaderProgram);
+
             int success = 0;
             glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
             if (!success)
@@ -52,7 +71,6 @@ namespace OGLRenderer::Graphics
 
             glDeleteShader(vs);
             glDeleteShader(fs);
-
             vertexShaderSource = vs;
             fragmentShaderSource = fs;
         }
@@ -250,17 +268,18 @@ namespace OGLRenderer::Graphics
         const std::string& GetVertexShaderSource() const { return vertexShaderSource; }
         const std::string& GetFragmentShaderSource() const { return fragmentShaderSource; }
     private:
-        bool CreateAndComplieShader(
-            const std::string& shaderFilePath,
+        bool LoadShaderBySourceCodeFile(
+            const std::string& shaderSourceCodeFilePath,
             GLenum shaderType,
             GLuint& outShader)
         {
             outShader = 0;
 
             const auto& str =
-                OGLRenderer::Common::FileUtils::GetInstance().ReadFile(shaderFilePath);
+                OGLRenderer::Common::FileUtils::GetInstance().ReadFileString(shaderSourceCodeFilePath);
             if (str.empty())
                 return false;
+
             const char* strC = str.c_str();
 
             outShader = glCreateShader(shaderType);
@@ -274,7 +293,41 @@ namespace OGLRenderer::Graphics
                 constexpr int errlogLen = 4096;
                 char errLog[errlogLen];
                 glGetShaderInfoLog(outShader, errlogLen, NULL, errLog);
-                std::cerr << "ERROR: shader file \"" << shaderFilePath << "\" compilation failed!\n" << errLog << std::endl;
+                std::cerr << "ERROR: shader file \"" << shaderSourceCodeFilePath << "\" compilation failed!\n" << errLog << std::endl;
+
+                glDeleteShader(outShader);
+                return false;
+            };
+            return true;
+        }
+
+        bool LoadShaderBySpvFile(
+            const std::string& spvFilePath,
+            GLenum shaderType,
+            GLuint& outShader
+        )
+        {
+            outShader = 0;
+
+            const auto& buffer =
+                OGLRenderer::Common::FileUtils::GetInstance().ReadFileBinary(spvFilePath);
+            if (buffer.empty())
+                return false;
+
+            outShader = glCreateShader(shaderType);
+            glShaderBinary(1, &outShader, GL_SHADER_BINARY_FORMAT_SPIR_V, buffer.data(), static_cast<GLsizei>(buffer.size()));
+            glSpecializeShader(outShader, "main", 0, NULL, NULL);
+
+            int success = 0;
+            glGetShaderiv(outShader, GL_COMPILE_STATUS, &success);
+            if (!success)
+            {
+                constexpr int errlogLen = 4096;
+                char errLog[errlogLen];
+                glGetShaderInfoLog(outShader, errlogLen, NULL, errLog);
+                std::cerr << "ERROR: shader spv file \"" << spvFilePath << "\" compilation failed!\n" << errLog << std::endl;
+
+                glDeleteShader(outShader);
                 return false;
             };
             return true;

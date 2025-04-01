@@ -245,13 +245,13 @@ namespace OGLRenderer::App
         {
             // 加载 场景用的 shader
             ShaderManager sm;
-            simpleShader = sm.Create("res/shaders/simple.vs", "res/shaders/simple.fs");
+            simpleShader = sm.Create("res/shaders/simple.vert", "res/shaders/simple.frag");
             simpleShader->Use();
             // 0 代表 GL_TEXTURE0
             simpleShader->SetUniformWithInt("mainTexture", 0);
 
             // 加载 高斯模糊的 shader
-            blurShader = OGLRenderer::Graphics::Shader("res/shaders/blur.vs", "res/shaders/blur.fs");
+            blurShader = OGLRenderer::Graphics::Shader("res/shaders/blur.vert", "res/shaders/blur.frag");
             blurShader.Use();
             blurShader.SetUniformWithInt("mainTexture", 0);
         }
