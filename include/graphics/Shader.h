@@ -278,7 +278,7 @@ namespace OGLRenderer::Graphics
             return true;
         }
 
-        bool SaveBinaryToFile(const std::string& localGPUBinaryFilePath)
+        bool SaveLocalGPUBinaryToFile(const std::string& localGPUBinaryFilePath)
         {
             if (!IsValid())
                 return false;
