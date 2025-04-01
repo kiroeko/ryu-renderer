@@ -315,7 +315,7 @@ namespace OGLRenderer::Graphics
                 return false;
 
             outShader = glCreateShader(shaderType);
-            glShaderBinary(1, &outShader, GL_SHADER_BINARY_FORMAT_SPIR_V, buffer.data(), static_cast<GLsizei>(buffer.size()));
+            glShaderBinary(1, &outShader, GL_SHADER_BINARY_FORMAT_SPIR_V, buffer.data(), buffer.size());
             glSpecializeShader(outShader, "main", 0, NULL, NULL);
 
             int success = 0;
