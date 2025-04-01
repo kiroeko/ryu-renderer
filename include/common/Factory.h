@@ -42,23 +42,38 @@ namespace OGLRenderer::Common
             return p;
         }
 
-        void Remove(const std::shared_ptr<P>& p)
+        template <typename Pred>
+        bool Remove(Pred pred)
         {
-            std::unique_lock<std::shared_mutex> lock(mutex);
+            std::shared_lock<std::shared_mutex> lock(mutex);
 
-            products.remove(p);
+            auto it = std::find_if(products.begin(), products.end(), pred);
+            if (it != products.end())
+            {
+                products.erase(it);
+                return true;
+            }
+
+            return false;
         }
 
         template <typename Pred>
-        void RemoveAll(Pred pred)
+        size_t RemoveAll(Pred pred)
         {
             std::unique_lock<std::shared_mutex> lock(mutex);
 
-            products.remove_if(pred);
+            return products.remove_if(pred);
+        }
+
+        size_t RemoveAll(const std::shared_ptr<P>& p)
+        {
+            std::unique_lock<std::shared_mutex> lock(mutex);
+
+            return products.remove(p);
         }
 
         template <typename Pred>
-        std::shared_ptr<P> FindAny(Pred pred)
+        std::shared_ptr<P> Find(Pred pred)
         {
             std::shared_lock<std::shared_mutex> lock(mutex);
 
@@ -71,7 +86,7 @@ namespace OGLRenderer::Common
         {
             std::shared_lock<std::shared_mutex> lock(mutex);
 
-            std::vector<std::shared_ptr<P>> matched;
+            std::list<std::shared_ptr<P>> matched;
             std::copy_if(
                 products.begin(),
                 products.end(),
@@ -94,11 +109,12 @@ namespace OGLRenderer::Common
         }
     protected:
         virtual void AfterCreate(const std::shared_ptr<P>& p) noexcept {}
-    private:
-        // Derived class need to impl this member function:
-        // bool BeforeCreate(Args&&... args) { /* do judgement */ }
 
         std::list<std::shared_ptr<P>> products;
+    private:
+        // Derived class need to impl this member function:
+        // bool BeforeCreate(...) { /* do judgement */ }
+
         mutable std::shared_mutex mutex;
     };
 }

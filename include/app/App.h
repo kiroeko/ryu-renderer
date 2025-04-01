@@ -8,7 +8,7 @@
 #include "common/Singleton.h"
 #include "graphics/Shader.h"
 
-#include "common/Factory.h"
+#include "graphics/ShaderManager.h"
 
 #include <iostream>
 #include <iterator>

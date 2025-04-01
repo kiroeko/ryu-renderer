@@ -52,6 +52,9 @@ namespace OGLRenderer::Graphics
 
             glDeleteShader(vs);
             glDeleteShader(fs);
+
+            vertexShaderSource = vs;
+            fragmentShaderSource = fs;
         }
 
         Shader(const Shader& other) = delete;
@@ -71,6 +74,9 @@ namespace OGLRenderer::Graphics
             glDeleteProgram(shaderProgram);
             shaderProgram = 0;
             uniformLocations.clear();
+
+            vertexShaderSource.clear();
+            fragmentShaderSource.clear();
         }
 
         Shader& operator=(Shader& other) = delete;
@@ -240,6 +246,9 @@ namespace OGLRenderer::Graphics
             }
             return true;
         }
+
+        const std::string& GetVertexShaderSource() const { return vertexShaderSource; }
+        const std::string& GetFragmentShaderSource() const { return fragmentShaderSource; }
     private:
         bool CreateAndComplieShader(
             const std::string& shaderFilePath,
@@ -296,6 +305,9 @@ namespace OGLRenderer::Graphics
 
         GLuint shaderProgram = 0;
         std::unordered_map<std::string, GLint> uniformLocations;
+
+        std::string vertexShaderSource;
+        std::string fragmentShaderSource;
     };
 }
 
