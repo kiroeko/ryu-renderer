@@ -32,13 +32,10 @@ namespace OGLRenderer::App
             // init glfw
             glfwInit();
 
-            // create glfw window
+            // create window
             glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
             glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-            
-            // 演示代码禁止窗口变化
-            glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
             
             window = glfwCreateWindow(initWidth, initHeight, name.c_str(), NULL, NULL);
             if (window == nullptr)
@@ -49,7 +46,7 @@ namespace OGLRenderer::App
             }
             glfwMakeContextCurrent(window);
 
-            // load glad
+            // init glad
             if (!gladLoadGL(glfwGetProcAddress))
             {
                 std::cerr << "Failed to initialize GLAD" << std::endl;
@@ -58,14 +55,14 @@ namespace OGLRenderer::App
                 return false;
             }
 
-            // other gl and window settings
+            // other settings
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
             windowWidth = initWidth;
             windowHeight = initHeight;
-            glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+            glfwSetFramebufferSizeCallback(window, onWindowSizeChanged);
 
             return true;
         }
@@ -333,7 +330,7 @@ namespace OGLRenderer::App
             window = nullptr;
         }
 
-        static void framebufferSizeCallback(GLFWwindow* window, int width, int height)
+        static void onWindowSizeChanged(GLFWwindow* window, int width, int height)
         {
             if (!window)
                 return;

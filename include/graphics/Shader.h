@@ -75,8 +75,8 @@ namespace OGLRenderer::Graphics
 
             glDeleteShader(vs);
             glDeleteShader(fs);
-            vertexShaderSource = vs;
-            fragmentShaderSource = fs;
+            vertexSource = vs;
+            fragmentSource = fs;
         }
 
         Shader(const std::string& localGPUBinaryFilePath)
@@ -89,11 +89,18 @@ namespace OGLRenderer::Graphics
 
         Shader(const Shader& other) = delete;
 
-        Shader(Shader&& other) noexcept
-            : shaderProgram(other.shaderProgram), uniformLocations(other.uniformLocations)
+        Shader(Shader&& other) noexcept :
+            shaderProgram(other.shaderProgram),
+            uniformLocations(other.uniformLocations),
+            vertexSource(other.vertexSource),
+            fragmentSource(other.fragmentSource),
+            binarySource(other.binarySource)
         {
             other.shaderProgram = 0;
             other.uniformLocations.clear();
+            other.vertexSource.clear();
+            other.fragmentSource.clear();
+            other.binarySource.clear();
         }
 
         ~Shader()
@@ -105,8 +112,8 @@ namespace OGLRenderer::Graphics
             shaderProgram = 0;
             uniformLocations.clear();
 
-            vertexShaderSource.clear();
-            fragmentShaderSource.clear();
+            vertexSource.clear();
+            fragmentSource.clear();
             binarySource.clear();
         }
 
@@ -119,8 +126,14 @@ namespace OGLRenderer::Graphics
 
             shaderProgram = other.shaderProgram;
             uniformLocations = other.uniformLocations;
+            vertexSource = other.vertexSource;
+            fragmentSource = other.fragmentSource;
+            binarySource = other.binarySource;
             other.shaderProgram = 0;
             other.uniformLocations.clear();
+            other.vertexSource.clear();
+            other.fragmentSource.clear();
+            other.binarySource.clear();
             return *this;
         }
 
@@ -304,8 +317,8 @@ namespace OGLRenderer::Graphics
             return file.good();
         }
 
-        const std::string& GetVertexShaderSource() const { return vertexShaderSource; }
-        const std::string& GetFragmentShaderSource() const { return fragmentShaderSource; }
+        const std::string& GetVertexSource() const { return vertexSource; }
+        const std::string& GetFragmentSource() const { return fragmentSource; }
         const std::string& GetBinarySource() const { return binarySource; }
     private:
         bool LoadShaderBySourceCodeFile(
@@ -447,8 +460,8 @@ namespace OGLRenderer::Graphics
         GLuint shaderProgram = 0;
         std::unordered_map<std::string, GLint> uniformLocations;
 
-        std::string vertexShaderSource;
-        std::string fragmentShaderSource;
+        std::string vertexSource;
+        std::string fragmentSource;
         std::string binarySource;
     };
 }

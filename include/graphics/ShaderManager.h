@@ -167,8 +167,8 @@ private:
     ) {
         if (!p)
             return false;
-        return p->GetVertexShaderSource() == vertexShaderFilePath &&
-               p->GetFragmentShaderSource() == fragmentShaderFilePath;
+        return p->GetVertexSource() == vertexShaderFilePath &&
+               p->GetFragmentSource() == fragmentShaderFilePath;
     }
 
     static bool CompareShaderByBinarySource(
