@@ -40,14 +40,14 @@ Now you should have completed all the environment preparations.
 The tool folder under the project directory provides various Powershell scripts that may be used in development:
 
 ### Run
-You can execute the following script to generate and open the Visual Studio solution for this project:
+You can execute the following powershell command to generate and open the Visual Studio solution for this project:
 ```powershell
 <path-to-project>\tools\build\cmake_open_project_vs2022.ps1
 ```
 You can then run the project in Visual Studio after it opens.
 
 ### Build
-In addition to using the .sln generated above, you can also build the release version of this project with the following command:
+In addition to using the .sln generated above, you can also build the release version of this project with the following powershell command:
 ```powershell
 <path-to-project>\tools\build\cmake_build_project_vs2022.ps1
 ```
