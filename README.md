@@ -4,7 +4,7 @@ An OpenGL renderer for Windows 64 bit platform.
 
 The goal of this project is to use OpenGl to implement most of the important features of modern renderers, including PBR / batching / GPU instancing / OIT / bloom / deferred shading and SSAO.
 
-However, due to the complexity of implementation, ray tracing / global illumination / mesh shaders and more GPU driven things are not included in the plan.
+However, due to the complexity of implementation, ray tracing / global illumination / mesh shaders and more GPU-driven things are not included in the plan.
 
 ## Tech Stack
 - C++ 20
