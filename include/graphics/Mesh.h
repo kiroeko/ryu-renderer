@@ -6,6 +6,7 @@
 #include <array>
 #include <bit>
 #include <cstddef>
+#include <stdexcept>
 #include <vector>
 #include <type_traits>
 #include <utility>
@@ -38,9 +39,26 @@ namespace RyuRenderer::Graphics
     public:
         template<typename... Args>
         requires (MeshImpl::IsStdVectorOfStdArrays<Args> && ...)
-        Mesh(std::vector<GLuint> vertexIndices, Args&&... args)
+        Mesh(std::vector<GLuint> vertexIndices, Args&&... vertexDataArgs)
         {
+            if constexpr (sizeof...(Args) <= 0)
+                return;
+            const std::size_t vectorSize = (std::forward<Args>(vertexDataArgs).size(), ...);
+            bool allSameSize = ((std::forward<Args>(vertexDataArgs).size() == vectorSize) && ...);
+            if (!allSameSize)
+                throw std::invalid_argument("All vertex data in vector must have the same size.");
 
+            for (std::size_t i = 0; i < vectorSize; ++i)
+            {
+                ([&] {
+                    auto& vec = vertexDataArgs;
+                    const auto& arr = vec[i];
+                    for (const auto& element : arr)
+                    {
+                        AppendToVertexData(element);
+                    }
+                }(), ...);
+            }
         }
     private:
         template <typename T>

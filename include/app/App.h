@@ -146,7 +146,7 @@ namespace RyuRenderer::App
             };
 
 
-            RyuRenderer::Graphics::Mesh m(std::vector<GLuint>(), std::vector<std::array<int, 1>>{{1}, {4}}, std::vector<std::array<float, 1>>{{1.3f}, {1.2f}});
+            RyuRenderer::Graphics::Mesh m(std::vector<GLuint>(), std::vector<std::array<int, 1>>{{1}, {2}}, std::vector<std::array<float, 2>>{{1.3f, 1.4f}, { 1.2f, 1.7f }});
             // VAOs
             glGenVertexArrays(1, &SceneVAO);
             // VBOs
