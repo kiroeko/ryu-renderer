@@ -6,10 +6,10 @@
 #include "graphics/Shader.h"
 #include "common/Factory.h"
 
-class ShaderManager : public OGLRenderer::Common::Factory<OGLRenderer::Graphics::Shader, ShaderManager>
+class ShaderManager : public RyuRenderer::Common::Factory<RyuRenderer::Graphics::Shader, ShaderManager>
 {
 public:
-    std::shared_ptr<OGLRenderer::Graphics::Shader> FindOrCreate(
+    std::shared_ptr<RyuRenderer::Graphics::Shader> FindOrCreate(
         const std::string& vertexShaderFilePath,
         const std::string& fragmentShaderFilePath
     )
@@ -21,7 +21,7 @@ public:
         return Create(vertexShaderFilePath, fragmentShaderFilePath);
     }
 
-    std::shared_ptr<OGLRenderer::Graphics::Shader> FindOrCreate(
+    std::shared_ptr<RyuRenderer::Graphics::Shader> FindOrCreate(
         const std::string& localGPUBinaryFilePath
     )
     {
@@ -48,7 +48,7 @@ public:
         return true;
     }
 
-    std::shared_ptr<OGLRenderer::Graphics::Shader> Find(
+    std::shared_ptr<RyuRenderer::Graphics::Shader> Find(
         const std::string& vertexShaderFilePath,
         const std::string& fragmentShaderFilePath
     )
@@ -63,7 +63,7 @@ public:
         return base::Find(predicate);
     }
 
-    std::shared_ptr<OGLRenderer::Graphics::Shader> Find(
+    std::shared_ptr<RyuRenderer::Graphics::Shader> Find(
         const std::string& localGPUBinaryFilePath
     )
     {
@@ -76,7 +76,7 @@ public:
         return base::Find(predicate);
     }
 
-    std::list<std::shared_ptr<OGLRenderer::Graphics::Shader>> FindAll(
+    std::list<std::shared_ptr<RyuRenderer::Graphics::Shader>> FindAll(
         const std::string& vertexShaderFilePath,
         const std::string& fragmentShaderFilePath
     )
@@ -91,7 +91,7 @@ public:
         return base::FindAll(predicate);
     }
 
-    std::list<std::shared_ptr<OGLRenderer::Graphics::Shader>> FindAll(
+    std::list<std::shared_ptr<RyuRenderer::Graphics::Shader>> FindAll(
         const std::string& localGPUBinaryFilePath
     )
     {
@@ -161,7 +161,7 @@ public:
     }
 private:
     static bool CompareShaderBySource(
-        const std::shared_ptr<OGLRenderer::Graphics::Shader>& p,
+        const std::shared_ptr<RyuRenderer::Graphics::Shader>& p,
         const std::string& vertexShaderFilePath,
         const std::string& fragmentShaderFilePath
     ) {
@@ -172,7 +172,7 @@ private:
     }
 
     static bool CompareShaderByBinarySource(
-        const std::shared_ptr<OGLRenderer::Graphics::Shader>& p,
+        const std::shared_ptr<RyuRenderer::Graphics::Shader>& p,
         const std::string& localGPUBinaryFilePath
     ) {
         if (!p)
@@ -180,7 +180,7 @@ private:
         return p->GetBinarySource() == localGPUBinaryFilePath;
     }
 
-using base = OGLRenderer::Common::Factory<OGLRenderer::Graphics::Shader, ShaderManager>;
+using base = RyuRenderer::Common::Factory<RyuRenderer::Graphics::Shader, ShaderManager>;
 };
 
 #endif

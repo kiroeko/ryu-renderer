@@ -1,6 +1,6 @@
 #include "App/app.h"
 
-using namespace OGLRenderer::App;
+using namespace RyuRenderer::App;
 
 int main()
 {

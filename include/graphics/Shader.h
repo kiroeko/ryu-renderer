@@ -17,7 +17,7 @@
 #include <vector>
 #include <cstddef>
 
-namespace OGLRenderer::Graphics
+namespace RyuRenderer::Graphics
 {
     class Shader
     {
@@ -329,7 +329,7 @@ namespace OGLRenderer::Graphics
             outShader = 0;
 
             const auto& str =
-                OGLRenderer::Common::FileUtils::GetInstance().ReadFileString(shaderSourceCodeFilePath);
+                RyuRenderer::Common::FileUtils::GetInstance().ReadFileString(shaderSourceCodeFilePath);
             if (str.empty())
                 return false;
 
@@ -363,7 +363,7 @@ namespace OGLRenderer::Graphics
             outShader = 0;
 
             const auto& buffer =
-                OGLRenderer::Common::FileUtils::GetInstance().ReadFileBinary(spvFilePath);
+                RyuRenderer::Common::FileUtils::GetInstance().ReadFileBinary(spvFilePath);
             if (buffer.empty())
                 return false;
 

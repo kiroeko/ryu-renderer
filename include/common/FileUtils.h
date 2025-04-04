@@ -10,7 +10,7 @@
 #include <vector>
 #include <cstddef>
 
-namespace OGLRenderer::Common
+namespace RyuRenderer::Common
 {
     class FileUtils : public Singleton<FileUtils>
     {

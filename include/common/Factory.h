@@ -10,7 +10,7 @@
 #include <shared_mutex>
 #include <utility>
 
-namespace OGLRenderer::Common
+namespace RyuRenderer::Common
 {
     // CRTP
     template <typename P, typename F>

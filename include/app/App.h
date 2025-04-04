@@ -6,8 +6,8 @@
 #include "stb/stb_image.h"
 
 #include "common/Singleton.h"
+#include "graphics/Mesh.h"
 #include "graphics/Shader.h"
-
 #include "graphics/ShaderManager.h"
 
 #include <iostream>
@@ -15,9 +15,9 @@
 #include <string>
 #include <vector>
 
-namespace OGLRenderer::App
+namespace RyuRenderer::App
 {
-    class App : public OGLRenderer::Common::Singleton<App>
+    class App : public RyuRenderer::Common::Singleton<App>
     {
     public:
         ~App()
@@ -145,6 +145,8 @@ namespace OGLRenderer::App
                 0, 2, 3
             };
 
+
+            RyuRenderer::Graphics::Mesh m(std::vector<GLuint>(), std::vector<std::array<int, 1>>{{1}, {4}}, std::vector<std::array<float, 1>>{{1.3f}, {1.2f}});
             // VAOs
             glGenVertexArrays(1, &SceneVAO);
             // VBOs
@@ -252,7 +254,7 @@ namespace OGLRenderer::App
 
 
             // 加载 高斯模糊的 shader
-            blurShader = OGLRenderer::Graphics::Shader("res/shaders/blur.vert", "res/shaders/blur.frag");
+            blurShader = RyuRenderer::Graphics::Shader("res/shaders/blur.vert", "res/shaders/blur.frag");
             blurShader.Use();
             blurShader.SetUniformWithInt("mainTexture", 0);
         }
@@ -356,8 +358,8 @@ namespace OGLRenderer::App
         GLuint QuadVAO = 0;
         size_t QuadElementCount = 0;
 
-        std::shared_ptr<OGLRenderer::Graphics::Shader> simpleShader;
-        OGLRenderer::Graphics::Shader blurShader;
+        std::shared_ptr<RyuRenderer::Graphics::Shader> simpleShader;
+        RyuRenderer::Graphics::Shader blurShader;
 
         GLuint fbo[2] = { 0 };
         GLuint fboTextures[2] = { 0 };

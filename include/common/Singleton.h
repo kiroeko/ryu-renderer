@@ -1,7 +1,7 @@
 #ifndef __SINGLETON_H__
 #define __SINGLETON_H__
 
-namespace OGLRenderer::Common
+namespace RyuRenderer::Common
 {
     template<class T>
     class Singleton
