@@ -44,7 +44,7 @@ You can execute the following powershell command to generate and open a Visual S
 ```powershell
 <path-to-project>\tools\build\cmake_open_project_vs2022.ps1
 ```
-You can then run the project in Visual Studio after it opens.
+Then you can run the project in Visual Studio after it opens.
 
 ### Build
 In addition to using the .sln generated above, you can also build the release version of this project with the following powershell command:
