@@ -144,6 +144,7 @@ namespace RyuRenderer::Graphics
                 glVertexAttribPointer(i, a.DataAmount, a.DataType, GL_FALSE, lastDataStartBytesOffset, (void*)a.DataStartBytesOffset);
                 glEnableVertexAttribArray(i);
             }
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             elementSize = indexData.size();
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
@@ -151,7 +152,6 @@ namespace RyuRenderer::Graphics
 
             // Unbind
             glBindVertexArray(0);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         }
     private:
