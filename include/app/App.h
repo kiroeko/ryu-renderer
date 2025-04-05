@@ -132,51 +132,15 @@ namespace RyuRenderer::App
         void initMainScene()
         {
             // 场景本身，这里恰好是带纹理图案的矩形
-            // 绑定 mesh 到 VAO
-            GLfloat vertices[] = {
-                // Position   // TexCoord
-                -1.0f,  1.0f, 0.0f, 1.0f,
-                -1.0f, -1.0f, 0.0f, 0.0f,
-                 1.0f, -1.0f, 1.0f, 0.0f,
-                 1.0f,  1.0f, 1.0f, 1.0f
-            };
-            GLuint indices[] = {
-                0, 1, 2,
-                0, 2, 3
-            };
-
             RyuRenderer::Graphics::Mesh m1(
                 std::vector<GLuint>{0, 1, 2, 0, 2, 3}, // indexes
-                std::vector<std::array<int, 3>>{{1,5,7}, {2,3,4}},// vertex
-                std::vector<std::array<float, 4>>{{1.3f, 1.4f, 1.3f, 1.4f}, { 1.2f, 1.7f, 1.3f, 1.4f}}, // color
-                std::vector<std::array<float, 1>>{{1.3f}, {1.7f}} // uv
+                std::vector<std::array<float, 2>>{{ -1.0f, 1.0f }, { -1.0f, -1.0f }, { 1.0f, -1.0f }, { 1.0f, 1.0f }},// Position
+                std::vector<std::array<float, 2>>{{ 0.0f, 1.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }} // TexCoord
             );
 
+            SceneVAO = m1.VAO;
+            SceneElementCount = m1.elementSize;
 
-            // VAOs
-            glGenVertexArrays(1, &SceneVAO);
-            // VBOs
-            GLuint VBO = 0;
-            glGenBuffers(1, &VBO);
-            // IBOs
-            GLuint IBO;
-            glGenBuffers(1, &IBO);
-
-            // VAO Binding
-            glBindVertexArray(SceneVAO);
-
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
-            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-            glEnableVertexAttribArray(0);
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-            glEnableVertexAttribArray(1);
-
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
-            SceneElementCount = std::size(indices);
-
-            glBindVertexArray(0);
 
             // 加载场景贴图
             glActiveTexture(GL_TEXTURE0);

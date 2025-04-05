@@ -53,7 +53,6 @@ namespace RyuRenderer::Graphics
             if (!allSameSize)
                 throw std::invalid_argument("All vertex data in vector must have the same size.");
 
-
             std::vector<std::byte> vertexData;
             unsigned long long lastDataStartBytesOffset = 0;
             std::vector<VertexAttribute> attributes;
@@ -173,6 +172,7 @@ namespace RyuRenderer::Graphics
                 }
             }
         }
+    public:
 
         GLuint VAO = 0;
         size_t elementSize = 0;
