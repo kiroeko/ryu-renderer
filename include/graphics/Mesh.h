@@ -44,7 +44,7 @@ namespace RyuRenderer::Graphics
     public:
         template<typename... Args>
         requires (MeshImpl::IsStdVectorOfStdArrays<Args> && ...)
-        Mesh(std::vector<GLuint> vertexIndices, Args&&... vertexDataArgs)
+        Mesh(std::vector<GLuint> indexData, Args&&... vertexDataArgs)
         {
             if constexpr (sizeof...(Args) <= 0)
                 return;
@@ -53,6 +53,8 @@ namespace RyuRenderer::Graphics
             if (!allSameSize)
                 throw std::invalid_argument("All vertex data in vector must have the same size.");
 
+
+            std::vector<std::byte> vertexData;
             unsigned long long lastDataStartBytesOffset = 0;
             std::vector<VertexAttribute> attributes;
 
@@ -64,7 +66,7 @@ namespace RyuRenderer::Graphics
                     for (std::size_t j = 0; j < arr.size(); ++j)
                     {
                         const auto& element = arr[j];
-                        AppendToVertexData(element);
+                        AppendToVertexData(vertexData, element);
 
                         // Vertex Attribute Collection
                         if (i == 0 && j == 0)
@@ -133,7 +135,7 @@ namespace RyuRenderer::Graphics
             glBindVertexArray(VAO);
 
             glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(std::byte) * vertexData.size(), vertexData.data(), GL_DYNAMIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(std::byte) * vertexData.size(), vertexData.data(), GL_STATIC_DRAW);
             for (int i = 0; i < attributes.size(); ++i)
             {
                 const auto& a = attributes[i];
@@ -141,8 +143,9 @@ namespace RyuRenderer::Graphics
                 glVertexAttribPointer(i, a.DataAmount, a.DataType, GL_FALSE, lastDataStartBytesOffset, (void*)a.DataStartBytesOffset);
                 glEnableVertexAttribArray(i);
             }
+            elementSize = indexData.size();
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indexData.size(), indexData.data(), GL_DYNAMIC_DRAW);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * elementSize, indexData.data(), GL_STATIC_DRAW);
 
             glBindVertexArray(0);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -151,10 +154,8 @@ namespace RyuRenderer::Graphics
     private:
         template <typename T>
         requires std::is_trivially_copyable_v<T>
-        void AppendToVertexData(const T& value)
+        static void AppendToVertexData(std::vector<std::byte> &vertexData, const T& value)
         {
-            vertexData.clear();
-
             const std::byte* valueAsBytes = reinterpret_cast<const std::byte*>(&value);
 
             if constexpr (std::endian::native == std::endian::little)
@@ -173,10 +174,8 @@ namespace RyuRenderer::Graphics
             }
         }
 
-        std::vector<std::byte> vertexData;
-        std::vector<GLuint> indexData;
-
         GLuint VAO = 0;
+        size_t elementSize = 0;
     };
 }
 
