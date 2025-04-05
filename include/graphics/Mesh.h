@@ -16,18 +16,10 @@ namespace RyuRenderer::Graphics
     namespace MeshImpl
     {
         template <typename T>
-        struct IsStdArrayImpl : std::false_type {};
-
-        template <typename T, std::size_t N>
-        struct IsStdArrayImpl<std::array<T, N>> : std::true_type {};
-
-        template <typename T>
-        concept IsStdArray = IsStdArrayImpl<std::remove_cvref_t<T>>::value;
-
-        template <typename T>
         struct IsStdVectorOfStdArraysImpl : std::false_type {};
 
         template <typename T, std::size_t N>
+        requires (N != 0)
         struct IsStdVectorOfStdArraysImpl<std::vector<std::array<T, N>>> : std::true_type {};
 
         template <typename T>
