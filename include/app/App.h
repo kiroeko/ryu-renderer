@@ -132,15 +132,11 @@ namespace RyuRenderer::App
         void initMainScene()
         {
             // 场景本身，这里恰好是带纹理图案的矩形
-            RyuRenderer::Graphics::Mesh m1(
+            SceneMesh = RyuRenderer::Graphics::Mesh(
                 std::vector<GLuint>{0, 1, 2, 0, 2, 3}, // indexes
                 std::vector<std::array<float, 2>>{{ -1.0f, 1.0f }, { -1.0f, -1.0f }, { 1.0f, -1.0f }, { 1.0f, 1.0f }},// Position
                 std::vector<std::array<float, 2>>{{ 0.0f, 1.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }} // TexCoord
             );
-
-            SceneVAO = m1.VAO;
-            SceneElementCount = m1.elementSize;
-
 
             // 加载场景贴图
             glActiveTexture(GL_TEXTURE0);
@@ -261,8 +257,7 @@ namespace RyuRenderer::App
             // 渲染场景本身到 fbo 里面
             simpleShader->Use();
             glBindTexture(GL_TEXTURE_2D, SceneTexture);
-            glBindVertexArray(SceneVAO);
-            glDrawElements(GL_TRIANGLES, SceneElementCount, GL_UNSIGNED_INT, 0);
+            SceneMesh.Draw();
 
             // 进行高斯模糊，水平+垂直共迭代 5 次
             blurShader.Use();
@@ -321,7 +316,7 @@ namespace RyuRenderer::App
         int windowHeight = 0;
 
         // tmp
-        GLuint SceneVAO = 0;
+        RyuRenderer::Graphics::Mesh SceneMesh;
         size_t SceneElementCount = 0;
         GLuint SceneTexture = 0;
 

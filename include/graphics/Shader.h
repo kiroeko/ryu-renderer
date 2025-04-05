@@ -317,6 +317,11 @@ namespace RyuRenderer::Graphics
             return file.good();
         }
 
+        bool IsValid()
+        {
+            return shaderProgram != 0;
+        }
+
         const std::string& GetVertexSource() const { return vertexSource; }
         const std::string& GetFragmentSource() const { return fragmentSource; }
         const std::string& GetBinarySource() const { return binarySource; }
@@ -432,11 +437,6 @@ namespace RyuRenderer::Graphics
             }
 
             return true;
-        }
-
-        bool IsValid()
-        {
-            return shaderProgram != 0;
         }
 
         GLint GetUniformLocation(const std::string& uniformName)

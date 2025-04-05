@@ -42,6 +42,8 @@ namespace RyuRenderer::Graphics
             unsigned long long DataAmount = 0;
         };
     public:
+        Mesh() = default;
+
         template<typename... Args>
         requires (MeshImpl::IsStdVectorOfStdArrays<Args> && ...)
         Mesh(std::vector<GLuint> indexData, Args&&... vertexDataArgs)
@@ -122,13 +124,11 @@ namespace RyuRenderer::Graphics
             }
 
             // VBOs
-            GLuint VBO = 0;
             glGenBuffers(1, &VBO);
             // VAOs
             glGenVertexArrays(1, &VAO);
             // IBOs
-            GLuint IBO;
-            glGenBuffers(1, &IBO);
+            glGenBuffers(1, &EBO);
 
             // Fill VBO
             glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -147,12 +147,108 @@ namespace RyuRenderer::Graphics
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             elementSize = indexData.size();
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * elementSize, indexData.data(), GL_STATIC_DRAW);
 
             // Unbind
             glBindVertexArray(0);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        }
+
+        Mesh(const Mesh& other) = delete;
+
+        Mesh(Mesh&& other) noexcept :
+            VAO(other.VAO),
+            elementSize(other.elementSize),
+            VBO(other.VBO),
+            EBO(other.EBO)
+        {
+            other.VAO = 0;
+            other.elementSize = 0;
+            other.VBO = 0;
+            other.EBO = 0;
+        }
+
+        ~Mesh()
+        {
+            if (!IsValid())
+                return;
+
+            elementSize = 0;
+
+            if (VAO != 0)
+            {
+                GLint currentVAO;
+                glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentVAO);
+                if (currentVAO == VAO)
+                {
+                    glBindVertexArray(0);
+                }
+
+                glDeleteVertexArrays(1, &VAO);
+                VAO = 0;
+            }
+
+            if (VBO != 0)
+            {
+                GLint currentVBO;
+                glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &currentVBO);
+                if (currentVBO == VBO)
+                {
+                    glBindBuffer(GL_ARRAY_BUFFER, 0);
+                }
+
+                glDeleteBuffers(1, &VBO);
+                VBO = 0;
+            }
+
+            if (EBO != 0)
+            {
+                GLint currentEBO;
+                glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &currentEBO);
+                if (currentEBO == EBO)
+                {
+                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+                }
+
+                glDeleteBuffers(1, &EBO);
+                EBO = 0;
+            }
+        }
+
+        Mesh& operator=(Mesh& other) = delete;
+
+        Mesh& operator=(Mesh&& other) noexcept
+        {
+            if (this == &other)
+                return *this;
+
+            VAO = other.VAO;
+            elementSize = other.elementSize;
+            VBO = other.VBO;
+            EBO = other.EBO;
+            other.VAO = 0;
+            other.elementSize = 0;
+            other.VBO = 0;
+            other.EBO = 0;
+            return *this;
+        }
+
+        bool IsValid()
+        {
+            return VAO != 0 &&
+                   elementSize != 0 &&
+                   VBO != 0 &&
+                   EBO != 0;
+        }
+
+        void Draw()
+        {
+            if (!IsValid())
+                return;
+
+            glBindVertexArray(VAO);
+            glDrawElements(GL_TRIANGLES, elementSize, GL_UNSIGNED_INT, 0);
         }
     private:
         template <typename T>
@@ -176,10 +272,11 @@ namespace RyuRenderer::Graphics
                 }
             }
         }
-    public:
-
+    private:
         GLuint VAO = 0;
         size_t elementSize = 0;
+        GLuint VBO = 0;
+        GLuint EBO = 0;
     };
 }
 
