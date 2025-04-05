@@ -121,20 +121,22 @@ namespace RyuRenderer::Graphics
                 }(), ...);
             }
 
-            // VAOs
-            glGenVertexArrays(1, &VAO);
             // VBOs
             GLuint VBO = 0;
             glGenBuffers(1, &VBO);
+            // VAOs
+            glGenVertexArrays(1, &VAO);
             // IBOs
             GLuint IBO;
             glGenBuffers(1, &IBO);
 
-            // VAO Binding
-            glBindVertexArray(VAO);
-
+            // Fill VBO
             glBindBuffer(GL_ARRAY_BUFFER, VBO);
             glBufferData(GL_ARRAY_BUFFER, sizeof(std::byte) * vertexData.size(), vertexData.data(), GL_STATIC_DRAW);
+
+            // VAO Binding
+            glBindVertexArray(VAO);
+            
             for (int i = 0; i < attributes.size(); ++i)
             {
                 const auto& a = attributes[i];
@@ -142,10 +144,12 @@ namespace RyuRenderer::Graphics
                 glVertexAttribPointer(i, a.DataAmount, a.DataType, GL_FALSE, lastDataStartBytesOffset, (void*)a.DataStartBytesOffset);
                 glEnableVertexAttribArray(i);
             }
+
             elementSize = indexData.size();
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * elementSize, indexData.data(), GL_STATIC_DRAW);
 
+            // Unbind
             glBindVertexArray(0);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
