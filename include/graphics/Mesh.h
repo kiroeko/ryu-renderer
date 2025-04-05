@@ -38,16 +38,16 @@ namespace RyuRenderer::Graphics
     {
         struct VertexAttribute
         {
-            VertexAttribute(GLenum dataType, unsigned long long dataStartBytesOffset, unsigned long long dataSize)
+            VertexAttribute(GLenum dataType, unsigned long long dataStartBytesOffset, unsigned long long dataAmount)
             {
                 DataType = dataType;
                 DataStartBytesOffset = dataStartBytesOffset;
-                DataSize = dataSize;
+                DataAmount = dataAmount;
             }
 
             GLenum DataType = GL_NONE;
             unsigned long long DataStartBytesOffset = 0;
-            unsigned long long DataSize = 0;
+            unsigned long long DataAmount = 0;
         };
     public:
         template<typename... Args>
@@ -118,17 +118,43 @@ namespace RyuRenderer::Graphics
                             {
                                 throw std::runtime_error("Unsupported element type");
                             }
-                            auto dataSize = arr.size();
-                            attributes.emplace_back(VertexAttribute(e, lastDataStartBytesOffset, dataSize));
+                            auto dataAmount = arr.size();
+                            attributes.emplace_back(VertexAttribute(e, lastDataStartBytesOffset, dataAmount));
 
-                            auto arrBytes = sizeof(element) * dataSize;
+                            auto arrBytes = sizeof(element) * dataAmount;
                             lastDataStartBytesOffset += arrBytes;
                         }
                     }
                 }(), ...);
             }
 
-            int ie143 = 10;
+            // VAOs
+            glGenVertexArrays(1, &VAO);
+            // VBOs
+            GLuint VBO = 0;
+            glGenBuffers(1, &VBO);
+            // IBOs
+            GLuint IBO;
+            glGenBuffers(1, &IBO);
+
+            // VAO Binding
+            glBindVertexArray(VAO);
+
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(std::byte) * vertexData.size(), vertexData.data(), GL_DYNAMIC_DRAW);
+            for (int i = 0; i < attributes.size(); ++i)
+            {
+                const auto& a = attributes[i];
+
+                glVertexAttribPointer(i, a.DataAmount, a.DataType, GL_FALSE, lastDataStartBytesOffset, (void*)a.DataStartBytesOffset);
+                glEnableVertexAttribArray(i);
+            }
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indexData.size(), indexData.data(), GL_DYNAMIC_DRAW);
+
+            glBindVertexArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         }
     private:
         template <typename T>
