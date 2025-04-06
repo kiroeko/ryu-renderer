@@ -159,6 +159,72 @@ namespace RyuRenderer::Graphics
             return true;
         }
 
+        bool SetUniformWithBool(const std::string& uniformName, const std::vector<bool>& bools)
+        {
+            if (!IsValid())
+                return false;
+
+            GLint loc = GetUniformLocation(uniformName);
+            if (loc == -1)
+                return false;
+
+            const auto& size = bools.size();
+            if (size == 1)
+            {
+                glUniform1i(loc, bools[0]);
+                return true;
+            }
+            if (size == 2)
+            {
+                glUniform2i(loc, bools[0], bools[1]);
+                return true;
+            }
+            if (size == 3)
+            {
+                glUniform3i(loc, bools[0], bools[1], bools[2]);
+                return true;
+            }
+            if (size == 4)
+            {
+                glUniform4i(loc, bools[0], bools[1], bools[2], bools[3]);
+                return true;
+            }
+            return false;
+        }
+
+        template<typename... Args>
+        std::enable_if_t<(std::is_same_v<Args, bool> && ...), bool>
+            SetUniformWithBool(const std::string& uniformName, Args... args)
+        {
+            if (!IsValid())
+                return false;
+
+            GLint loc = GetUniformLocation(uniformName);
+            if (loc == -1)
+                return false;
+
+            constexpr std::size_t numArgs = sizeof...(Args);
+            static_assert(numArgs >= 1 && numArgs <= 4, "Error: Unsupported number of arguments in SetUniformWithBool.");
+
+            if constexpr (numArgs == 1)
+            {
+                glUniform1i(loc, args...);
+            }
+            else if constexpr (numArgs == 2)
+            {
+                glUniform2i(loc, args...);
+            }
+            else if constexpr (numArgs == 3)
+            {
+                glUniform3i(loc, args...);
+            }
+            else if constexpr (numArgs == 4)
+            {
+                glUniform4i(loc, args...);
+            }
+            return true;
+        }
+
         bool SetUniformWithInt(const std::string& uniformName, const std::vector<int>& ints)
         {
             if (!IsValid())

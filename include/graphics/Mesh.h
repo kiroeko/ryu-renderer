@@ -123,6 +123,11 @@ namespace RyuRenderer::Graphics
                 }(), ...);
             }
 
+            GLint nrAttributes = 0;
+            glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
+            if (attributes.size() > nrAttributes)
+                throw std::invalid_argument("Vertex attribute is oversize for OpenGL.");
+
             // VBOs
             glGenBuffers(1, &VBO);
             // VAOs
