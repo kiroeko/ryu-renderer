@@ -146,20 +146,7 @@ namespace RyuRenderer::Graphics
             return true;
         }
 
-        bool SetUniformWithMatrixFloat(const std::string& uniformName, const glm::mat4& mat)
-        {
-            if (!IsValid())
-                return false;
-
-            GLint loc = GetUniformLocation(uniformName);
-            if (loc == -1)
-                return false;
-
-            glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
-            return true;
-        }
-
-        bool SetUniformWithBool(const std::string& uniformName, const std::vector<bool>& bools)
+        bool SetUniform(const std::string& uniformName, const std::vector<bool>& bools)
         {
             if (!IsValid())
                 return false;
@@ -194,7 +181,7 @@ namespace RyuRenderer::Graphics
 
         template<typename... Args>
         std::enable_if_t<(std::is_same_v<Args, bool> && ...), bool>
-            SetUniformWithBool(const std::string& uniformName, Args... args)
+            SetUniform(const std::string& uniformName, Args... args)
         {
             if (!IsValid())
                 return false;
@@ -225,7 +212,7 @@ namespace RyuRenderer::Graphics
             return true;
         }
 
-        bool SetUniformWithInt(const std::string& uniformName, const std::vector<int>& ints)
+        bool SetUniform(const std::string& uniformName, const std::vector<int>& ints)
         {
             if (!IsValid())
                 return false;
@@ -260,7 +247,7 @@ namespace RyuRenderer::Graphics
 
         template<typename... Args>
         std::enable_if_t<(std::is_same_v<Args, int> && ...), bool>
-            SetUniformWithInt(const std::string& uniformName, Args... args)
+            SetUniform(const std::string& uniformName, Args... args)
         {
             if (!IsValid())
                 return false;
@@ -291,7 +278,73 @@ namespace RyuRenderer::Graphics
             return true;
         }
 
-        bool SetUniformWithFloat(const std::string& uniformName, const std::vector<float>& floats)
+        bool SetUniform(const std::string& uniformName, const std::vector<unsigned int>& uints)
+        {
+            if (!IsValid())
+                return false;
+
+            GLint loc = GetUniformLocation(uniformName);
+            if (loc == -1)
+                return false;
+
+            const auto& size = uints.size();
+            if (size == 1)
+            {
+                glUniform1ui(loc, uints[0]);
+                return true;
+            }
+            if (size == 2)
+            {
+                glUniform2ui(loc, uints[0], uints[1]);
+                return true;
+            }
+            if (size == 3)
+            {
+                glUniform3ui(loc, uints[0], uints[1], uints[2]);
+                return true;
+            }
+            if (size == 4)
+            {
+                glUniform4ui(loc, uints[0], uints[1], uints[2], uints[3]);
+                return true;
+            }
+            return false;
+        }
+
+        template<typename... Args>
+        std::enable_if_t<(std::is_same_v<Args, unsigned int> && ...), bool>
+            SetUniform(const std::string& uniformName, Args... args)
+        {
+            if (!IsValid())
+                return false;
+
+            GLint loc = GetUniformLocation(uniformName);
+            if (loc == -1)
+                return false;
+
+            constexpr std::size_t numArgs = sizeof...(Args);
+            static_assert(numArgs >= 1 && numArgs <= 4, "Error: Unsupported number of arguments in SetUniformWithUInt.");
+
+            if constexpr (numArgs == 1)
+            {
+                glUniform1ui(loc, args...);
+            }
+            else if constexpr (numArgs == 2)
+            {
+                glUniform2ui(loc, args...);
+            }
+            else if constexpr (numArgs == 3)
+            {
+                glUniform3ui(loc, args...);
+            }
+            else if constexpr (numArgs == 4)
+            {
+                glUniform4ui(loc, args...);
+            }
+            return true;
+        }
+
+        bool SetUniform(const std::string& uniformName, const std::vector<float>& floats)
         {
             if (!IsValid())
                 return false;
@@ -326,7 +379,7 @@ namespace RyuRenderer::Graphics
 
         template<typename... Args>
         std::enable_if_t<(std::is_same_v<Args, float> && ...), bool>
-            SetUniformWithFloat(const std::string& uniformName, Args... args)
+            SetUniform(const std::string& uniformName, Args... args)
         {
             if (!IsValid())
                 return false;
@@ -354,6 +407,85 @@ namespace RyuRenderer::Graphics
             {
                 glUniform4f(loc, args...);
             }
+            return true;
+        }
+
+        bool SetUniform(const std::string& uniformName, const std::vector<double>& doubles)
+        {
+            if (!IsValid())
+                return false;
+
+            GLint loc = GetUniformLocation(uniformName);
+            if (loc == -1)
+                return false;
+
+            const auto& size = doubles.size();
+            if (size == 1)
+            {
+                glUniform1d(loc, doubles[0]);
+                return true;
+            }
+            if (size == 2)
+            {
+                glUniform2d(loc, doubles[0], doubles[1]);
+                return true;
+            }
+            if (size == 3)
+            {
+                glUniform3d(loc, doubles[0], doubles[1], doubles[2]);
+                return true;
+            }
+            if (size == 4)
+            {
+                glUniform4d(loc, doubles[0], doubles[1], doubles[2], doubles[3]);
+                return true;
+            }
+            return false;
+        }
+
+        template<typename... Args>
+        std::enable_if_t<(std::is_same_v<Args, double> && ...), bool>
+            SetUniform(const std::string& uniformName, Args... args)
+        {
+            if (!IsValid())
+                return false;
+
+            GLint loc = GetUniformLocation(uniformName);
+            if (loc == -1)
+                return false;
+
+            constexpr std::size_t numArgs = sizeof...(Args);
+            static_assert(numArgs >= 1 && numArgs <= 4, "Error: Unsupported number of arguments in SetUniformWithDouble.");
+
+            if constexpr (numArgs == 1)
+            {
+                glUniform1d(loc, args...);
+            }
+            else if constexpr (numArgs == 2)
+            {
+                glUniform2d(loc, args...);
+            }
+            else if constexpr (numArgs == 3)
+            {
+                glUniform3d(loc, args...);
+            }
+            else if constexpr (numArgs == 4)
+            {
+                glUniform4d(loc, args...);
+            }
+            return true;
+        }
+
+        bool SetUniform(const std::string& uniformName, const glm::mat4& mat)
+        {
+            if (!IsValid())
+                return false;
+
+            GLint loc = GetUniformLocation(uniformName);
+            if (loc == -1)
+                return false;
+
+            glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
             return true;
         }
 

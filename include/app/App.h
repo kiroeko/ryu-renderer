@@ -215,14 +215,14 @@ namespace RyuRenderer::App
             {
                 simpleShader->Use();
                 // 0 代表 GL_TEXTURE0
-                simpleShader->SetUniformWithInt("mainTexture", 0);
+                simpleShader->SetUniform("mainTexture", 0);
             }
 
 
             // 加载 高斯模糊的 shader
             blurShader = RyuRenderer::Graphics::Shader("res/shaders/blur.vert", "res/shaders/blur.frag");
             blurShader.Use();
-            blurShader.SetUniformWithInt("mainTexture", 0);
+            blurShader.SetUniform("mainTexture", 0);
         }
 
         void initFBO()
@@ -267,7 +267,7 @@ namespace RyuRenderer::App
             {
                 glBindFramebuffer(GL_FRAMEBUFFER, fbo[horizontal]);
                 glBindTexture(GL_TEXTURE_2D, firstIteration ? SceneTexture : fboTextures[!horizontal]);
-                blurShader.SetUniformWithInt("isHorizontal", (int)horizontal);
+                blurShader.SetUniform("isHorizontal", horizontal);
 
                 // 渲染全屏四边形到 fbo 里
                 glBindVertexArray(QuadVAO);
