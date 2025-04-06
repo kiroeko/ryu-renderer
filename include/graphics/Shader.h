@@ -148,7 +148,7 @@ namespace RyuRenderer::Graphics
 
         bool SetUniform(const std::string& uniformName, const std::vector<bool>& bools)
         {
-            if (!IsValid())
+            if (!IsUsing())
                 return false;
 
             GLint loc = GetUniformLocation(uniformName);
@@ -183,7 +183,7 @@ namespace RyuRenderer::Graphics
         std::enable_if_t<(std::is_same_v<Args, bool> && ...), bool>
             SetUniform(const std::string& uniformName, Args... args)
         {
-            if (!IsValid())
+            if (!IsUsing())
                 return false;
 
             GLint loc = GetUniformLocation(uniformName);
@@ -214,7 +214,7 @@ namespace RyuRenderer::Graphics
 
         bool SetUniform(const std::string& uniformName, const std::vector<int>& ints)
         {
-            if (!IsValid())
+            if (!IsUsing())
                 return false;
 
             GLint loc = GetUniformLocation(uniformName);
@@ -249,7 +249,7 @@ namespace RyuRenderer::Graphics
         std::enable_if_t<(std::is_same_v<Args, int> && ...), bool>
             SetUniform(const std::string& uniformName, Args... args)
         {
-            if (!IsValid())
+            if (!IsUsing())
                 return false;
 
             GLint loc = GetUniformLocation(uniformName);
@@ -280,7 +280,7 @@ namespace RyuRenderer::Graphics
 
         bool SetUniform(const std::string& uniformName, const std::vector<unsigned int>& uints)
         {
-            if (!IsValid())
+            if (!IsUsing())
                 return false;
 
             GLint loc = GetUniformLocation(uniformName);
@@ -315,7 +315,7 @@ namespace RyuRenderer::Graphics
         std::enable_if_t<(std::is_same_v<Args, unsigned int> && ...), bool>
             SetUniform(const std::string& uniformName, Args... args)
         {
-            if (!IsValid())
+            if (!IsUsing())
                 return false;
 
             GLint loc = GetUniformLocation(uniformName);
@@ -346,7 +346,7 @@ namespace RyuRenderer::Graphics
 
         bool SetUniform(const std::string& uniformName, const std::vector<float>& floats)
         {
-            if (!IsValid())
+            if (!IsUsing())
                 return false;
 
             GLint loc = GetUniformLocation(uniformName);
@@ -381,7 +381,7 @@ namespace RyuRenderer::Graphics
         std::enable_if_t<(std::is_same_v<Args, float> && ...), bool>
             SetUniform(const std::string& uniformName, Args... args)
         {
-            if (!IsValid())
+            if (!IsUsing())
                 return false;
 
             GLint loc = GetUniformLocation(uniformName);
@@ -412,7 +412,7 @@ namespace RyuRenderer::Graphics
 
         bool SetUniform(const std::string& uniformName, const std::vector<double>& doubles)
         {
-            if (!IsValid())
+            if (!IsUsing())
                 return false;
 
             GLint loc = GetUniformLocation(uniformName);
@@ -447,7 +447,7 @@ namespace RyuRenderer::Graphics
         std::enable_if_t<(std::is_same_v<Args, double> && ...), bool>
             SetUniform(const std::string& uniformName, Args... args)
         {
-            if (!IsValid())
+            if (!IsUsing())
                 return false;
 
             GLint loc = GetUniformLocation(uniformName);
@@ -478,7 +478,7 @@ namespace RyuRenderer::Graphics
 
         bool SetUniform(const std::string& uniformName, const glm::mat4& mat)
         {
-            if (!IsValid())
+            if (!IsUsing())
                 return false;
 
             GLint loc = GetUniformLocation(uniformName);
@@ -518,6 +518,19 @@ namespace RyuRenderer::Graphics
         bool IsValid()
         {
             return shaderProgram != 0;
+        }
+
+        bool IsUsing()
+        {
+            if (!IsValid())
+                return false;
+
+            GLint currentProgram = 0;
+            glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+            if (currentProgram == 0)
+                return false;
+
+            return shaderProgram == currentProgram;
         }
 
         const std::string& GetVertexSource() const { return vertexSource; }
