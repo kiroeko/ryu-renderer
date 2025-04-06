@@ -19,7 +19,7 @@ namespace RyuRenderer::Graphics
         struct IsStdVectorOfStdArraysImpl : std::false_type {};
 
         template <typename T, std::size_t N>
-        requires (N != 0)
+        requires (N > 0)
         struct IsStdVectorOfStdArraysImpl<std::vector<std::array<T, N>>> : std::true_type {};
 
         template <typename T>
@@ -123,9 +123,11 @@ namespace RyuRenderer::Graphics
                 }(), ...);
             }
 
-            GLint nrAttributes = 0;
-            glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
-            if (attributes.size() > nrAttributes)
+            if (maxAttributeAmount <= 0)
+            {
+                glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxAttributeAmount);
+            }
+            if (attributes.size() > maxAttributeAmount)
                 throw std::invalid_argument("Vertex attribute is oversize for OpenGL.");
 
             // VBOs
@@ -282,6 +284,7 @@ namespace RyuRenderer::Graphics
         size_t elementSize = 0;
         GLuint VBO = 0;
         GLuint EBO = 0;
+        inline static GLint maxAttributeAmount = 0;
     };
 }
 
