@@ -3,11 +3,9 @@
 
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include "common/FileUtils.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -16,6 +14,8 @@
 #include <sstream>
 #include <vector>
 #include <cstddef>
+
+#include "common/FileUtils.h"
 
 namespace RyuRenderer::Graphics
 {
@@ -64,11 +64,7 @@ namespace RyuRenderer::Graphics
                 constexpr int errlogLen = 4096;
                 char errLog[errlogLen];
                 glGetProgramInfoLog(shaderProgram, 4096, NULL, errLog);
-                std::cerr <<
-                    "ERROR: shader program (vs: \"" <<vertexShaderFilePath <<
-                    "\",fs: \"" << fragmentShaderFilePath << "\") linking failed!\n" <<
-                    errLog << std::endl;
-
+                std::cerr << "ERROR: shader program (vs: \"" <<vertexShaderFilePath << "\",fs: \"" << fragmentShaderFilePath << "\") linking failed!\n" << errLog << std::endl;
                 glDeleteProgram(shaderProgram);
                 shaderProgram = 0;
             }
@@ -142,6 +138,9 @@ namespace RyuRenderer::Graphics
         {
             if (!IsValid())
                 return false;
+
+            if (IsUsing())
+                return true;
 
             glUseProgram(shaderProgram);
             return true;
@@ -564,7 +563,6 @@ namespace RyuRenderer::Graphics
                 char errLog[errlogLen];
                 glGetShaderInfoLog(outShader, errlogLen, NULL, errLog);
                 std::cerr << "ERROR: shader file \"" << shaderSourceCodeFilePath << "\" compilation failed!\n" << errLog << std::endl;
-
                 glDeleteShader(outShader);
                 return false;
             };
@@ -596,7 +594,6 @@ namespace RyuRenderer::Graphics
                 char errLog[errlogLen];
                 glGetShaderInfoLog(outShader, errlogLen, NULL, errLog);
                 std::cerr << "ERROR: shader spv file \"" << spvFilePath << "\" compilation failed!\n" << errLog << std::endl;
-
                 glDeleteShader(outShader);
                 return false;
             };
@@ -638,11 +635,7 @@ namespace RyuRenderer::Graphics
                 constexpr int errlogLen = 4096;
                 char errLog[errlogLen];
                 glGetProgramInfoLog(shaderProgram, 4096, NULL, errLog);
-                std::cerr <<
-                    "ERROR: shader program binary file: \"" << spvFilePath <<
-                    "\" linking failed!\n" <<
-                    errLog << std::endl;
-
+                std::cerr << "ERROR: shader program binary file: \"" << spvFilePath << "\" linking failed!\n" << errLog << std::endl;
                 glDeleteProgram(shaderProgram);
                 shaderProgram = 0;
                 return false;

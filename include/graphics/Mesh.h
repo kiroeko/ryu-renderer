@@ -1,15 +1,20 @@
 #ifndef __MESH_H__
 #define __MESH_H__
 
+#define RYU_RENDERER_MACROS
+
 #include "glad/gl.h"
 
 #include <array>
 #include <bit>
 #include <cstddef>
+#include <iostream>
 #include <stdexcept>
 #include <vector>
 #include <type_traits>
 #include <utility>
+
+#include "common/Macros.h"
 
 namespace RyuRenderer::Graphics
 {
@@ -52,13 +57,13 @@ namespace RyuRenderer::Graphics
                 return;
             const std::size_t vectorSize = (std::forward<Args>(vertexDataArgs).size(), ...);
             bool allSameSize = ((std::forward<Args>(vertexDataArgs).size() == vectorSize) && ...);
-            if (!allSameSize)
-                throw std::invalid_argument("All vertex data in vector must have the same size.");
+            FAILTEST_RTN_MSG(!allSameSize, "All vertex data in vector must have the same size.")
 
             std::vector<std::byte> vertexData;
             unsigned long long lastDataStartBytesOffset = 0;
             std::vector<VertexAttribute> attributes;
 
+            bool isParseFailed = false;
             for (std::size_t i = 0; i < vectorSize; ++i)
             {
                 ([&] {
@@ -111,7 +116,9 @@ namespace RyuRenderer::Graphics
                             }
                             else
                             {
-                                throw std::runtime_error("Unsupported element type");
+                                std::cerr << "Unsupported element type." << std::endl;
+                                isParseFailed = true;
+                                break;
                             }
                             auto dataAmount = arr.size();
                             attributes.emplace_back(VertexAttribute(e, lastDataStartBytesOffset, dataAmount));
@@ -120,11 +127,18 @@ namespace RyuRenderer::Graphics
                             lastDataStartBytesOffset += arrBytes;
                         }
                     }
-                }(), ...);
-            }
 
-            if (attributes.size() > GetMaxAttributeAmount())
-                throw std::invalid_argument("Vertex attribute is oversize for OpenGL.");
+                    if (isParseFailed)
+                        return;
+                }(), ...);
+
+                if (isParseFailed)
+                    break;
+            }
+            if (isParseFailed)
+                return;
+
+            FAILTEST_RTN_MSG(attributes.size() > GetMaxAttributeAmount(), "Vertex attribute is oversize for OpenGL.")
 
             // VBOs
             glGenBuffers(1, &VBO);
@@ -290,5 +304,7 @@ namespace RyuRenderer::Graphics
         inline static GLint maxAttributeAmount = -1;
     };
 }
+
+#undef RYU_RENDERER_MACROS
 
 #endif

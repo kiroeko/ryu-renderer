@@ -1,14 +1,14 @@
 #ifndef __FACTORY_H__
 #define __FACTORY_H__
 
-#include "common/Singleton.h"
-
 #include <algorithm>
 #include <iostream>
 #include <list>
 #include <memory>
 #include <shared_mutex>
 #include <utility>
+
+#include "common/Singleton.h"
 
 namespace RyuRenderer::Common
 {

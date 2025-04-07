@@ -1,14 +1,14 @@
 #ifndef __FILEUTILS_H__
 #define __FILEUTILS_H__
 
-#include "common/Singleton.h"
-
 #include <fstream>
 #include <filesystem>
 #include <string>
 #include <sstream>
 #include <vector>
 #include <cstddef>
+
+#include "common/Singleton.h"
 
 namespace RyuRenderer::Common
 {
