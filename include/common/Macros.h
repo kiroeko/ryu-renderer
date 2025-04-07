@@ -21,9 +21,9 @@
 
 #define FAILTEST_RTN_3(boolExpression, failedMessage, failedReturnValue) FAILTEST(boolExpression, std::cerr << failedMessage << std::endl; return failedReturnValue)
 
-#define GET_MACRO(_1, _2, _3, NAME, ...) NAME
+#define GET_MACRO3(_1, _2, _3, NAME, ...) NAME
 
-#define FAILTEST_RTN(...) EXPAND(GET_MACRO(__VA_ARGS__, FAILTEST_RTN_3, FAILTEST_RTN_2, FAILTEST_RTN_1)(__VA_ARGS__))
+#define FAILTEST_RTN(...) EXPAND(GET_MACRO3(__VA_ARGS__, FAILTEST_RTN_3, FAILTEST_RTN_2, FAILTEST_RTN_1)(__VA_ARGS__))
 
 #endif
 
