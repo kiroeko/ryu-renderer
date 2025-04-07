@@ -7,31 +7,19 @@
 
 #define EXPAND(x) x
 
-#define FAILTEST_RTN_MSG_1(boolExpression) \
+#define FAILTEST(boolExpression, statement) \
 { \
     if (!(boolExpression)) \
     { \
-        return; \
+        statement; \
     } \
 }
 
-#define FAILTEST_RTN_MSG_2(boolExpression, failedMessage) \
-{ \
-    if (!(boolExpression)) \
-    { \
-        std::cerr << failedMessage << std::endl; \
-        return; \
-    } \
-}
+#define FAILTEST_RTN_MSG_1(boolExpression) FAILTEST(boolExpression, return)
 
-#define FAILTEST_RTN_MSG_3(boolExpression, failedMessage, failedReturnValue) \
-{ \
-    if (!(boolExpression)) \
-    { \
-        std::cerr << failedMessage << std::endl; \
-        return failedReturnValue; \
-    } \
-}
+#define FAILTEST_RTN_MSG_2(boolExpression, failedMessage) FAILTEST(boolExpression, std::cerr << failedMessage << std::endl; return)
+
+#define FAILTEST_RTN_MSG_3(boolExpression, failedMessage, failedReturnValue) FAILTEST(boolExpression, std::cerr << failedMessage << std::endl; return failedReturnValue)
 
 #define GET_MACRO(_1, _2, _3, NAME, ...) NAME
 
