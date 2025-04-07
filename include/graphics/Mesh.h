@@ -57,7 +57,7 @@ namespace RyuRenderer::Graphics
                 return;
             const std::size_t vectorSize = (std::forward<Args>(vertexDataArgs).size(), ...);
             bool allSameSize = ((std::forward<Args>(vertexDataArgs).size() == vectorSize) && ...);
-            FAILTEST_RTN_MSG(!allSameSize, "All vertex data in vector must have the same size.")
+            FAILTEST_RTN_MSG(allSameSize, "All vertex data in vector must have the same size.")
 
             std::vector<std::byte> vertexData;
             unsigned long long lastDataStartBytesOffset = 0;
@@ -138,7 +138,7 @@ namespace RyuRenderer::Graphics
             if (isParseFailed)
                 return;
 
-            FAILTEST_RTN_MSG(attributes.size() > GetMaxAttributeAmount(), "Vertex attribute is oversize for OpenGL.")
+            FAILTEST_RTN_MSG(attributes.size() < GetMaxAttributeAmount(), "Vertex attribute is oversize for OpenGL.")
 
             // VBOs
             glGenBuffers(1, &VBO);
@@ -301,6 +301,7 @@ namespace RyuRenderer::Graphics
         size_t elementSize = 0;
         GLuint VBO = 0;
         GLuint EBO = 0;
+
         inline static GLint maxAttributeAmount = -1;
     };
 }

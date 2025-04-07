@@ -21,12 +21,12 @@ namespace RyuRenderer::Graphics
         Texture2D(GLenum t, GLenum f, GLint uIdx, int w, int h)
         {
             FAILTEST_RTN_MSG(
-                t == GL_NONE ||
-                f == GL_NONE ||
-                uIdx < 0 ||
-                uIdx >= GetMaxTextureAmount() ||
-                w < 0 ||
-                h < 0,
+                t != GL_NONE &&
+                f != GL_NONE &&
+                uIdx >= 0 ||
+                uIdx < GetMaxTextureAmount() &&
+                w >= 0 &&
+                h >= 0,
                 "Invaild texture arguements");
 
             unitId = GetTextureUnitId(uIdx);
@@ -50,9 +50,7 @@ namespace RyuRenderer::Graphics
         
         Texture2D(const std::string& textureFilePath, GLint unitIdx)
         {
-            FAILTEST_RTN_MSG(
-                unitIdx < 0 || unitIdx >= GetMaxTextureAmount(),
-                "Texture unit id is oversize for OpenGL.");
+            FAILTEST_RTN_MSG(unitIdx >= 0 && unitIdx < GetMaxTextureAmount(), "Texture unit id is oversize for OpenGL.");
             
             if (textureFilePath.ends_with(".jpg"))
             {
@@ -110,7 +108,21 @@ namespace RyuRenderer::Graphics
 
         bool IsUsing()
         {
-            return false;
+            GLint prevActiveUnitId;
+            glGetIntegerv(GL_ACTIVE_TEXTURE, &prevActiveUnitId);
+
+            if(prevActiveUnitId != unitId)
+                glActiveTexture(unitId);
+
+            GLint currentId = 0;
+            glGetIntegerv(GL_TEXTURE_BINDING_2D, &currentId);
+
+            bool isUsing = currentId == id;
+
+            if (prevActiveUnitId != unitId)
+                glActiveTexture(prevActiveUnitId);
+
+            return isUsing;
         }
 
         bool IsValid()
@@ -144,8 +156,8 @@ namespace RyuRenderer::Graphics
         }
 
         GLuint id = 0;
-        GLenum format = GL_NONE;
         GLint unitId = 0;
+        GLenum format = GL_NONE;
         int width = 0;
         int height = 0;
 

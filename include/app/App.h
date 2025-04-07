@@ -9,6 +9,7 @@
 #include "graphics/Mesh.h"
 #include "graphics/Shader.h"
 #include "graphics/ShaderManager.h"
+#include "graphics/Texture2D.h"
 
 #include <iostream>
 #include <iterator>
@@ -142,28 +143,7 @@ namespace RyuRenderer::App
 
             // 加载场景贴图
             glActiveTexture(GL_TEXTURE0);
-            glGenTextures(1, &SceneTexture);
-            glBindTexture(GL_TEXTURE_2D, SceneTexture);
-            // 为当前绑定的纹理对象设置环绕、过滤方式
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            // 加载并生成纹理
-            int textureWidth = 0, textureHeight = 0, textureNRChannels = 0;
-            stbi_set_flip_vertically_on_load(true);
-            unsigned char* textureData = stbi_load("res/textures/test.jpg", &textureWidth, &textureHeight, &textureNRChannels, 0);
-            if (textureData)
-            {
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
-            }
-            else
-            {
-                std::cerr << "Failed to load texture" << std::endl;
-            }
-            stbi_image_free(textureData);
-
-            glBindTexture(GL_TEXTURE_2D, 0);
+            SceneTexture1 = RyuRenderer::Graphics::Texture2D("res/textures/test.jpg", 0);
         }
 
         void initQuad()
@@ -258,7 +238,7 @@ namespace RyuRenderer::App
 
             // 渲染场景本身到 fbo 里面
             simpleShader->Use();
-            glBindTexture(GL_TEXTURE_2D, SceneTexture);
+            SceneTexture1.Use();
             SceneMesh.Draw();
 
             // 进行高斯模糊，水平+垂直共迭代 5 次
@@ -268,7 +248,10 @@ namespace RyuRenderer::App
             for (unsigned int i = 0; i < amount; ++i)
             {
                 glBindFramebuffer(GL_FRAMEBUFFER, fbo[horizontal]);
-                glBindTexture(GL_TEXTURE_2D, firstIteration ? SceneTexture : fboTextures[!horizontal]);
+                if (firstIteration)
+                    SceneTexture1.Use();
+                else
+                    glBindTexture(GL_TEXTURE_2D, fboTextures[!horizontal]);
                 blurShader.SetUniform("isHorizontal", horizontal);
 
                 // 渲染全屏四边形到 fbo 里
@@ -321,6 +304,7 @@ namespace RyuRenderer::App
         RyuRenderer::Graphics::Mesh SceneMesh;
         size_t SceneElementCount = 0;
         GLuint SceneTexture = 0;
+        RyuRenderer::Graphics::Texture2D SceneTexture1;
 
         GLuint QuadVAO = 0;
         size_t QuadElementCount = 0;
