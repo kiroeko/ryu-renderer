@@ -256,6 +256,13 @@ namespace RyuRenderer::Graphics
                    EBO != 0;
         }
 
+        bool IsUsing()
+        {
+            GLint currentVAO;
+            glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentVAO);
+            return currentVAO == VAO;
+        }
+
         void Draw()
         {
             if (!IsValid())

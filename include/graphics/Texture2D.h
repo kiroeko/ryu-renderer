@@ -93,6 +93,58 @@ namespace RyuRenderer::Graphics
             glBindTexture(GL_TEXTURE_2D, 0);
         }
 
+        Texture2D(const Texture2D& other) = delete;
+
+        Texture2D(Texture2D&& other) noexcept :
+            id(other.id),
+            unitId(other.unitId),
+            format(other.format),
+            width(other.width),
+            height(other.height)
+        {
+            other.id = 0;
+            other.unitId = 0;
+            other.format = 0;
+            other.width = 0;
+            other.height = 0;
+        }
+
+        ~Texture2D()
+        {
+            if (IsUsing())
+            {
+                glActiveTexture(unitId);
+                glBindTexture(GL_TEXTURE_2D, 0);
+            }
+
+            glDeleteTextures(1, &id);
+            id = 0;
+            unitId = 0;
+            format = GL_NONE;
+            width = 0;
+            height = 0;
+        }
+
+        Texture2D& operator=(Texture2D& other) = delete;
+
+        Texture2D& operator=(Texture2D&& other) noexcept
+        {
+            if (this == &other)
+                return *this;
+
+            id = other.id;
+            unitId = other.unitId;
+            format = other.format;
+            width = other.width;
+            height = other.height;
+            other.id = 0;
+            other.unitId = 0;
+            other.format = GL_NONE;
+            other.width = 0;
+            other.height = 0;
+            return *this;
+        }
+
         bool Use()
         {
             if (!IsValid())
