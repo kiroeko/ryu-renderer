@@ -64,6 +64,8 @@ namespace RyuRenderer::App
             windowHeight = initHeight;
             glfwSetFramebufferSizeCallback(window, onWindowSizeChanged);
 
+            stbi_set_flip_vertically_on_load(true);
+
             return true;
         }
 

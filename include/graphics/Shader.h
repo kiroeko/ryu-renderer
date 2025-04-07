@@ -105,11 +105,12 @@ namespace RyuRenderer::Graphics
 
         ~Shader()
         {
-            if (!IsValid())
-                return;
+            if (shaderProgram != 0)
+            {
+                glDeleteProgram(shaderProgram);
+                shaderProgram = 0;
+            }
 
-            glDeleteProgram(shaderProgram);
-            shaderProgram = 0;
             uniformLocations.clear();
 
             vertexSource.clear();
@@ -522,7 +523,7 @@ namespace RyuRenderer::Graphics
 
         bool IsUsing()
         {
-            if (!IsValid())
+            if (shaderProgram == 0)
                 return false;
 
             GLint currentProgram = 0;

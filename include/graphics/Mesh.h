@@ -123,11 +123,7 @@ namespace RyuRenderer::Graphics
                 }(), ...);
             }
 
-            if (maxAttributeAmount <= 0)
-            {
-                glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxAttributeAmount);
-            }
-            if (attributes.size() > maxAttributeAmount)
+            if (attributes.size() > GetMaxAttributeAmount())
                 throw std::invalid_argument("Vertex attribute is oversize for OpenGL.");
 
             // VBOs
@@ -178,9 +174,6 @@ namespace RyuRenderer::Graphics
 
         ~Mesh()
         {
-            if (!IsValid())
-                return;
-
             elementSize = 0;
 
             if (VAO != 0)
@@ -280,11 +273,21 @@ namespace RyuRenderer::Graphics
             }
         }
     private:
+        static GLint GetMaxAttributeAmount()
+        {
+            if (maxAttributeAmount < 0)
+            {
+                glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxAttributeAmount);
+            }
+
+            return maxAttributeAmount;
+        }
+
         GLuint VAO = 0;
         size_t elementSize = 0;
         GLuint VBO = 0;
         GLuint EBO = 0;
-        inline static GLint maxAttributeAmount = 0;
+        inline static GLint maxAttributeAmount = -1;
     };
 }
 
