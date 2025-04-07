@@ -143,7 +143,7 @@ namespace RyuRenderer::App
 
             // 加载场景贴图
             glActiveTexture(GL_TEXTURE0);
-            SceneTexture1 = RyuRenderer::Graphics::Texture2D("res/textures/test.jpg", 0);
+            SceneTexture = RyuRenderer::Graphics::Texture2D("res/textures/test.jpg", 0);
         }
 
         void initQuad()
@@ -238,7 +238,7 @@ namespace RyuRenderer::App
 
             // 渲染场景本身到 fbo 里面
             simpleShader->Use();
-            SceneTexture1.Use();
+            SceneTexture.Use();
             SceneMesh.Draw();
 
             // 进行高斯模糊，水平+垂直共迭代 5 次
@@ -249,7 +249,7 @@ namespace RyuRenderer::App
             {
                 glBindFramebuffer(GL_FRAMEBUFFER, fbo[horizontal]);
                 if (firstIteration)
-                    SceneTexture1.Use();
+                    SceneTexture.Use();
                 else
                     glBindTexture(GL_TEXTURE_2D, fboTextures[!horizontal]);
                 blurShader.SetUniform("isHorizontal", horizontal);
@@ -303,8 +303,7 @@ namespace RyuRenderer::App
         // tmp
         RyuRenderer::Graphics::Mesh SceneMesh;
         size_t SceneElementCount = 0;
-        GLuint SceneTexture = 0;
-        RyuRenderer::Graphics::Texture2D SceneTexture1;
+        RyuRenderer::Graphics::Texture2D SceneTexture;
 
         GLuint QuadVAO = 0;
         size_t QuadElementCount = 0;
