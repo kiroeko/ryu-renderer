@@ -14,12 +14,12 @@
 
 namespace RyuRenderer::Graphics
 {
-    class Texture2D
+    class Texture2d
     {
     public:
-        Texture2D() = default;
+        Texture2d() = default;
 
-        Texture2D(GLenum t, GLenum f, GLint uIdx, int w, int h)
+        Texture2d(GLenum t, GLenum f, GLint uIdx, int w, int h)
         {
             FAILTEST_RTN(
                 t != GL_NONE &&
@@ -38,7 +38,7 @@ namespace RyuRenderer::Graphics
             glGenTextures(1, &id);
             glActiveTexture(unitId);
             glBindTexture(GL_TEXTURE_2D, id);
-            lastestUsedTexture2dIds[unitId] = id;
+            lastestUsedT2dIds[unitId] = id;
             glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, NULL);
             glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -48,10 +48,10 @@ namespace RyuRenderer::Graphics
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
             glBindTexture(GL_TEXTURE_2D, 0);
-            lastestUsedTexture2dIds[unitId] = 0;
+            lastestUsedT2dIds[unitId] = 0;
         }
         
-        Texture2D(const std::string& textureFilePath, GLint unitIdx)
+        Texture2d(const std::string& textureFilePath, GLint unitIdx)
         {
             FAILTEST_RTN(unitIdx >= 0 && unitIdx < GetMaxTextureAmount(), "Texture unit id is oversize for OpenGL.");
             
@@ -84,7 +84,7 @@ namespace RyuRenderer::Graphics
             glGenTextures(1, &id);
             glActiveTexture(unitId);
             glBindTexture(GL_TEXTURE_2D, id);
-            lastestUsedTexture2dIds[unitId] = id;
+            lastestUsedT2dIds[unitId] = id;
 
             glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, textureData);
             glGenerateMipmap(GL_TEXTURE_2D);
@@ -95,12 +95,12 @@ namespace RyuRenderer::Graphics
 
             stbi_image_free(textureData);
             glBindTexture(GL_TEXTURE_2D, 0);
-            lastestUsedTexture2dIds[unitId] = 0;
+            lastestUsedT2dIds[unitId] = 0;
         }
 
-        Texture2D(const Texture2D& other) = delete;
+        Texture2d(const Texture2d& other) = delete;
 
-        Texture2D(Texture2D&& other) noexcept :
+        Texture2d(Texture2d&& other) noexcept :
             id(other.id),
             unitId(other.unitId),
             format(other.format),
@@ -114,13 +114,13 @@ namespace RyuRenderer::Graphics
             other.height = 0;
         }
 
-        ~Texture2D()
+        ~Texture2d()
         {
             if (IsUsing())
             {
                 glActiveTexture(unitId);
                 glBindTexture(GL_TEXTURE_2D, 0);
-                lastestUsedTexture2dIds[unitId] = 0;
+                lastestUsedT2dIds[unitId] = 0;
             }
 
             glDeleteTextures(1, &id);
@@ -131,9 +131,9 @@ namespace RyuRenderer::Graphics
             height = 0;
         }
 
-        Texture2D& operator=(Texture2D& other) = delete;
+        Texture2d& operator=(Texture2d& other) = delete;
 
-        Texture2D& operator=(Texture2D&& other) noexcept
+        Texture2d& operator=(Texture2d&& other) noexcept
         {
             if (this == &other)
                 return *this;
@@ -161,7 +161,7 @@ namespace RyuRenderer::Graphics
 
             glActiveTexture(unitId);
             glBindTexture(GL_TEXTURE_2D, id);
-            lastestUsedTexture2dIds[unitId] = id;
+            lastestUsedT2dIds[unitId] = id;
             return true;
         }
 
@@ -172,8 +172,8 @@ namespace RyuRenderer::Graphics
 
             if (IsCleanMode)
             {
-                const auto& it = lastestUsedTexture2dIds.find(unitId);
-                if (it == lastestUsedTexture2dIds.end())
+                const auto& it = lastestUsedT2dIds.find(unitId);
+                if (it == lastestUsedT2dIds.end())
                     return false;
 
                 if (it->second == 0)
@@ -240,7 +240,7 @@ namespace RyuRenderer::Graphics
         int height = 0;
 
         inline static GLint maxTextureAmount = -1;
-        inline static std::unordered_map<GLint, GLuint> lastestUsedTexture2dIds;
+        inline static std::unordered_map<GLint, GLuint> lastestUsedT2dIds;
     };
 }
 

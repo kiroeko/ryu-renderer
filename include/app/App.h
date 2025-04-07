@@ -143,7 +143,7 @@ namespace RyuRenderer::App
 
             // 加载场景贴图
             glActiveTexture(GL_TEXTURE0);
-            SceneTexture = RyuRenderer::Graphics::Texture2D("res/textures/test.jpg", 0);
+            SceneTexture = RyuRenderer::Graphics::Texture2d("res/textures/test.jpg", 0);
         }
 
         void initQuad()
@@ -303,7 +303,7 @@ namespace RyuRenderer::App
         // tmp
         RyuRenderer::Graphics::Mesh SceneMesh;
         size_t SceneElementCount = 0;
-        RyuRenderer::Graphics::Texture2D SceneTexture;
+        RyuRenderer::Graphics::Texture2d SceneTexture;
 
         GLuint QuadVAO = 0;
         size_t QuadElementCount = 0;

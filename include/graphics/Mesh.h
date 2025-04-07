@@ -141,19 +141,19 @@ namespace RyuRenderer::Graphics
             FAILTEST_RTN(attributes.size() < GetMaxAttributeAmount(), "Vertex attribute is oversize for OpenGL.")
 
             // VBOs
-            glGenBuffers(1, &VBO);
+            glGenBuffers(1, &VBOId);
             // VAOs
-            glGenVertexArrays(1, &VAO);
+            glGenVertexArrays(1, &VAOId);
             // IBOs
-            glGenBuffers(1, &EBO);
+            glGenBuffers(1, &EBOId);
 
             // Fill VBO
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBindBuffer(GL_ARRAY_BUFFER, VBOId);
             glBufferData(GL_ARRAY_BUFFER, sizeof(std::byte) * vertexData.size(), vertexData.data(), GL_STATIC_DRAW);
 
             // VAO Binding
-            glBindVertexArray(VAO);
-            lastestUsedVAOId = VAO;
+            glBindVertexArray(VAOId);
+            lastestUsedVAOId = VAOId;
             
             for (int i = 0; i < attributes.size(); ++i)
             {
@@ -165,7 +165,7 @@ namespace RyuRenderer::Graphics
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             elementSize = indexData.size();
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOId);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * elementSize, indexData.data(), GL_STATIC_DRAW);
 
             // Unbind
@@ -177,22 +177,22 @@ namespace RyuRenderer::Graphics
         Mesh(const Mesh& other) = delete;
 
         Mesh(Mesh&& other) noexcept :
-            VAO(other.VAO),
+            VAOId(other.VAOId),
             elementSize(other.elementSize),
-            VBO(other.VBO),
-            EBO(other.EBO)
+            VBOId(other.VBOId),
+            EBOId(other.EBOId)
         {
-            other.VAO = 0;
+            other.VAOId = 0;
             other.elementSize = 0;
-            other.VBO = 0;
-            other.EBO = 0;
+            other.VBOId = 0;
+            other.EBOId = 0;
         }
 
         ~Mesh()
         {
             elementSize = 0;
 
-            if (VAO != 0)
+            if (VAOId != 0)
             {
                 if (IsUsing())
                 {
@@ -200,34 +200,34 @@ namespace RyuRenderer::Graphics
                     lastestUsedVAOId = 0;
                 }
 
-                glDeleteVertexArrays(1, &VAO);
-                VAO = 0;
+                glDeleteVertexArrays(1, &VAOId);
+                VAOId = 0;
             }
 
-            if (VBO != 0)
+            if (VBOId != 0)
             {
                 GLint currentVBO;
                 glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &currentVBO);
-                if (currentVBO == VBO)
+                if (currentVBO == VBOId)
                 {
                     glBindBuffer(GL_ARRAY_BUFFER, 0);
                 }
 
-                glDeleteBuffers(1, &VBO);
-                VBO = 0;
+                glDeleteBuffers(1, &VBOId);
+                VBOId = 0;
             }
 
-            if (EBO != 0)
+            if (EBOId != 0)
             {
                 GLint currentEBO;
                 glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &currentEBO);
-                if (currentEBO == EBO)
+                if (currentEBO == EBOId)
                 {
                     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
                 }
 
-                glDeleteBuffers(1, &EBO);
-                EBO = 0;
+                glDeleteBuffers(1, &EBOId);
+                EBOId = 0;
             }
         }
 
@@ -238,28 +238,28 @@ namespace RyuRenderer::Graphics
             if (this == &other)
                 return *this;
 
-            VAO = other.VAO;
+            VAOId = other.VAOId;
             elementSize = other.elementSize;
-            VBO = other.VBO;
-            EBO = other.EBO;
-            other.VAO = 0;
+            VBOId = other.VBOId;
+            EBOId = other.EBOId;
+            other.VAOId = 0;
             other.elementSize = 0;
-            other.VBO = 0;
-            other.EBO = 0;
+            other.VBOId = 0;
+            other.EBOId = 0;
             return *this;
         }
 
         bool IsValid()
         {
-            return VAO != 0 &&
+            return VAOId != 0 &&
                    elementSize != 0 &&
-                   VBO != 0 &&
-                   EBO != 0;
+                   VBOId != 0 &&
+                   EBOId != 0;
         }
 
         bool IsUsing()
         {
-            if (VAO == 0)
+            if (VAOId == 0)
                 return false;
 
             if (IsCleanMode)
@@ -267,12 +267,12 @@ namespace RyuRenderer::Graphics
                 if (lastestUsedVAOId == 0)
                     return false;
 
-                return lastestUsedVAOId == VAO;
+                return lastestUsedVAOId == VAOId;
             }
 
             GLint currentVAO;
             glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentVAO);
-            return currentVAO == VAO;
+            return currentVAO == VAOId;
         }
 
         void Draw()
@@ -282,8 +282,8 @@ namespace RyuRenderer::Graphics
 
             if (!IsUsing())
             {
-                glBindVertexArray(VAO);
-                lastestUsedVAOId = VAO;
+                glBindVertexArray(VAOId);
+                lastestUsedVAOId = VAOId;
             }
 
             glDrawElements(GL_TRIANGLES, elementSize, GL_UNSIGNED_INT, 0);
@@ -323,10 +323,10 @@ namespace RyuRenderer::Graphics
             return maxAttributeAmount;
         }
 
-        GLuint VAO = 0;
+        GLuint VAOId = 0;
         size_t elementSize = 0;
-        GLuint VBO = 0;
-        GLuint EBO = 0;
+        GLuint VBOId = 0;
+        GLuint EBOId = 0;
 
         inline static GLint maxAttributeAmount = -1;
         inline static GLuint lastestUsedVAOId = 0;
