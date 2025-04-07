@@ -167,10 +167,16 @@ namespace RyuRenderer::Graphics
 
         bool IsUsing()
         {
+            if (unitId == 0)
+                return false;
+
             if (IsCleanMode)
             {
                 const auto& it = lastestUsedTexture2dIds.find(unitId);
                 if (it == lastestUsedTexture2dIds.end())
+                    return false;
+
+                if (it->second == 0)
                     return false;
 
                 if (it->second == unitId)

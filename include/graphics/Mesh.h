@@ -259,6 +259,9 @@ namespace RyuRenderer::Graphics
 
         bool IsUsing()
         {
+            if (VAO == 0)
+                return false;
+
             if (IsCleanMode)
             {
                 if (lastestUsedVAOId == 0)
