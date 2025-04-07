@@ -20,7 +20,7 @@ namespace RyuRenderer::Graphics
 
         Texture2D(GLenum t, GLenum f, GLint uIdx, int w, int h)
         {
-            FAILTEST_RTN_MSG(
+            FAILTEST_RTN(
                 t != GL_NONE &&
                 f != GL_NONE &&
                 uIdx >= 0 ||
@@ -50,7 +50,7 @@ namespace RyuRenderer::Graphics
         
         Texture2D(const std::string& textureFilePath, GLint unitIdx)
         {
-            FAILTEST_RTN_MSG(unitIdx >= 0 && unitIdx < GetMaxTextureAmount(), "Texture unit id is oversize for OpenGL.");
+            FAILTEST_RTN(unitIdx >= 0 && unitIdx < GetMaxTextureAmount(), "Texture unit id is oversize for OpenGL.");
             
             if (textureFilePath.ends_with(".jpg"))
             {
