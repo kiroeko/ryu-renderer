@@ -7,13 +7,13 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-#include <iostream>
+#include <cstddef>
 #include <fstream>
-#include <unordered_map>
+#include <iostream>
 #include <string>
 #include <sstream>
 #include <vector>
-#include <cstddef>
+#include <unordered_map>
 
 #include "common/FileUtils.h"
 
@@ -52,21 +52,21 @@ namespace RyuRenderer::Graphics
                 return;
             }
 
-            shaderProgram = glCreateProgram();
-            glAttachShader(shaderProgram, vs);
-            glAttachShader(shaderProgram, fs);
-            glLinkProgram(shaderProgram);
+            shaderProgramId = glCreateProgram();
+            glAttachShader(shaderProgramId, vs);
+            glAttachShader(shaderProgramId, fs);
+            glLinkProgram(shaderProgramId);
 
             int success = 0;
-            glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+            glGetProgramiv(shaderProgramId, GL_LINK_STATUS, &success);
             if (!success)
             {
                 constexpr int errlogLen = 4096;
                 char errLog[errlogLen];
-                glGetProgramInfoLog(shaderProgram, 4096, NULL, errLog);
+                glGetProgramInfoLog(shaderProgramId, 4096, NULL, errLog);
                 std::cerr << "ERROR: shader program (vs: \"" <<vertexShaderFilePath << "\",fs: \"" << fragmentShaderFilePath << "\") linking failed!\n" << errLog << std::endl;
-                glDeleteProgram(shaderProgram);
-                shaderProgram = 0;
+                glDeleteProgram(shaderProgramId);
+                shaderProgramId = 0;
             }
 
             glDeleteShader(vs);
@@ -77,7 +77,7 @@ namespace RyuRenderer::Graphics
 
         Shader(const std::string& localGPUBinaryFilePath)
         {
-            if (!LoadShaderByLocalGPUBinaryFile(localGPUBinaryFilePath, shaderProgram))
+            if (!LoadShaderByLocalGPUBinaryFile(localGPUBinaryFilePath, shaderProgramId))
                 return;
 
             binarySource = localGPUBinaryFilePath;
@@ -86,13 +86,13 @@ namespace RyuRenderer::Graphics
         Shader(const Shader& other) = delete;
 
         Shader(Shader&& other) noexcept :
-            shaderProgram(other.shaderProgram),
+            shaderProgramId(other.shaderProgramId),
             uniformLocations(other.uniformLocations),
             vertexSource(other.vertexSource),
             fragmentSource(other.fragmentSource),
             binarySource(other.binarySource)
         {
-            other.shaderProgram = 0;
+            other.shaderProgramId = 0;
             other.uniformLocations.clear();
             other.vertexSource.clear();
             other.fragmentSource.clear();
@@ -101,10 +101,10 @@ namespace RyuRenderer::Graphics
 
         ~Shader()
         {
-            if (shaderProgram != 0)
+            if (shaderProgramId != 0)
             {
-                glDeleteProgram(shaderProgram);
-                shaderProgram = 0;
+                glDeleteProgram(shaderProgramId);
+                shaderProgramId = 0;
             }
 
             uniformLocations.clear();
@@ -121,12 +121,12 @@ namespace RyuRenderer::Graphics
             if (this == &other)
                 return *this;
 
-            shaderProgram = other.shaderProgram;
+            shaderProgramId = other.shaderProgramId;
             uniformLocations = other.uniformLocations;
             vertexSource = other.vertexSource;
             fragmentSource = other.fragmentSource;
             binarySource = other.binarySource;
-            other.shaderProgram = 0;
+            other.shaderProgramId = 0;
             other.uniformLocations.clear();
             other.vertexSource.clear();
             other.fragmentSource.clear();
@@ -142,7 +142,8 @@ namespace RyuRenderer::Graphics
             if (IsUsing())
                 return true;
 
-            glUseProgram(shaderProgram);
+            glUseProgram(shaderProgramId);
+            lastestUsedShaderProgramId = shaderProgramId;
             return true;
         }
 
@@ -495,13 +496,13 @@ namespace RyuRenderer::Graphics
                 return false;
 
             GLint bufferSize = 0;
-            glGetProgramiv(shaderProgram, GL_PROGRAM_BINARY_LENGTH, &bufferSize);
+            glGetProgramiv(shaderProgramId, GL_PROGRAM_BINARY_LENGTH, &bufferSize);
             if (bufferSize <= 0)
                 return false;
 
             GLenum format = 0;
             std::vector<std::byte> buffer(bufferSize);
-            glGetProgramBinary(shaderProgram, bufferSize, nullptr, &format, buffer.data());
+            glGetProgramBinary(shaderProgramId, bufferSize, nullptr, &format, buffer.data());
             
             std::ofstream file(localGPUBinaryFilePath, std::ios::binary);
             if (!file.is_open())
@@ -517,25 +518,35 @@ namespace RyuRenderer::Graphics
 
         bool IsValid()
         {
-            return shaderProgram != 0;
+            return shaderProgramId != 0;
         }
 
         bool IsUsing()
         {
-            if (shaderProgram == 0)
+            if (shaderProgramId == 0)
                 return false;
+
+            if (IsCleanMode)
+            {
+                if (lastestUsedShaderProgramId == 0)
+                    return false;
+
+                return lastestUsedShaderProgramId == shaderProgramId;
+            }
 
             GLint currentProgram = 0;
             glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
             if (currentProgram == 0)
                 return false;
 
-            return shaderProgram == currentProgram;
+            return shaderProgramId == currentProgram;
         }
 
         const std::string& GetVertexSource() const { return vertexSource; }
         const std::string& GetFragmentSource() const { return fragmentSource; }
         const std::string& GetBinarySource() const { return binarySource; }
+        
+        inline static bool IsCleanMode = true;
     private:
         bool LoadShaderBySourceCodeFile(
             const std::string& shaderSourceCodeFilePath,
@@ -653,7 +664,7 @@ namespace RyuRenderer::Graphics
             if (it != uniformLocations.end())
                 return it->second;
 
-            GLint loc = glGetUniformLocation(shaderProgram, uniformName.c_str());
+            GLint loc = glGetUniformLocation(shaderProgramId, uniformName.c_str());
             if (loc == -1)
                 std::cerr << "Shader uniform: \"" << uniformName << "\" not found." << std::endl;
             else
@@ -662,12 +673,14 @@ namespace RyuRenderer::Graphics
             return loc;
         }
 
-        GLuint shaderProgram = 0;
+        GLuint shaderProgramId = 0;
         std::unordered_map<std::string, GLint> uniformLocations;
 
         std::string vertexSource;
         std::string fragmentSource;
         std::string binarySource;
+
+        inline static GLuint lastestUsedShaderProgramId = 0;
     };
 }
 

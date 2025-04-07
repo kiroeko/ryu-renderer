@@ -153,6 +153,7 @@ namespace RyuRenderer::Graphics
 
             // VAO Binding
             glBindVertexArray(VAO);
+            lastestUsedVAOId = VAO;
             
             for (int i = 0; i < attributes.size(); ++i)
             {
@@ -169,6 +170,7 @@ namespace RyuRenderer::Graphics
 
             // Unbind
             glBindVertexArray(0);
+            lastestUsedVAOId = 0;
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         }
 
@@ -192,11 +194,10 @@ namespace RyuRenderer::Graphics
 
             if (VAO != 0)
             {
-                GLint currentVAO;
-                glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentVAO);
-                if (currentVAO == VAO)
+                if (IsUsing())
                 {
                     glBindVertexArray(0);
+                    lastestUsedVAOId = 0;
                 }
 
                 glDeleteVertexArrays(1, &VAO);
@@ -258,6 +259,14 @@ namespace RyuRenderer::Graphics
 
         bool IsUsing()
         {
+            if (IsCleanMode)
+            {
+                if (lastestUsedVAOId == 0)
+                    return false;
+
+                return lastestUsedVAOId == VAO;
+            }
+
             GLint currentVAO;
             glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentVAO);
             return currentVAO == VAO;
@@ -268,9 +277,16 @@ namespace RyuRenderer::Graphics
             if (!IsValid())
                 return;
 
-            glBindVertexArray(VAO);
+            if (!IsUsing())
+            {
+                glBindVertexArray(VAO);
+                lastestUsedVAOId = VAO;
+            }
+
             glDrawElements(GL_TRIANGLES, elementSize, GL_UNSIGNED_INT, 0);
         }
+
+        inline static bool IsCleanMode = true;
     private:
         template <typename T>
         requires std::is_trivially_copyable_v<T>
@@ -310,6 +326,7 @@ namespace RyuRenderer::Graphics
         GLuint EBO = 0;
 
         inline static GLint maxAttributeAmount = -1;
+        inline static GLuint lastestUsedVAOId = 0;
     };
 }
 

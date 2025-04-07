@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <string>
+#include <unordered_map>
 
 #include "common/Macros.h"
 
@@ -37,6 +38,7 @@ namespace RyuRenderer::Graphics
             glGenTextures(1, &id);
             glActiveTexture(unitId);
             glBindTexture(GL_TEXTURE_2D, id);
+            lastestUsedTexture2dIds[unitId] = id;
             glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, NULL);
             glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -46,6 +48,7 @@ namespace RyuRenderer::Graphics
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
             glBindTexture(GL_TEXTURE_2D, 0);
+            lastestUsedTexture2dIds[unitId] = 0;
         }
         
         Texture2D(const std::string& textureFilePath, GLint unitIdx)
@@ -81,6 +84,7 @@ namespace RyuRenderer::Graphics
             glGenTextures(1, &id);
             glActiveTexture(unitId);
             glBindTexture(GL_TEXTURE_2D, id);
+            lastestUsedTexture2dIds[unitId] = id;
 
             glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, textureData);
             glGenerateMipmap(GL_TEXTURE_2D);
@@ -91,6 +95,7 @@ namespace RyuRenderer::Graphics
 
             stbi_image_free(textureData);
             glBindTexture(GL_TEXTURE_2D, 0);
+            lastestUsedTexture2dIds[unitId] = 0;
         }
 
         Texture2D(const Texture2D& other) = delete;
@@ -115,6 +120,7 @@ namespace RyuRenderer::Graphics
             {
                 glActiveTexture(unitId);
                 glBindTexture(GL_TEXTURE_2D, 0);
+                lastestUsedTexture2dIds[unitId] = 0;
             }
 
             glDeleteTextures(1, &id);
@@ -155,11 +161,23 @@ namespace RyuRenderer::Graphics
 
             glActiveTexture(unitId);
             glBindTexture(GL_TEXTURE_2D, id);
+            lastestUsedTexture2dIds[unitId] = id;
             return true;
         }
 
         bool IsUsing()
         {
+            if (IsCleanMode)
+            {
+                const auto& it = lastestUsedTexture2dIds.find(unitId);
+                if (it == lastestUsedTexture2dIds.end())
+                    return false;
+
+                if (it->second == unitId)
+                    return true;
+                return false;
+            }
+
             GLint prevActiveUnitId;
             glGetIntegerv(GL_ACTIVE_TEXTURE, &prevActiveUnitId);
 
@@ -196,6 +214,8 @@ namespace RyuRenderer::Graphics
         {
             return unitId - GL_TEXTURE0;
         }
+
+        inline static bool IsCleanMode = true;
     private:
         static GLint GetMaxTextureAmount()
         {
@@ -214,6 +234,7 @@ namespace RyuRenderer::Graphics
         int height = 0;
 
         inline static GLint maxTextureAmount = -1;
+        inline static std::unordered_map<GLint, GLuint> lastestUsedTexture2dIds;
     };
 }
 
