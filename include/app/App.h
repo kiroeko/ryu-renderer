@@ -78,7 +78,7 @@ namespace RyuRenderer::App
                 return;
             }
             
-            initScene();
+            initRenderer();
 
             // main loop
             while (!glfwWindowShouldClose(window))
@@ -92,7 +92,7 @@ namespace RyuRenderer::App
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
                 // render
-                renderScene();
+                renderTick();
 
                 // show render result
                 glfwSwapBuffers(window);
@@ -121,29 +121,35 @@ namespace RyuRenderer::App
         // 这里我们简单手动填写一下所需的 mesh 和它们有关的变换矩阵的数据，
         //     实际上 mesh 一般由 fbx 文件读入，
         //     变换矩阵一般是通过游戏场景编辑器设置的数值。
-        void initScene()
+        void initRenderer()
         {
             initMainScene();
 
             initQuad();
 
-            initShader();
-
             initFBO();
+
+            initOtherSettings();
         }
 
         void initMainScene()
         {
             // 场景本身，这里恰好是带纹理图案的矩形
-            SceneMesh = RyuRenderer::Graphics::Mesh(
+            sceneMesh = RyuRenderer::Graphics::Mesh(
                 std::vector<GLuint>{0, 1, 2, 0, 2, 3}, // indexes
                 std::vector<std::array<float, 2>>{{ -1.0f, 1.0f }, { -1.0f, -1.0f }, { 1.0f, -1.0f }, { 1.0f, 1.0f }},// Position
                 std::vector<std::array<float, 2>>{{ 0.0f, 1.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }} // TexCoord
             );
 
             // 加载场景贴图
-            glActiveTexture(GL_TEXTURE0);
-            SceneTexture = RyuRenderer::Graphics::Texture2d("res/textures/test.jpg", 0);
+            sceneTexture = RyuRenderer::Graphics::Texture2d("res/textures/test.jpg", 0);
+
+            simpleShader = shaderManager.Create("res/shaders/2d-texture.vert", "res/shaders/2d-texture.frag");
+            if (simpleShader)
+            {
+                simpleShader->Use();
+                simpleShader->SetUniform("mainTexture", 0);
+            }
         }
 
         void initQuad()
@@ -188,23 +194,15 @@ namespace RyuRenderer::App
             glBindVertexArray(0);
         }
 
-        void initShader()
+        void initOtherSettings()
         {
-            // 加载 场景用的 shader
-            ShaderManager sm;
-            simpleShader = sm.Create("res/shaders/simple.vert", "res/shaders/simple.frag");
-            if (simpleShader)
-            {
-                simpleShader->Use();
-                // 0 代表 GL_TEXTURE0
-                simpleShader->SetUniform("mainTexture", 0);
-            }
-
-
             // 加载 高斯模糊的 shader
-            blurShader = RyuRenderer::Graphics::Shader("res/shaders/blur.vert", "res/shaders/blur.frag");
-            blurShader.Use();
-            blurShader.SetUniform("mainTexture", 0);
+            gaussianBlurShader = shaderManager.Create("res/shaders/gaussian-blur.vert", "res/shaders/gaussian-blur.frag");
+            if (gaussianBlurShader)
+            {
+                gaussianBlurShader->Use();
+                gaussianBlurShader->SetUniform("mainTexture", 0);
+            }
         }
 
         void initFBO()
@@ -231,28 +229,28 @@ namespace RyuRenderer::App
 
         // 这里我们简单合批渲染一下由不同材质参数的多个物件，
         //     实际上可以使用复杂的场景物体预剔除、LOD以及合批的策略，优化这一步的性能，但其实对于几个场景物体，也没啥优化空间。
-        void renderScene()
+        void renderTick()
         {
             // 先绑定 fbo0
             glBindFramebuffer(GL_FRAMEBUFFER, fbo[0]);
 
             // 渲染场景本身到 fbo 里面
+            sceneTexture.Use();
             simpleShader->Use();
-            SceneTexture.Use();
-            SceneMesh.Draw();
+            sceneMesh.Draw();
 
             // 进行高斯模糊，水平+垂直共迭代 5 次
-            blurShader.Use();
+            gaussianBlurShader->Use();
             bool horizontal = true, firstIteration = true;
             constexpr int amount = 30; // 模糊迭代次数
             for (unsigned int i = 0; i < amount; ++i)
             {
                 glBindFramebuffer(GL_FRAMEBUFFER, fbo[horizontal]);
                 if (firstIteration)
-                    SceneTexture.Use();
+                    sceneTexture.Use();
                 else
                     glBindTexture(GL_TEXTURE_2D, fboTextures[!horizontal]);
-                blurShader.SetUniform("isHorizontal", horizontal);
+                gaussianBlurShader->SetUniform("isHorizontal", horizontal);
 
                 // 渲染全屏四边形到 fbo 里
                 glBindVertexArray(QuadVAO);
@@ -301,15 +299,16 @@ namespace RyuRenderer::App
         int windowHeight = 0;
 
         // tmp
-        RyuRenderer::Graphics::Mesh SceneMesh;
-        size_t SceneElementCount = 0;
-        RyuRenderer::Graphics::Texture2d SceneTexture;
+        ShaderManager shaderManager;
+
+        RyuRenderer::Graphics::Mesh sceneMesh;
+        RyuRenderer::Graphics::Texture2d sceneTexture;
+        std::shared_ptr<RyuRenderer::Graphics::Shader> simpleShader;
 
         GLuint QuadVAO = 0;
         size_t QuadElementCount = 0;
 
-        std::shared_ptr<RyuRenderer::Graphics::Shader> simpleShader;
-        RyuRenderer::Graphics::Shader blurShader;
+        std::shared_ptr<RyuRenderer::Graphics::Shader> gaussianBlurShader;
 
         GLuint fbo[2] = { 0 };
         GLuint fboTextures[2] = { 0 };
