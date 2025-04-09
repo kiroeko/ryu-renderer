@@ -118,16 +118,13 @@ namespace RyuRenderer::App
                 glfwSetWindowShouldClose(window, true);
         }
 
-        // 这里我们简单手动填写一下所需的 mesh 和它们有关的变换矩阵的数据，
-        //     实际上 mesh 一般由 fbx 文件读入，
-        //     变换矩阵一般是通过游戏场景编辑器设置的数值。
         void initRenderer()
         {
             initMainScene();
 
-            initQuad();
+            initFullScreenQuadMesh();
 
-            initFBO();
+            initFrames();
 
             initOtherSettings();
         }
@@ -152,46 +149,13 @@ namespace RyuRenderer::App
             }
         }
 
-        void initQuad()
+        void initFullScreenQuadMesh()
         {
-            // 渲染模糊用的模型，这里是一个带纹理的，和屏幕大小一致的矩形
-            // 绑定 mesh 到 VAO
-            GLfloat vertices[] = {
-                // Position   // TexCoord
-                -1.0f,  1.0f, 0.0f, 1.0f,
-                -1.0f, -1.0f, 0.0f, 0.0f,
-                 1.0f, -1.0f, 1.0f, 0.0f,
-                 1.0f,  1.0f, 1.0f, 1.0f
-            };
-            GLuint indices[] = {
-                0, 1, 2,
-                0, 2, 3
-            };
-
-            // VAOs
-            glGenVertexArrays(1, &QuadVAO);
-            // VBOs
-            GLuint VBO = 0;
-            glGenBuffers(1, &VBO);
-            // IBOs
-            GLuint IBO;
-            glGenBuffers(1, &IBO);
-
-            // VAO Binding
-            glBindVertexArray(QuadVAO);
-
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
-            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-            glEnableVertexAttribArray(0);
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-            glEnableVertexAttribArray(1);
-
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
-            QuadElementCount = std::size(indices);
-
-            glBindVertexArray(0);
+            fullScreenQuadMesh = RyuRenderer::Graphics::Mesh(
+                std::vector<GLuint>{0, 1, 2, 0, 2, 3}, // indexes
+                std::vector<std::array<float, 2>>{{ -1.0f, 1.0f }, { -1.0f, -1.0f }, { 1.0f, -1.0f }, { 1.0f, 1.0f }},// Position
+                std::vector<std::array<float, 2>>{{ 0.0f, 1.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }} // TexCoord
+            );
         }
 
         void initOtherSettings()
@@ -205,12 +169,13 @@ namespace RyuRenderer::App
             }
         }
 
-        void initFBO()
+        void initFrames()
         {
             glGenFramebuffers(2, fbo);
             glGenTextures(2, fboTextures);
 
-            for (int i = 0; i < 2; ++i) {
+            for (int i = 0; i < 2; ++i)
+            {
                 glBindFramebuffer(GL_FRAMEBUFFER, fbo[i]);
                 glBindTexture(GL_TEXTURE_2D, fboTextures[i]);
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
@@ -253,8 +218,7 @@ namespace RyuRenderer::App
                 gaussianBlurShader->SetUniform("isHorizontal", horizontal);
 
                 // 渲染全屏四边形到 fbo 里
-                glBindVertexArray(QuadVAO);
-                glDrawElements(GL_TRIANGLES, QuadElementCount, GL_UNSIGNED_INT, 0);
+                fullScreenQuadMesh.Draw();
 
                 // 状态管理
                 horizontal = !horizontal;
@@ -266,8 +230,7 @@ namespace RyuRenderer::App
             // 把最后一次渲染出的 fbo 纹理作为结果输出到 OpenGl 画布上
             simpleShader->Use();
             glBindTexture(GL_TEXTURE_2D, fboTextures[!horizontal]);
-            glBindVertexArray(QuadVAO);
-            glDrawElements(GL_TRIANGLES, QuadElementCount, GL_UNSIGNED_INT, 0);
+            fullScreenQuadMesh.Draw();
         }
 
         void Clear()
@@ -305,8 +268,7 @@ namespace RyuRenderer::App
         RyuRenderer::Graphics::Texture2d sceneTexture;
         std::shared_ptr<RyuRenderer::Graphics::Shader> simpleShader;
 
-        GLuint QuadVAO = 0;
-        size_t QuadElementCount = 0;
+        RyuRenderer::Graphics::Mesh fullScreenQuadMesh;
 
         std::shared_ptr<RyuRenderer::Graphics::Shader> gaussianBlurShader;
 
