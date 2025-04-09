@@ -10,6 +10,7 @@
 #include "graphics/Shader.h"
 #include "graphics/ShaderManager.h"
 #include "graphics/Texture2D.h"
+#include "graphics/Frame.h"
 
 #include <iostream>
 #include <iterator>
@@ -171,25 +172,11 @@ namespace RyuRenderer::App
 
         void initFrames()
         {
-            glGenFramebuffers(2, fbo);
-            glGenTextures(2, fboTextures);
+            frameTextures[0] = RyuRenderer::Graphics::Texture2d(GL_RGB, 0, windowWidth, windowHeight);
+            frameTextures[1] = RyuRenderer::Graphics::Texture2d(GL_RGB, 0, windowWidth, windowHeight);
 
-            for (int i = 0; i < 2; ++i)
-            {
-                glBindFramebuffer(GL_FRAMEBUFFER, fbo[i]);
-                glBindTexture(GL_TEXTURE_2D, fboTextures[i]);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTextures[i], 0);
-
-                if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-                    std::cerr << "frame buffer status error." << std::endl;
-                }
-            }
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            frames[0] = RyuRenderer::Graphics::Frame(&frameTextures[0]);
+            frames[1] = RyuRenderer::Graphics::Frame(&frameTextures[1]);
         }
 
         // 这里我们简单合批渲染一下由不同材质参数的多个物件，
@@ -197,7 +184,7 @@ namespace RyuRenderer::App
         void renderTick()
         {
             // 先绑定 fbo0
-            glBindFramebuffer(GL_FRAMEBUFFER, fbo[0]);
+            frames[0].Use();
 
             // 渲染场景本身到 fbo 里面
             sceneTexture.Use();
@@ -210,11 +197,11 @@ namespace RyuRenderer::App
             constexpr int amount = 30; // 模糊迭代次数
             for (unsigned int i = 0; i < amount; ++i)
             {
-                glBindFramebuffer(GL_FRAMEBUFFER, fbo[horizontal]);
+                frames[horizontal].Use();
                 if (firstIteration)
                     sceneTexture.Use();
                 else
-                    glBindTexture(GL_TEXTURE_2D, fboTextures[!horizontal]);
+                    frameTextures[!horizontal].Use();
                 gaussianBlurShader->SetUniform("isHorizontal", horizontal);
 
                 // 渲染全屏四边形到 fbo 里
@@ -225,11 +212,11 @@ namespace RyuRenderer::App
                 if (firstIteration)
                     firstIteration = false;
             }
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            RyuRenderer::Graphics::Frame::Unuse();
 
             // 把最后一次渲染出的 fbo 纹理作为结果输出到 OpenGl 画布上
+            frameTextures[!horizontal].Use();
             simpleShader->Use();
-            glBindTexture(GL_TEXTURE_2D, fboTextures[!horizontal]);
             fullScreenQuadMesh.Draw();
         }
 
@@ -270,10 +257,10 @@ namespace RyuRenderer::App
 
         RyuRenderer::Graphics::Mesh fullScreenQuadMesh;
 
-        std::shared_ptr<RyuRenderer::Graphics::Shader> gaussianBlurShader;
+        RyuRenderer::Graphics::Frame frames[2] = {};
+        RyuRenderer::Graphics::Texture2d frameTextures[2] = {};
 
-        GLuint fbo[2] = { 0 };
-        GLuint fboTextures[2] = { 0 };
+        std::shared_ptr<RyuRenderer::Graphics::Shader> gaussianBlurShader;
     };
 }
 

@@ -19,10 +19,9 @@ namespace RyuRenderer::Graphics
     public:
         Texture2d() = default;
 
-        Texture2d(GLenum t, GLenum f, GLint uIdx, int w, int h)
+        Texture2d(GLenum f, GLint uIdx, int w, int h)
         {
             FAILTEST_RTN(
-                t != GL_NONE &&
                 f != GL_NONE &&
                 uIdx >= 0 ||
                 uIdx < GetMaxTextureAmount() &&
