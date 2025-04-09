@@ -123,8 +123,12 @@ namespace RyuRenderer::Graphics
                 lastestUsedTexture2dIds[unitId] = 0;
             }
 
-            glDeleteTextures(1, &id);
-            id = 0;
+            if (id != 0)
+            {
+                glDeleteTextures(1, &id);
+                id = 0;
+            }
+
             unitId = 0;
             format = GL_NONE;
             width = 0;

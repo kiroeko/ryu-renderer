@@ -18,6 +18,41 @@ namespace RyuRenderer::Graphics
             glGenFramebuffers(1, &id);
         }
 
+        Frame(const Frame& other) = delete;
+
+        Frame(Frame&& other) noexcept :
+            id(other.id)
+        {
+            other.id = 0;
+        }
+
+        ~Frame()
+        {
+            if (IsUsing())
+            {
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                lastestUsedFrameId = 0;
+            }
+
+            if (id != 0)
+            {
+                glDeleteFramebuffers(1, &id);
+                id = 0;
+            }
+        }
+
+        Frame& operator=(Frame& other) = delete;
+
+        Frame& operator=(Frame&& other) noexcept
+        {
+            if (this == &other)
+                return *this;
+
+            id = other.id;
+            other.id = 0;
+            return *this;
+        }
+
         bool IsValid()
         {
             return
