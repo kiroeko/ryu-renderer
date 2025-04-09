@@ -297,19 +297,9 @@ namespace RyuRenderer::Graphics
         {
             const std::byte* valueAsBytes = reinterpret_cast<const std::byte*>(&value);
 
-            if constexpr (std::endian::native == std::endian::little)
+            for (int i = 0; i < sizeof(T); ++i)
             {
-                for (int i = sizeof(T) - 1; i >= 0; --i)
-                {
-                    vertexData.push_back(valueAsBytes[i]);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < sizeof(T); ++i)
-                {
-                    vertexData.push_back(valueAsBytes[i]);
-                }
+                vertexData.push_back(valueAsBytes[i]);
             }
         }
     private:
