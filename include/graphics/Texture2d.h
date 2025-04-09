@@ -165,6 +165,16 @@ namespace RyuRenderer::Graphics
             return true;
         }
 
+        bool IsValid()
+        {
+            return id != 0 &&
+                format != GL_NONE &&
+                GetTextureUnitIdx(unitId) >= 0 &&
+                GetTextureUnitIdx(unitId) < GetMaxTextureAmount() &&
+                width >= 0 &&
+                height >= 0;
+        }
+
         bool IsUsing()
         {
             if (unitId == 0)
@@ -201,14 +211,9 @@ namespace RyuRenderer::Graphics
             return isUsing;
         }
 
-        bool IsValid()
+        GLuint GetId()
         {
-            return id != 0 &&
-                format != GL_NONE &&
-                GetTextureUnitIdx(unitId) >= 0 &&
-                GetTextureUnitIdx(unitId) < GetMaxTextureAmount() &&
-                width >= 0 &&
-                height >= 0;
+            return id;
         }
 
         static GLint GetTextureUnitId(GLint unitIdx)
