@@ -5,6 +5,7 @@
 #include "GLFW/glfw3.h"
 #include "stb/stb_image.h"
 
+#include "app/AppSettings.h"
 #include "common/Singleton.h"
 #include "graphics/Mesh.h"
 #include "graphics/Shader.h"
@@ -27,7 +28,7 @@ namespace RyuRenderer::App
             Clear();
         }
 
-        bool Init(std::string name = "", int initWidth = 1920, int initHeight = 1080)
+        bool Init(const AppSettings& settings)
         {
             Clear();
 
@@ -39,7 +40,7 @@ namespace RyuRenderer::App
             glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
             
-            window = glfwCreateWindow(initWidth, initHeight, name.c_str(), NULL, NULL);
+            window = glfwCreateWindow(settings.WindowWidth, settings.WindowHeight, settings.WindowName.c_str(), NULL, NULL);
             if (window == nullptr)
             {
                 std::cerr << "Failed to create GLFW window" << std::endl;
@@ -62,8 +63,8 @@ namespace RyuRenderer::App
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-            windowWidth = initWidth;
-            windowHeight = initHeight;
+            windowWidth = settings.WindowWidth;
+            windowHeight = settings.WindowHeight;
             glfwSetFramebufferSizeCallback(window, onWindowSizeChanged);
 
             stbi_set_flip_vertically_on_load(true);
