@@ -249,7 +249,7 @@ namespace RyuRenderer::Graphics
             return *this;
         }
 
-        bool IsValid()
+        bool IsValid() const
         {
             return VAOId != 0 &&
                    elementSize != 0 &&
@@ -257,7 +257,7 @@ namespace RyuRenderer::Graphics
                    EBOId != 0;
         }
 
-        bool IsUsing()
+        bool IsUsing() const
         {
             if (VAOId == 0)
                 return false;
@@ -275,7 +275,7 @@ namespace RyuRenderer::Graphics
             return currentVAO == VAOId;
         }
 
-        void Draw()
+        void Draw() const
         {
             if (!IsValid())
                 return;

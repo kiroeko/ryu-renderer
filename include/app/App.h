@@ -100,12 +100,12 @@ namespace RyuRenderer::App
             }
         }
 
-        int GetWindowWidth()
+        int GetWindowWidth() const
         {
             return windowWidth;
         }
 
-        int GetWindowHeight()
+        int GetWindowHeight() const
         {
             return windowHeight;
         }

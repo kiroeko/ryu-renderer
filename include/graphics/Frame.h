@@ -57,19 +57,19 @@ namespace RyuRenderer::Graphics
             return *this;
         }
 
-        bool IsValid()
+        bool IsValid() const
         {
             return id != 0;
         }
 
-        bool IsCompleted()
+        bool IsCompleted() const
         {
             return
                 IsValid() &&
                 frameCompleted;
         }
 
-        bool IsUsing()
+        bool IsUsing() const
         {
             if (id == 0)
                 return false;
@@ -115,7 +115,7 @@ namespace RyuRenderer::Graphics
             return true;
         }
 
-        bool Use()
+        bool Use() const
         {
             if (!IsCompleted())
                 return false;

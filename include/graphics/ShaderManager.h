@@ -51,7 +51,7 @@ public:
     std::shared_ptr<RyuRenderer::Graphics::Shader> Find(
         const std::string& vertexShaderFilePath,
         const std::string& fragmentShaderFilePath
-    )
+    ) const
     {
         auto predicate = std::bind(
             &CompareShaderBySource,
@@ -65,7 +65,7 @@ public:
 
     std::shared_ptr<RyuRenderer::Graphics::Shader> Find(
         const std::string& localGPUBinaryFilePath
-    )
+    ) const
     {
         auto predicate = std::bind(
             &CompareShaderByBinarySource,
@@ -79,7 +79,7 @@ public:
     std::list<std::shared_ptr<RyuRenderer::Graphics::Shader>> FindAll(
         const std::string& vertexShaderFilePath,
         const std::string& fragmentShaderFilePath
-    )
+    ) const
     {
         auto predicate = std::bind(
             &CompareShaderBySource,
@@ -93,7 +93,7 @@ public:
 
     std::list<std::shared_ptr<RyuRenderer::Graphics::Shader>> FindAll(
         const std::string& localGPUBinaryFilePath
-    )
+    ) const
     {
         auto predicate = std::bind(
             &CompareShaderByBinarySource,

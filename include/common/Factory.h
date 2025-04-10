@@ -72,7 +72,7 @@ namespace RyuRenderer::Common
         }
 
         template <typename Pred>
-        std::shared_ptr<P> Find(Pred pred)
+        std::shared_ptr<P> Find(Pred pred) const
         {
             std::shared_lock<std::shared_mutex> lock(mutex);
 
@@ -81,7 +81,7 @@ namespace RyuRenderer::Common
         }
 
         template <typename Pred>
-        std::list<std::shared_ptr<P>> FindAll(Pred pred)
+        std::list<std::shared_ptr<P>> FindAll(Pred pred) const
         {
             std::shared_lock<std::shared_mutex> lock(mutex);
 
@@ -102,7 +102,7 @@ namespace RyuRenderer::Common
             products.clear();
         }
         
-        size_t Count()
+        size_t Count() const
         {
             return products.size();
         }

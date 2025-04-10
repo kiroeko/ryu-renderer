@@ -134,7 +134,7 @@ namespace RyuRenderer::Graphics
             return *this;
         }
 
-        bool Use()
+        bool Use() const
         {
             if (!IsValid())
                 return false;
@@ -490,7 +490,7 @@ namespace RyuRenderer::Graphics
             return true;
         }
 
-        bool SaveLocalGPUBinaryToFile(const std::string& localGPUBinaryFilePath)
+        bool SaveLocalGPUBinaryToFile(const std::string& localGPUBinaryFilePath) const
         {
             if (!IsValid())
                 return false;
@@ -516,12 +516,12 @@ namespace RyuRenderer::Graphics
             return file.good();
         }
 
-        bool IsValid()
+        bool IsValid() const
         {
             return programId != 0;
         }
 
-        bool IsUsing()
+        bool IsUsing() const
         {
             if (programId == 0)
                 return false;

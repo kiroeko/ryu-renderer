@@ -154,7 +154,7 @@ namespace RyuRenderer::Graphics
             return *this;
         }
 
-        bool Use()
+        bool Use() const
         {
             if (!IsValid())
                 return false;
@@ -168,7 +168,7 @@ namespace RyuRenderer::Graphics
             return true;
         }
 
-        bool IsValid()
+        bool IsValid() const
         {
             return id != 0 &&
                 format != GL_NONE &&
@@ -178,7 +178,7 @@ namespace RyuRenderer::Graphics
                 height >= 0;
         }
 
-        bool IsUsing()
+        bool IsUsing() const
         {
             if (unitId == 0)
                 return false;
@@ -214,7 +214,7 @@ namespace RyuRenderer::Graphics
             return isUsing;
         }
 
-        GLuint GetId()
+        GLuint GetId() const
         {
             return id;
         }
