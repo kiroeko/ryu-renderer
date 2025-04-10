@@ -1,5 +1,5 @@
-#ifndef __DEFAULTPIPELINE_H__
-#define __DEFAULTPIPELINE_H__
+#ifndef __GUASSIANBLURPIPELINE_H__
+#define __GUASSIANBLURPIPELINE_H__
 
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
@@ -15,10 +15,10 @@
 
 namespace RyuRenderer::App::Pipeline
 {
-    class DefaultPipeline : public IPipeline
+    class GuassianBlurPipeline : public IPipeline
     {
     public:
-        DefaultPipeline() = default;
+        GuassianBlurPipeline() = default;
 
         void init() override
         {
