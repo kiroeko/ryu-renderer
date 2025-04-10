@@ -56,9 +56,18 @@ namespace RyuRenderer::App
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+            if (settings.lockCursorToCenter)
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
             windowWidth = settings.WindowWidth;
             windowHeight = settings.WindowHeight;
             glfwSetFramebufferSizeCallback(window, onWindowSizeChanged);
+
+            glfwSetCursorPosCallback(window, onMouseMove);
+            glfwSetMouseButtonCallback(window, onMouseButton);
+            glfwSetScrollCallback(window, onMouseScroll);
+            glfwSetCursorEnterCallback(window, onMouseEnter);
+            glfwSetKeyCallback(window, onKeyEvent);
 
             stbi_set_flip_vertically_on_load(true);
 
@@ -86,7 +95,6 @@ namespace RyuRenderer::App
             {
                 // handle input events
                 glfwPollEvents();
-                processInput(window);
 
                 // clear canvas
                 glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -110,15 +118,6 @@ namespace RyuRenderer::App
             return windowHeight;
         }
     private:
-        // 这里我们简单地去接受一下键盘和鼠标的数据，并根据鼠标位置调整 Shader 参数来让绘制图形根据鼠标颜色而不同，
-        //     如果要封装得和游戏引擎一样，那我们应该接受所有的输入事件和游戏引擎内部定义的事件，把事件们放到事件队列里，再由我们自己定义的事件类型有关回调逐个处理。
-        void processInput(GLFWwindow* window)
-        {
-            // ESC 退出
-            if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-                glfwSetWindowShouldClose(window, true);
-        }
-
         void Clear()
         {
             if (window)
@@ -141,6 +140,59 @@ namespace RyuRenderer::App
             glViewport(0, 0, width, height);
             App::GetInstance().windowWidth = width;
             App::GetInstance().windowHeight = height;
+        }
+
+        static void onMouseMove(GLFWwindow* window, double xpos, double ypos) {
+            std::cout << "Mouse position: (" << xpos << ", " << ypos << ")" << std::endl;
+        }
+
+        static void onMouseButton(GLFWwindow* window, int button, int action, int mods) {
+            const char* buttonName = "";
+            switch (button) {
+            case GLFW_MOUSE_BUTTON_LEFT:   buttonName = "LEFT";   break;
+            case GLFW_MOUSE_BUTTON_RIGHT:  buttonName = "RIGHT";  break;
+            case GLFW_MOUSE_BUTTON_MIDDLE: buttonName = "MIDDLE"; break;
+            default:                      buttonName = "OTHER";   break;
+            }
+
+            const char* actionName = (action == GLFW_PRESS) ? "PRESSED" : "RELEASED";
+            std::cout << "Mouse button: " << buttonName << " " << actionName << std::endl;
+        }
+
+        static void onMouseScroll(GLFWwindow* window, double xoffset, double yoffset) {
+            std::cout << "Mouse scroll: X=" << xoffset << ", Y=" << yoffset << std::endl;
+        }
+
+        static void onMouseEnter(GLFWwindow* window, int entered) {
+            if (entered) {
+                std::cout << "Mouse entered window" << std::endl;
+            }
+            else {
+                std::cout << "Mouse left window" << std::endl;
+            }
+        }
+
+        static void onKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods)
+        {
+            std::string keyName;
+            auto keyNameCStr = glfwGetKeyName(key, scancode);
+            if (keyNameCStr)
+            {
+                keyName = keyNameCStr;
+            }
+
+            if (key == GLFW_KEY_S && (mods & GLFW_MOD_CONTROL) && (mods & GLFW_MOD_SHIFT)) {
+                std::cout << "Save with extra options!" << std::endl;
+            }
+            // 检测字母键
+            else if (!keyName.empty() && keyName[0] >= 'A' && keyName[0] <= 'Z') {
+                if (mods & GLFW_MOD_SHIFT) {
+                    std::cout << "Shift+" << keyName << std::endl;
+                }
+                else {
+                    std::cout << "Key: " << keyName << std::endl;
+                }
+            }
         }
 
         GLFWwindow* window = nullptr;
