@@ -1,24 +1,24 @@
-#ifndef __DEFAULTPIPELINE_H__
-#define __DEFAULTPIPELINE_H__
+#ifndef __DEFAULTRENDERPIPELINE_H__
+#define __DEFAULTRENDERPIPELINE_H__
 
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
 #include "stb/stb_image.h"
 
 #include "app/App.h"
-#include "app/Pipeline/IPipeline.h"
+#include "app/render-pipeline/IRenderPipeline.h"
 #include "graphics/Frame.h"
 #include "graphics/Mesh.h"
 #include "graphics/Shader.h"
 #include "graphics/ShaderManager.h"
 #include "graphics/Texture2D.h"
 
-namespace RyuRenderer::App::Pipeline
+namespace RyuRenderer::App::RenderPipeline
 {
-    class DefaultPipeline : public IPipeline
+    class DefaultRenderPipeline : public IRenderPipeline
     {
     public:
-        DefaultPipeline() = default;
+        DefaultRenderPipeline() = default;
 
         void init() override
         {
