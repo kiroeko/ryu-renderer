@@ -7,10 +7,11 @@
 
 #include "app/AppSettings.h"
 #include "app/render-pipeline/IRenderPipeline.h"
-#include "common/Singleton.h"
 #include "app/events/KeyEvent.h"
 #include "app/events/MouseEvent.h"
 #include "app/events/WindowEvent.h"
+#include "common/Publisher.h"
+#include "common/Singleton.h"
 
 #include <iostream>
 
@@ -130,6 +131,8 @@ namespace RyuRenderer::App
         {
             return windowHeight;
         }
+
+        RyuRenderer::Common::Publisher EventPublisher;
     private:
         void Clear()
         {
@@ -158,6 +161,7 @@ namespace RyuRenderer::App
             event.Event = Events::WindowEvent::EventType::WINDOW_RESIZE;
             event.Width = width;
             event.Height = height;
+            App::GetInstance().EventPublisher.Dispatch(event);
         }
 
         static void onWindowFocusChanged(GLFWwindow* window, int focused)
@@ -174,6 +178,7 @@ namespace RyuRenderer::App
             Events::WindowEvent event;
             event.Event = Events::WindowEvent::EventType::WINDOW_FOCUS;
             event.IsFocused = focused;
+            App::GetInstance().EventPublisher.Dispatch(event);
         }
 
         static void onMouseMove(GLFWwindow* window, double xpos, double ypos)
@@ -189,6 +194,7 @@ namespace RyuRenderer::App
             event.Event = Events::MouseEvent::EventType::MOUSE_MOVE;
             event.MoveXPos = xpos;
             event.MoveYPos = ypos;
+            App::GetInstance().EventPublisher.Dispatch(event);
         }
 
         static void onMouseScroll(GLFWwindow* window, double xoffset, double yoffset)
@@ -204,6 +210,7 @@ namespace RyuRenderer::App
             event.Event = Events::MouseEvent::EventType::MOUSE_SCROLL;
             event.ScrollXOffset = xoffset;
             event.ScrollYOffset = yoffset;
+            App::GetInstance().EventPublisher.Dispatch(event);
         }
 
         static void onMouseButton(GLFWwindow* window, int button, int action, int mods)
@@ -259,6 +266,8 @@ namespace RyuRenderer::App
             default:
                 return;
             }
+
+            App::GetInstance().EventPublisher.Dispatch(event);
         }
 
         static void onMouseEnter(GLFWwindow* window, int entered)
@@ -273,6 +282,7 @@ namespace RyuRenderer::App
             Events::MouseEvent event;
             event.Event = Events::MouseEvent::EventType::MOUSE_ENTER_OR_LEAVE;
             event.IsEnteredWindow = entered;
+            App::GetInstance().EventPublisher.Dispatch(event);
         }
 
         static void onKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -722,8 +732,7 @@ namespace RyuRenderer::App
             }
 
             event.Name = keyNameCStr;
-
-
+            App::GetInstance().EventPublisher.Dispatch(event);
         }
 
         GLFWwindow* window = nullptr;
