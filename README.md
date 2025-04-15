@@ -1,7 +1,4 @@
-<div style="display: flex; align-items: center;">
-  <img src="res\icons\icon.png" width="40px" style="display: inline-block; vertical-align: middle;"/>
-  <h1 style="display: inline-block; margin: 0; padding-left: 10px; vertical-align: middle;">Ryu Renderer</h1>
-</div>
+# <img src="res\icons\icon.png" width="40px" /> Ryu Renderer
 
 An OpenGL renderer for Windows 64 bit platform.
 
