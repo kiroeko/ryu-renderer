@@ -47,6 +47,8 @@ namespace RyuRenderer::App
             windowWidth = settings.WindowWidth;
             windowHeight = settings.WindowHeight;
 
+            setWindowIcon(settings.WindowIconPath);
+
             glfwMakeContextCurrent(window);
 
             // init glad
@@ -70,13 +72,13 @@ namespace RyuRenderer::App
             glfwSetWindowFocusCallback(window, onWindowFocusChanged);
 
             // Inputs
-            if (!settings.hideCursor && !settings.lockCursorToCenter)
+            if (!settings.HideCursor && !settings.LockCursorToCenter)
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); // Normal software
-            else if(settings.hideCursor && !settings.lockCursorToCenter)
+            else if(settings.HideCursor && !settings.LockCursorToCenter)
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-            else if (settings.hideCursor && settings.lockCursorToCenter)
+            else if (settings.HideCursor && settings.LockCursorToCenter)
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // FPS game
-            else if (!settings.hideCursor && settings.lockCursorToCenter)
+            else if (!settings.HideCursor && settings.LockCursorToCenter)
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
             glfwSetCursorPosCallback(window, onMouseMove);
             glfwSetScrollCallback(window, onMouseScroll);
@@ -144,6 +146,22 @@ namespace RyuRenderer::App
             windowWidth = 0;
             windowHeight = 0;
             window = nullptr;
+        }
+
+        void setWindowIcon(const std::string& iconPath)
+        {
+            int width, height, channels;
+            unsigned char* pixels = stbi_load(iconPath.c_str(), &width, &height, &channels, 4);
+            if (!pixels)
+                return;
+
+            GLFWimage icon;
+            icon.width = width;
+            icon.height = height;
+            icon.pixels = pixels;
+
+            glfwSetWindowIcon(window, 1, &icon);
+            stbi_image_free(pixels);
         }
 
         static void onWindowSizeChanged(GLFWwindow* window, int width, int height)

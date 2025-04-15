@@ -7,12 +7,13 @@ namespace RyuRenderer::App
 {
     struct AppSettings
     {
-        std::string WindowName;
+        std::string WindowName = "Ryu Renderer";
+        std::string WindowIconPath = "res/icons/icon.png";
         int WindowWidth = 1920;
         int WindowHeight = 1080;
         int VSyncInterval = 1;
-        bool hideCursor = false;
-        bool lockCursorToCenter = false;
+        bool HideCursor = false;
+        bool LockCursorToCenter = false;
     };
 }
 
