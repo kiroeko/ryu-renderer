@@ -63,6 +63,8 @@ namespace RyuRenderer::App
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+            glfwSwapInterval(settings.VSyncInterval);
+
             // Window state
             glfwSetFramebufferSizeCallback(window, onWindowSizeChanged);
             glfwSetWindowFocusCallback(window, onWindowFocusChanged);

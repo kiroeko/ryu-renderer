@@ -10,6 +10,7 @@ namespace RyuRenderer::App
         std::string WindowName;
         int WindowWidth = 1920;
         int WindowHeight = 1080;
+        int VSyncInterval = 1;
         bool hideCursor = false;
         bool lockCursorToCenter = false;
     };
