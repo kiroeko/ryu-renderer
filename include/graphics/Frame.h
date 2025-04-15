@@ -20,27 +20,18 @@ namespace RyuRenderer::Graphics
 
         Frame(const Frame& other) = delete;
 
-        Frame(Frame&& other) noexcept :
-            id(other.id),
-            frameCompleted(other.frameCompleted)
+        Frame(Frame&& other) noexcept
         {
+            Clear();
+            id = other.id;
+            frameCompleted = other.frameCompleted;
             other.id = 0;
             other.frameCompleted = false;
         }
 
         ~Frame()
         {
-            if (IsUsing())
-            {
-                glBindFramebuffer(GL_FRAMEBUFFER, 0);
-                lastestUsedFrameId = 0;
-            }
-
-            if (id != 0)
-            {
-                glDeleteFramebuffers(1, &id);
-                id = 0;
-            }
+            Clear();
         }
 
         Frame& operator=(Frame& other) = delete;
@@ -50,6 +41,7 @@ namespace RyuRenderer::Graphics
             if (this == &other)
                 return *this;
 
+            Clear();
             id = other.id;
             frameCompleted = other.frameCompleted;
             other.id = 0;
@@ -159,6 +151,21 @@ namespace RyuRenderer::Graphics
 
         inline static bool IsCleanMode = true;
     private:
+        void Clear()
+        {
+            if (IsUsing())
+            {
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                lastestUsedFrameId = 0;
+            }
+
+            if (id != 0)
+            {
+                glDeleteFramebuffers(1, &id);
+                id = 0;
+            }
+        }
+
         static GLint GetMaxColorAttachmentAmount()
         {
             if (maxColorAttachmentAmount < 0)

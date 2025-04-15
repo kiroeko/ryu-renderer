@@ -85,13 +85,14 @@ namespace RyuRenderer::Graphics
 
         Shader(const Shader& other) = delete;
 
-        Shader(Shader&& other) noexcept :
-            programId(other.programId),
-            uniformLocations(other.uniformLocations),
-            vertexSource(other.vertexSource),
-            fragmentSource(other.fragmentSource),
-            binarySource(other.binarySource)
+        Shader(Shader&& other) noexcept
         {
+            Clear();
+            programId = other.programId;
+            uniformLocations = other.uniformLocations;
+            vertexSource = other.vertexSource;
+            fragmentSource = other.fragmentSource;
+            binarySource = other.binarySource;
             other.programId = 0;
             other.uniformLocations.clear();
             other.vertexSource.clear();
@@ -101,17 +102,7 @@ namespace RyuRenderer::Graphics
 
         ~Shader()
         {
-            if (programId != 0)
-            {
-                glDeleteProgram(programId);
-                programId = 0;
-            }
-
-            uniformLocations.clear();
-
-            vertexSource.clear();
-            fragmentSource.clear();
-            binarySource.clear();
+            Clear();
         }
 
         Shader& operator=(Shader& other) = delete;
@@ -121,6 +112,7 @@ namespace RyuRenderer::Graphics
             if (this == &other)
                 return *this;
 
+            Clear();
             programId = other.programId;
             uniformLocations = other.uniformLocations;
             vertexSource = other.vertexSource;
@@ -548,6 +540,21 @@ namespace RyuRenderer::Graphics
         
         inline static bool IsCleanMode = true;
     private:
+        void Clear()
+        {
+            if (programId != 0)
+            {
+                glDeleteProgram(programId);
+                programId = 0;
+            }
+
+            uniformLocations.clear();
+
+            vertexSource.clear();
+            fragmentSource.clear();
+            binarySource.clear();
+        }
+
         bool LoadShaderBySourceCodeFile(
             const std::string& shaderSourceCodeFilePath,
             GLenum shaderType,

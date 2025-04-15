@@ -176,12 +176,13 @@ namespace RyuRenderer::Graphics
 
         Mesh(const Mesh& other) = delete;
 
-        Mesh(Mesh&& other) noexcept :
-            VAOId(other.VAOId),
-            elementSize(other.elementSize),
-            VBOId(other.VBOId),
-            EBOId(other.EBOId)
+        Mesh(Mesh&& other) noexcept
         {
+            Clear();
+            VAOId = other.VAOId;
+            elementSize = other.elementSize;
+            VBOId = other.VBOId;
+            EBOId = other.EBOId;
             other.VAOId = 0;
             other.elementSize = 0;
             other.VBOId = 0;
@@ -190,45 +191,7 @@ namespace RyuRenderer::Graphics
 
         ~Mesh()
         {
-            elementSize = 0;
-
-            if (VAOId != 0)
-            {
-                if (IsUsing())
-                {
-                    glBindVertexArray(0);
-                    lastestUsedVAOId = 0;
-                }
-
-                glDeleteVertexArrays(1, &VAOId);
-                VAOId = 0;
-            }
-
-            if (VBOId != 0)
-            {
-                GLint currentVBO;
-                glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &currentVBO);
-                if (currentVBO == VBOId)
-                {
-                    glBindBuffer(GL_ARRAY_BUFFER, 0);
-                }
-
-                glDeleteBuffers(1, &VBOId);
-                VBOId = 0;
-            }
-
-            if (EBOId != 0)
-            {
-                GLint currentEBO;
-                glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &currentEBO);
-                if (currentEBO == EBOId)
-                {
-                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-                }
-
-                glDeleteBuffers(1, &EBOId);
-                EBOId = 0;
-            }
+            Clear();
         }
 
         Mesh& operator=(Mesh& other) = delete;
@@ -238,6 +201,7 @@ namespace RyuRenderer::Graphics
             if (this == &other)
                 return *this;
 
+            Clear();
             VAOId = other.VAOId;
             elementSize = other.elementSize;
             VBOId = other.VBOId;
@@ -302,7 +266,50 @@ namespace RyuRenderer::Graphics
                 vertexData.push_back(valueAsBytes[i]);
             }
         }
-    private:
+
+        void Clear()
+        {
+            elementSize = 0;
+
+            if (VAOId != 0)
+            {
+                if (IsUsing())
+                {
+                    glBindVertexArray(0);
+                    lastestUsedVAOId = 0;
+                }
+
+                glDeleteVertexArrays(1, &VAOId);
+                VAOId = 0;
+            }
+
+            if (VBOId != 0)
+            {
+                GLint currentVBO;
+                glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &currentVBO);
+                if (currentVBO == VBOId)
+                {
+                    glBindBuffer(GL_ARRAY_BUFFER, 0);
+                }
+
+                glDeleteBuffers(1, &VBOId);
+                VBOId = 0;
+            }
+
+            if (EBOId != 0)
+            {
+                GLint currentEBO;
+                glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &currentEBO);
+                if (currentEBO == EBOId)
+                {
+                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+                }
+
+                glDeleteBuffers(1, &EBOId);
+                EBOId = 0;
+            }
+        }
+
         static GLint GetMaxAttributeAmount()
         {
             if (maxAttributeAmount < 0)
