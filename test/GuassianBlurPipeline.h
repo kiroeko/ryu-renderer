@@ -6,16 +6,16 @@
 #include "stb/stb_image.h"
 
 #include "app/App.h"
-#include "app/Pipeline/IPipeline.h"
+#include "app/render-pipeline/IRenderPipeline.h"
 #include "graphics/Frame.h"
 #include "graphics/Mesh.h"
 #include "graphics/Shader.h"
 #include "graphics/ShaderManager.h"
 #include "graphics/Texture2D.h"
 
-namespace RyuRenderer::App::Pipeline
+namespace RyuRenderer::App::RenderPipeline
 {
-    class GuassianBlurPipeline : public IPipeline
+    class GuassianBlurPipeline : public IRenderPipeline
     {
     public:
         GuassianBlurPipeline() = default;
