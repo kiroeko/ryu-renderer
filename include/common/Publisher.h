@@ -2,9 +2,8 @@
 #include <functional>
 #include <any>
 #include <typeindex>
-#include <vector>
+#include <list>
 #include <memory>
-#include <stdexcept>
 
 namespace RyuRenderer::Common
 {
@@ -14,17 +13,29 @@ namespace RyuRenderer::Common
         template <typename EventType>
         size_t RegisterHandler(std::function<void(const EventType&)> handler)
         {
-            auto key = std::type_index(typeid(EventType));
-            size_t id = nextHandlerID++;
-            auto wrapper =
-                [handler = std::move(handler)](const std::any& event)
-                {
-                    handler(std::any_cast<const EventType&>(event));
-                };
+            return registerHandlerImpl<EventType>(std::move(handler));
+        }
 
-            handlers[key].emplace_back(id, std::move(wrapper));
+        template <typename T, typename EventType>
+        size_t RegisterHandler(T* instance, void (T::* method)(const EventType&))
+        {
+            return registerHandlerImpl<EventType>(
+                    [instance, method](const EventType& event)
+                    {
+                        (instance->*method)(event);
+                    }
+                );
+        }
 
-            return id;
+        template <typename T, typename EventType>
+        size_t RegisterHandler(const T* instance, void (T::* method)(const EventType&) const)
+        {
+            return registerHandlerImpl<EventType>(
+                    [instance, method](const EventType& event)
+                    {
+                        (instance->*method)(event);
+                    }
+                );
         }
 
         template <typename EventType>
@@ -48,8 +59,9 @@ namespace RyuRenderer::Common
             return false;
         }
 
+        // 分发事件
         template <typename EventType>
-        void Dispatch(const EventType& event)
+        void Dispatch(const EventType& event) const
         {
             auto key = std::type_index(typeid(EventType));
             auto it = handlers.find(key);
@@ -69,9 +81,24 @@ namespace RyuRenderer::Common
             nextHandlerID = 0;
         }
     private:
+        template <typename EventType>
+        size_t registerHandlerImpl(std::function<void(const EventType&)> handler)
+        {
+            auto key = std::type_index(typeid(EventType));
+            auto wrapper =
+                [handler = std::move(handler)](const std::any& event)
+                {
+                    handler(std::any_cast<const EventType&>(event));
+                };
+
+            size_t id = nextHandlerID++;
+            handlers[key].emplace_back(id, std::move(wrapper));
+            return id;
+        }
+
         std::unordered_map<
             std::type_index,
-            std::vector<std::pair<size_t, std::function<void(const std::any&)>>>
+            std::list<std::pair<size_t, std::function<void(const std::any&)>>>
         > handlers;
 
         size_t nextHandlerID = 0;

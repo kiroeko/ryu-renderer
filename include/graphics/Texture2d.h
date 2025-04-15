@@ -99,13 +99,14 @@ namespace RyuRenderer::Graphics
 
         Texture2d(const Texture2d& other) = delete;
 
-        Texture2d(Texture2d&& other) noexcept :
-            id(other.id),
-            unitId(other.unitId),
-            format(other.format),
-            width(other.width),
-            height(other.height)
+        Texture2d(Texture2d&& other) noexcept
         {
+            Clear();
+            id = other.id;
+            unitId = other.unitId;
+            format = other.format;
+            width = other.width;
+            height = other.height;
             other.id = 0;
             other.unitId = 0;
             other.format = 0;
@@ -115,23 +116,7 @@ namespace RyuRenderer::Graphics
 
         ~Texture2d()
         {
-            if (IsUsing())
-            {
-                glActiveTexture(unitId);
-                glBindTexture(GL_TEXTURE_2D, 0);
-                lastestUsedTexture2dIds[unitId] = 0;
-            }
-
-            if (id != 0)
-            {
-                glDeleteTextures(1, &id);
-                id = 0;
-            }
-
-            unitId = 0;
-            format = GL_NONE;
-            width = 0;
-            height = 0;
+            Clear();
         }
 
         Texture2d& operator=(Texture2d& other) = delete;
@@ -141,6 +126,7 @@ namespace RyuRenderer::Graphics
             if (this == &other)
                 return *this;
 
+            Clear();
             id = other.id;
             unitId = other.unitId;
             format = other.format;
@@ -231,6 +217,27 @@ namespace RyuRenderer::Graphics
 
         inline static bool IsCleanMode = true;
     private:
+        void Clear()
+        {
+            if (IsUsing())
+            {
+                glActiveTexture(unitId);
+                glBindTexture(GL_TEXTURE_2D, 0);
+                lastestUsedTexture2dIds[unitId] = 0;
+            }
+
+            if (id != 0)
+            {
+                glDeleteTextures(1, &id);
+                id = 0;
+            }
+
+            unitId = 0;
+            format = GL_NONE;
+            width = 0;
+            height = 0;
+        }
+
         static GLint GetMaxTextureAmount()
         {
             if (maxTextureAmount < 0)

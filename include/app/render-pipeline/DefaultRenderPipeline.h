@@ -6,6 +6,7 @@
 #include "stb/stb_image.h"
 
 #include "app/App.h"
+#include "app/events/WindowEvent.h"
 #include "app/render-pipeline/IRenderPipeline.h"
 #include "graphics/Frame.h"
 #include "graphics/Mesh.h"
@@ -23,6 +24,8 @@ namespace RyuRenderer::App::RenderPipeline
         void init() override
         {
             initRenderer();
+
+            App::GetInstance().EventPublisher.RegisterHandler(this, &DefaultRenderPipeline::OnWindowResize);
         }
 
         void tick() override
@@ -132,6 +135,14 @@ namespace RyuRenderer::App::RenderPipeline
             frameTextures[!horizontal].Use();
             simpleShader->Use();
             fullScreenQuadMesh.Draw();
+        }
+
+        void OnWindowResize(const Events::WindowEvent& e)
+        {
+            if (e.Event == Events::WindowEvent::EventType::WINDOW_RESIZE)
+            {
+                initFrames();
+            }
         }
 
         // tmp
