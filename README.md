@@ -1,6 +1,6 @@
 <div style="display: flex; align-items: center;">
-  <img src="res\icons\icon.png" width="40px"/>
-  <h1 style="margin: 0; padding-left: 10px;">Ryu-Renderer</h1>
+  <img src="res\icons\icon.png" width="40px" style="display: inline-block; vertical-align: middle;"/>
+  <h1 style="display: inline-block; margin: 0; padding-left: 10px; vertical-align: middle;">Ryu Renderer</h1>
 </div>
 
 An OpenGL renderer for Windows 64 bit platform.
