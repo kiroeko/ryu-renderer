@@ -63,6 +63,11 @@ namespace RyuRenderer::Common
             }
         }
 
+        void Clear()
+        {
+            handlers.clear();
+            nextHandlerID = 0;
+        }
     private:
         std::unordered_map<
             std::type_index,
