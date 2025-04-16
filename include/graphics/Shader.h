@@ -563,7 +563,7 @@ namespace RyuRenderer::Graphics
             outShader = 0;
 
             const auto& str =
-                RyuRenderer::Common::FileUtils::GetInstance().ReadFileString(shaderSourceCodeFilePath);
+                Common::FileUtils::GetInstance().ReadFileString(shaderSourceCodeFilePath);
             if (str.empty())
                 return false;
 
@@ -596,7 +596,7 @@ namespace RyuRenderer::Graphics
             outShader = 0;
 
             const auto& buffer =
-                RyuRenderer::Common::FileUtils::GetInstance().ReadFileBinary(spvFilePath);
+                Common::FileUtils::GetInstance().ReadFileBinary(spvFilePath);
             if (buffer.empty())
                 return false;
 

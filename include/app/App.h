@@ -17,7 +17,7 @@
 
 namespace RyuRenderer::App
 {
-    class App : public RyuRenderer::Common::Singleton<App>
+    class App : public Common::Singleton<App>
     {
     public:
         ~App()
@@ -136,7 +136,7 @@ namespace RyuRenderer::App
             return windowHeight;
         }
 
-        RyuRenderer::Common::Publisher EventPublisher;
+        Common::Publisher EventPublisher;
     private:
         void Clear()
         {
