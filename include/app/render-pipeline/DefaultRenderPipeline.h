@@ -1,9 +1,11 @@
-#ifndef __GUASSIANBLURPIPELINE_H__
-#define __GUASSIANBLURPIPELINE_H__
+#ifndef __DEFAULTRENDERPIPELINE_H__
+#define __DEFAULTRENDERPIPELINE_H__
 
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
 #include "stb/stb_image.h"
+
+#include <vector>
 
 #include "app/App.h"
 #include "app/events/WindowEvent.h"
@@ -23,138 +25,66 @@ namespace RyuRenderer::App::RenderPipeline
 
         void init() override
         {
-            initRenderer();
+            // Box
+            boxMeshes.emplace_back(Graphics::Mesh(
+                std::vector<GLuint>{0, 1, 2, 0, 2, 3}, // indexes
+                std::vector<std::array<float, 2>>{{ -1.0f, 1.0f }, { -1.0f, -1.0f }, { 1.0f, -1.0f }, { 1.0f, 1.0f }},// Position
+                std::vector<std::array<float, 2>>{{ 0.0f, 1.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }} // TexCoord
+            ));
 
+            boxTexture = Graphics::Texture2d("res/textures/box.jpg", 0);
+            boxTexture.Use();
+
+            boxShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-unlit-simple.vert", "res/shaders/3d-unlit-simple.frag");
+            if (boxShader)
+            {
+                boxShader->Use();
+                boxShader->SetUniform("diffuseTexture", 0);
+            }
+
+            // init mvp
+            view = glm::lookAt(
+                glm::vec3(0.0f, 0.0f, 3.0f), // 摄像机位置
+                glm::vec3(0.0f, 0.0f, 0.0f), // 看向的目标点
+                glm::vec3(0.0f, 1.0f, 0.0f)  // 上方向，设为 Y 轴正方向
+            );
+            projection = glm::perspective(glm::radians(60.0f), (float)App::GetInstance().GetWindowWidth() / App::GetInstance().GetWindowHeight(), 0.001f, 1000000.0f);
+
+            // Other settings
             App::GetInstance().EventPublisher.RegisterHandler(this, &DefaultRenderPipeline::OnWindowResize);
         }
 
         void tick() override
         {
-            renderTick();
+            if (!boxShader)
+                return;
+
+            model = glm::rotate(glm::identity<glm::mat4>(), (float)glfwGetTime() * glm::radians(60.f), glm::vec3(0.0f, 1.0f, 0.0f));
+            boxShader->SetUniform("model", model);
+            boxShader->SetUniform("view", view);
+            boxShader->SetUniform("projection", projection);
+
+            for (int i = 0; i < boxMeshes.size(); ++i)
+            {
+                boxMeshes[i].Draw();
+            }
         }
     private:
-        void initRenderer()
-        {
-            initMainScene();
-
-            initFullScreenQuadMesh();
-
-            initFrames();
-
-            initOtherSettings();
-        }
-
-        void initMainScene()
-        {
-            // 场景本身，这里恰好是带纹理图案的矩形
-            sceneMesh = Graphics::Mesh(
-                std::vector<GLuint>{0, 1, 2, 0, 2, 3}, // indexes
-                std::vector<std::array<float, 2>>{{ -1.0f, 1.0f }, { -1.0f, -1.0f }, { 1.0f, -1.0f }, { 1.0f, 1.0f }},// Position
-                std::vector<std::array<float, 2>>{{ 0.0f, 1.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }} // TexCoord
-            );
-
-            // 加载场景贴图
-            sceneTexture = Graphics::Texture2d("res/textures/cantarella.jpg", 0);
-
-            simpleShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/2d-unlit-simple.vert", "res/shaders/2d-unlit-simple.frag");
-            if (simpleShader)
-            {
-                simpleShader->Use();
-                simpleShader->SetUniform("mainTexture", 0);
-            }
-        }
-
-        void initFullScreenQuadMesh()
-        {
-            fullScreenQuadMesh = Graphics::Mesh(
-                std::vector<GLuint>{0, 1, 2, 0, 2, 3}, // indexes
-                std::vector<std::array<float, 2>>{{ -1.0f, 1.0f }, { -1.0f, -1.0f }, { 1.0f, -1.0f }, { 1.0f, 1.0f }},// Position
-                std::vector<std::array<float, 2>>{{ 0.0f, 1.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }} // TexCoord
-            );
-        }
-
-        void initOtherSettings()
-        {
-            // 加载 高斯模糊的 shader
-            gaussianBlurShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/2d-unlit-gaussian-blur.vert", "res/shaders/2d-unlit-gaussian-blur.frag");
-            if (gaussianBlurShader)
-            {
-                gaussianBlurShader->Use();
-                gaussianBlurShader->SetUniform("mainTexture", 0);
-            }
-        }
-
-        void initFrames()
-        {
-            auto w = App::App::GetInstance().GetWindowWidth();
-            auto h = App::App::GetInstance().GetWindowHeight();
-
-            frameTextures[0] = Graphics::Texture2d(GL_RGB, 0, w, h);
-            frameTextures[1] = Graphics::Texture2d(GL_RGB, 0, w, h);
-
-            frames[0] = Graphics::Frame(&frameTextures[0]);
-            frames[1] = Graphics::Frame(&frameTextures[1]);
-        }
-
-        // 这里我们简单合批渲染一下由不同材质参数的多个物件，
-       //     实际上可以使用复杂的场景物体预剔除、LOD以及合批的策略，优化这一步的性能，但其实对于几个场景物体，也没啥优化空间。
-        void renderTick()
-        {
-            // 先绑定 fbo0
-            frames[0].Use();
-
-            // 渲染场景本身到 fbo 里面
-            sceneTexture.Use();
-            simpleShader->Use();
-            sceneMesh.Draw();
-
-            // 进行高斯模糊，水平+垂直共迭代 5 次
-            gaussianBlurShader->Use();
-            bool horizontal = true, firstIteration = true;
-            constexpr int amount = 30; // 模糊迭代次数
-            for (unsigned int i = 0; i < amount; ++i)
-            {
-                frames[horizontal].Use();
-                if (firstIteration)
-                    sceneTexture.Use();
-                else
-                    frameTextures[!horizontal].Use();
-                gaussianBlurShader->SetUniform("isHorizontal", horizontal);
-
-                // 渲染全屏四边形到 fbo 里
-                fullScreenQuadMesh.Draw();
-
-                // 状态管理
-                horizontal = !horizontal;
-                if (firstIteration)
-                    firstIteration = false;
-            }
-            Graphics::Frame::Unuse();
-
-            // 把最后一次渲染出的 fbo 纹理作为结果输出到 OpenGl 画布上
-            frameTextures[!horizontal].Use();
-            simpleShader->Use();
-            fullScreenQuadMesh.Draw();
-        }
-
         void OnWindowResize(const Events::WindowEvent& e)
         {
             if (e.Event == Events::WindowEvent::EventType::WINDOW_RESIZE)
             {
-                initFrames();
+                projection = glm::perspective(glm::radians(60.0f), (float)App::GetInstance().GetWindowWidth() / App::GetInstance().GetWindowHeight(), 0.001f, 1000000.0f);
             }
         }
 
-        Graphics::Mesh sceneMesh;
-        Graphics::Texture2d sceneTexture;
-        std::shared_ptr<Graphics::Shader> simpleShader;
+        std::vector<RyuRenderer::Graphics::Mesh> boxMeshes;
+        RyuRenderer::Graphics::Texture2d boxTexture;
+        std::shared_ptr<RyuRenderer::Graphics::Shader> boxShader;
 
-        Graphics::Mesh fullScreenQuadMesh;
-
-        Graphics::Frame frames[2] = {};
-        Graphics::Texture2d frameTextures[2] = {};
-
-        std::shared_ptr<Graphics::Shader> gaussianBlurShader;
+        glm::mat4 model = glm::identity<glm::mat4>();
+        glm::mat4 view = glm::identity<glm::mat4>();
+        glm::mat4 projection = glm::identity<glm::mat4>();
     };
 }
 
