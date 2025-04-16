@@ -54,9 +54,9 @@ namespace RyuRenderer::App::RenderPipeline
             );
 
             // 加载场景贴图
-            sceneTexture = RyuRenderer::Graphics::Texture2d("res/textures/test.jpg", 0);
+            sceneTexture = RyuRenderer::Graphics::Texture2d("res/textures/cantarella.jpg", 0);
 
-            simpleShader = shaderManager.Create("res/shaders/2d-texture.vert", "res/shaders/2d-texture.frag");
+            simpleShader = shaderManager.Create("res/shaders/2d-unlit-simple.vert", "res/shaders/2d-unlit-simple.frag");
             if (simpleShader)
             {
                 simpleShader->Use();
@@ -76,7 +76,7 @@ namespace RyuRenderer::App::RenderPipeline
         void initOtherSettings()
         {
             // 加载 高斯模糊的 shader
-            gaussianBlurShader = shaderManager.Create("res/shaders/gaussian-blur.vert", "res/shaders/gaussian-blur.frag");
+            gaussianBlurShader = shaderManager.Create("res/shaders/2d-unlit-gaussian-blur.vert", "res/shaders/2d-unlit-gaussian-blur.frag");
             if (gaussianBlurShader)
             {
                 gaussianBlurShader->Use();
