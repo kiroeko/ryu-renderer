@@ -118,8 +118,12 @@ namespace RyuRenderer::App
                 glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+                double currentTimeInS = glfwGetTime();
+                double deltaTime = currentTimeInS - lastTickTimeInS;
+                lastTickTimeInS = currentTimeInS;
+
                 // render
-                renderPipeline->tick();
+                renderPipeline->tick(deltaTime);
 
                 // show render result
                 glfwSwapBuffers(window);
@@ -759,6 +763,7 @@ namespace RyuRenderer::App
         RyuRenderer::App::RenderPipeline::IRenderPipeline* renderPipeline = nullptr;
         int windowWidth = 0;
         int windowHeight = 0;
+        double lastTickTimeInS = 0.0;
         bool IsFocused = true;
     };
 }

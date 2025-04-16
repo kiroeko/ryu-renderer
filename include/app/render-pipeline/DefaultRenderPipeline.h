@@ -135,7 +135,7 @@ namespace RyuRenderer::App::RenderPipeline
             App::GetInstance().EventPublisher.RegisterHandler(this, &DefaultRenderPipeline::OnWindowResize);
         }
 
-        void tick() override
+        void tick(double deltaTimeInS) override
         {
             if (!boxShader)
                 return;
@@ -155,7 +155,7 @@ namespace RyuRenderer::App::RenderPipeline
         {
             if (e.Event == Events::WindowEvent::EventType::WINDOW_RESIZE)
             {
-                projection = glm::perspective(glm::radians(60.0f), (float)App::GetInstance().GetWindowWidth() / App::GetInstance().GetWindowHeight(), 0.001f, 1000000.0f);
+                projection = glm::perspective(glm::radians(10.0f), (float)App::GetInstance().GetWindowWidth() / App::GetInstance().GetWindowHeight(), 0.001f, 1000000.0f);
             }
         }
 

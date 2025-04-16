@@ -28,7 +28,7 @@ namespace RyuRenderer::App::RenderPipeline
             App::GetInstance().EventPublisher.RegisterHandler(this, &GuassianBlurPipeline::OnWindowResize);
         }
 
-        void tick() override
+        void tick(double deltaTimeInS) override
         {
             renderTick();
         }
