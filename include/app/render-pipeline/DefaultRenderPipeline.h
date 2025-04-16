@@ -18,6 +18,166 @@
 
 namespace RyuRenderer::App::RenderPipeline
 {
+    class PerspectiveCamera
+    {
+    public:
+        PerspectiveCamera() = default;
+
+        PerspectiveCamera(
+            const glm::vec3& cPos,
+            const glm::vec3& cFront,
+            const glm::vec3& cUp,
+            int windowWidth,
+            int windowHeight,
+            float cVFOV = 60.f,
+            float cNearPlane = 0.001f,
+            float cFarPlane = 1000000.f)
+        {
+            LookAt(cPos, cFront, cUp);
+            vFOV = cVFOV;
+            nearPlane = cNearPlane;
+            farPlane = cFarPlane;
+            aspectRatio = (float)windowWidth / windowHeight;
+        }
+
+        void Move(const glm::vec3& direction, float distance)
+        {
+            glm::vec3 dir = glm::normalize(direction);
+            pos += dir * distance;
+        }
+
+        void MoveTo(const glm::vec3& cPos)
+        {
+            pos = cPos;
+        }
+
+        void LookAt(
+            const glm::vec3& cPos,
+            const glm::vec3& cFront,
+            const glm::vec3& cUp)
+        {
+            pos = cPos;
+            front = glm::normalize(cFront);
+            up = glm::normalize(cUp);
+        }
+
+        void OnWindowResize(int windowWidth, int windowHeight)
+        {
+            aspectRatio = (float)windowWidth / windowHeight;
+        }
+
+        void SetVFov(float cVFOV)
+        {
+            vFOV = cVFOV;
+        }
+
+        void SetHFov(float cHFOV)
+        {
+            float horizontalFovRad = glm::radians(cHFOV);
+            float verticalFovRad = 2.0f * std::atan(std::tan(horizontalFovRad / 2.0f) / aspectRatio);
+            vFOV = glm::degrees(verticalFovRad);
+        }
+        
+        void SetNearPlane(const float& cNearPlane)
+        {
+            nearPlane = cNearPlane;
+        }
+
+        void SetFarPlane(const float& cFarPlane)
+        {
+            farPlane = cFarPlane;
+        }
+
+        glm::mat4 GetView() const
+        {
+            return glm::lookAt(
+                pos,
+                pos + front,
+                up
+            );
+        }
+
+        glm::mat4 GetProjection() const
+        {
+            return glm::perspective(
+                glm::radians(vFOV),
+                aspectRatio,
+                nearPlane,
+                farPlane
+            );
+        }
+
+        glm::vec3 GetPos() const
+        {
+            return pos;
+        }
+
+        glm::vec3 GetFront() const
+        {
+            return front;
+        }
+
+        glm::vec3 GetBack() const
+        {
+            return front * -1.f;
+        }
+
+        glm::vec3 GetLeft() const
+        {
+            return GetRight() * -1.f;
+        }
+
+        glm::vec3 GetRight() const
+        {
+            return glm::normalize(glm::cross(front, up));
+        }
+
+        glm::vec3 GetUp() const
+        {
+            return up;
+        }
+
+        glm::vec3 GetDown() const
+        {
+            return up * -1.f;
+        }
+
+        float GetAspectRatio() const
+        {
+            return aspectRatio;
+        }
+
+        float GetVFOV() const
+        {
+            return vFOV;
+        }
+
+        float GetHFOV() const
+        {
+            float verticalFovRad = glm::radians(vFOV);
+            float horizontalFovRad = 2.0f * atan(tan(verticalFovRad / 2.0f) * aspectRatio);
+            return glm::degrees(horizontalFovRad);
+        }
+
+        float GetNearPlane() const
+        {
+            return nearPlane;
+        }
+
+        float GetFarPlane() const
+        {
+            return farPlane;
+        }
+    private:
+        glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f);
+        glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+        float aspectRatio = 16.f / 9.f;
+        float vFOV = 60.f;
+        float nearPlane = 0.001f;
+        float farPlane = 1000000.f;
+    };
+
     class DefaultRenderPipeline : public IRenderPipeline
     {
     public:
@@ -123,13 +283,17 @@ namespace RyuRenderer::App::RenderPipeline
                 boxShader->SetUniform("diffuseTexture", 0);
             }
 
-            // init mvp
-            view = glm::lookAt(
-                glm::vec3(0.0f, 0.0f, 6.0f), // 摄像机位置
-                glm::vec3(0.0f, 0.0f, 0.0f), // 看向的目标点
-                glm::vec3(0.0f, 1.0f, 0.0f)  // 上方向，设为 Y 轴正方向
+            // init camera
+            camera = PerspectiveCamera(
+                glm::vec3(0.0f, 0.0f, 6.0f),
+                glm::vec3(0.0f, 0.0f, -1.0f),
+                glm::vec3(0.0f, 1.0f, 0.0f),
+                App::GetInstance().GetWindowWidth(),
+                App::GetInstance().GetWindowHeight()
             );
-            projection = glm::perspective(glm::radians(60.0f), (float)App::GetInstance().GetWindowWidth() / App::GetInstance().GetWindowHeight(), 0.001f, 1000000.0f);
+
+            view = camera.GetView();
+            projection = camera.GetProjection();
 
             // Other settings
             App::GetInstance().EventPublisher.RegisterHandler(this, &DefaultRenderPipeline::OnWindowResize);
@@ -141,6 +305,8 @@ namespace RyuRenderer::App::RenderPipeline
                 return;
 
             model = glm::rotate(glm::identity<glm::mat4>(), (float)glfwGetTime() * glm::radians(60.f), glm::vec3(0.0f, 1.0f, 0.0f));
+            view = camera.GetView();
+
             boxShader->SetUniform("model", model);
             boxShader->SetUniform("view", view);
             boxShader->SetUniform("projection", projection);
@@ -155,7 +321,7 @@ namespace RyuRenderer::App::RenderPipeline
         {
             if (e.Event == Events::WindowEvent::EventType::WINDOW_RESIZE)
             {
-                projection = glm::perspective(glm::radians(10.0f), (float)App::GetInstance().GetWindowWidth() / App::GetInstance().GetWindowHeight(), 0.001f, 1000000.0f);
+                projection = camera.GetProjection();
             }
         }
 
@@ -166,6 +332,7 @@ namespace RyuRenderer::App::RenderPipeline
         glm::mat4 model = glm::identity<glm::mat4>();
         glm::mat4 view = glm::identity<glm::mat4>();
         glm::mat4 projection = glm::identity<glm::mat4>();
+        PerspectiveCamera camera;
     };
 }
 
