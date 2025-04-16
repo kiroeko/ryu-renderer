@@ -18,7 +18,6 @@ namespace RyuRenderer::Common
         Singleton& operator= (const Singleton&) = delete;
     private:
         Singleton() {}
-        ~Singleton() {}
     };
 }
 

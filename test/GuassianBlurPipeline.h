@@ -19,7 +19,7 @@ namespace RyuRenderer::App::RenderPipeline
     class GuassianBlurPipeline : public IRenderPipeline
     {
     public:
-    GuassianBlurPipeline() = default;
+        GuassianBlurPipeline() = default;
 
         void init() override
         {
@@ -47,16 +47,16 @@ namespace RyuRenderer::App::RenderPipeline
         void initMainScene()
         {
             // 场景本身，这里恰好是带纹理图案的矩形
-            sceneMesh = RyuRenderer::Graphics::Mesh(
+            sceneMesh = Graphics::Mesh(
                 std::vector<GLuint>{0, 1, 2, 0, 2, 3}, // indexes
                 std::vector<std::array<float, 2>>{{ -1.0f, 1.0f }, { -1.0f, -1.0f }, { 1.0f, -1.0f }, { 1.0f, 1.0f }},// Position
                 std::vector<std::array<float, 2>>{{ 0.0f, 1.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }} // TexCoord
             );
 
             // 加载场景贴图
-            sceneTexture = RyuRenderer::Graphics::Texture2d("res/textures/cantarella.jpg", 0);
+            sceneTexture = Graphics::Texture2d("res/textures/cantarella.jpg", 0);
 
-            simpleShader = shaderManager.Create("res/shaders/2d-unlit-simple.vert", "res/shaders/2d-unlit-simple.frag");
+            simpleShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/2d-unlit-simple.vert", "res/shaders/2d-unlit-simple.frag");
             if (simpleShader)
             {
                 simpleShader->Use();
@@ -66,7 +66,7 @@ namespace RyuRenderer::App::RenderPipeline
 
         void initFullScreenQuadMesh()
         {
-            fullScreenQuadMesh = RyuRenderer::Graphics::Mesh(
+            fullScreenQuadMesh = Graphics::Mesh(
                 std::vector<GLuint>{0, 1, 2, 0, 2, 3}, // indexes
                 std::vector<std::array<float, 2>>{{ -1.0f, 1.0f }, { -1.0f, -1.0f }, { 1.0f, -1.0f }, { 1.0f, 1.0f }},// Position
                 std::vector<std::array<float, 2>>{{ 0.0f, 1.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }} // TexCoord
@@ -76,7 +76,7 @@ namespace RyuRenderer::App::RenderPipeline
         void initOtherSettings()
         {
             // 加载 高斯模糊的 shader
-            gaussianBlurShader = shaderManager.Create("res/shaders/2d-unlit-gaussian-blur.vert", "res/shaders/2d-unlit-gaussian-blur.frag");
+            gaussianBlurShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/2d-unlit-gaussian-blur.vert", "res/shaders/2d-unlit-gaussian-blur.frag");
             if (gaussianBlurShader)
             {
                 gaussianBlurShader->Use();
@@ -86,14 +86,14 @@ namespace RyuRenderer::App::RenderPipeline
 
         void initFrames()
         {
-            auto w = RyuRenderer::App::App::GetInstance().GetWindowWidth();
-            auto h = RyuRenderer::App::App::GetInstance().GetWindowHeight();
+            auto w = App::App::GetInstance().GetWindowWidth();
+            auto h = App::App::GetInstance().GetWindowHeight();
 
-            frameTextures[0] = RyuRenderer::Graphics::Texture2d(GL_RGB, 0, w, h);
-            frameTextures[1] = RyuRenderer::Graphics::Texture2d(GL_RGB, 0, w, h);
+            frameTextures[0] = Graphics::Texture2d(GL_RGB, 0, w, h);
+            frameTextures[1] = Graphics::Texture2d(GL_RGB, 0, w, h);
 
-            frames[0] = RyuRenderer::Graphics::Frame(&frameTextures[0]);
-            frames[1] = RyuRenderer::Graphics::Frame(&frameTextures[1]);
+            frames[0] = Graphics::Frame(&frameTextures[0]);
+            frames[1] = Graphics::Frame(&frameTextures[1]);
         }
 
         // 这里我们简单合批渲染一下由不同材质参数的多个物件，
@@ -129,7 +129,7 @@ namespace RyuRenderer::App::RenderPipeline
                 if (firstIteration)
                     firstIteration = false;
             }
-            RyuRenderer::Graphics::Frame::Unuse();
+            Graphics::Frame::Unuse();
 
             // 把最后一次渲染出的 fbo 纹理作为结果输出到 OpenGl 画布上
             frameTextures[!horizontal].Use();
@@ -145,19 +145,16 @@ namespace RyuRenderer::App::RenderPipeline
             }
         }
 
-        // tmp
-        ShaderManager shaderManager;
+        Graphics::Mesh sceneMesh;
+        Graphics::Texture2d sceneTexture;
+        std::shared_ptr<Graphics::Shader> simpleShader;
 
-        RyuRenderer::Graphics::Mesh sceneMesh;
-        RyuRenderer::Graphics::Texture2d sceneTexture;
-        std::shared_ptr<RyuRenderer::Graphics::Shader> simpleShader;
+        Graphics::Mesh fullScreenQuadMesh;
 
-        RyuRenderer::Graphics::Mesh fullScreenQuadMesh;
+        Graphics::Frame frames[2] = {};
+        Graphics::Texture2d frameTextures[2] = {};
 
-        RyuRenderer::Graphics::Frame frames[2] = {};
-        RyuRenderer::Graphics::Texture2d frameTextures[2] = {};
-
-        std::shared_ptr<RyuRenderer::Graphics::Shader> gaussianBlurShader;
+        std::shared_ptr<Graphics::Shader> gaussianBlurShader;
     };
 }
 
