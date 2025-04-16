@@ -321,6 +321,7 @@ namespace RyuRenderer::App::RenderPipeline
         {
             if (e.Event == Events::WindowEvent::EventType::WINDOW_RESIZE)
             {
+                camera.OnWindowResize(e.Width, e.Height);
                 projection = camera.GetProjection();
             }
         }
