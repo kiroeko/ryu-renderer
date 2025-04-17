@@ -18,6 +18,40 @@
 
 namespace RyuRenderer::App::RenderPipeline
 {
+    class World
+    {
+    public:
+        static glm::vec3 GetFront()
+        {
+            return glm::vec3(0.0f, 0.0f, -1.0f);
+        }
+
+        static glm::vec3 GetBack()
+        {
+            return glm::vec3(0.0f, 0.0f, 1.0f);
+        }
+
+        static glm::vec3 GetLeft()
+        {
+            return glm::vec3(-1.0f, 0.0f, 0.0f);
+        }
+
+        static glm::vec3 GetRight()
+        {
+            return glm::vec3(1.0f, 0.0f, 0.0f);
+        }
+
+        static glm::vec3 GetUp()
+        {
+            return glm::vec3(0.0f, 1.0f, 0.0f);
+        }
+
+        static glm::vec3 GetDown()
+        {
+            return glm::vec3(0.0f, -1.0f, 0.0f);
+        }
+    };
+
     class PerspectiveCamera
     {
     public:
@@ -49,6 +83,13 @@ namespace RyuRenderer::App::RenderPipeline
         void MoveTo(const glm::vec3& cPos)
         {
             pos = cPos;
+        }
+
+        void Rotate(float degree, const glm::vec3 rotateAxis)
+        {
+            float angle = glm::radians(degree);
+            glm::quat rotation = glm::angleAxis(angle, rotateAxis);
+            front = rotation * front;
         }
 
         void LookAt(
