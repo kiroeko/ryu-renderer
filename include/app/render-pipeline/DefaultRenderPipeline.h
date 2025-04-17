@@ -318,7 +318,16 @@ namespace RyuRenderer::App::RenderPipeline
             if (!boxShader)
                 return;
 
-            model = glm::rotate(glm::identity<glm::mat4>(), (float)glfwGetTime() * glm::radians(60.f), glm::vec3(0.0f, 1.0f, 0.0f));
+            constexpr float degreesPerSecond = 60.0f;
+            constexpr float rotationSpeed = glm::radians(degreesPerSecond);
+            static float totalAngle = 0.0f;
+            totalAngle += rotationSpeed * (float)deltaTimeInS;
+
+            glm::quat rotation = glm::angleAxis(
+                totalAngle,                                // 旋转角度（弧度）
+                glm::vec3(0.0f, 1.0f, 0.0f)                // 旋转轴（Y 轴）
+            );
+            model = glm::mat4_cast(rotation);
             view = camera.GetView();
 
             boxShader->SetUniform("model", model);
