@@ -492,6 +492,15 @@ namespace RyuRenderer::App::RenderPipeline
         {
             if (e.Action == Events::KeyEvent::ActionType::ACTION_PRESS)
             {
+                if (e.Key == Events::KeyEvent::KeyType::KEY_R)
+                {
+                    camera.MoveTo(glm::vec3(0.0f, 0.0f, 6.0f));
+                    camera.LookAt(
+                        glm::vec3(0.0f, 0.0f, -1.0f),
+                        glm::vec3(0.0f, 1.0f, 0.0f)
+                    );
+                }
+
                 if (e.Key == Events::KeyEvent::KeyType::KEY_W)
                 {
                     isWKeyHolding = true;
