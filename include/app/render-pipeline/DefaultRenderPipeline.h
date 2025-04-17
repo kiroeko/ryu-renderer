@@ -69,13 +69,13 @@ namespace RyuRenderer::App::RenderPipeline
         void SetVFov(float cVFOV)
         {
             vFOV = cVFOV;
+            isBasedOnVFOV = true;
         }
 
         void SetHFov(float cHFOV)
         {
-            float horizontalFovRad = glm::radians(cHFOV);
-            float verticalFovRad = 2.0f * std::atan(std::tan(horizontalFovRad / 2.0f) / aspectRatio);
-            vFOV = glm::degrees(verticalFovRad);
+            hFOV = cHFOV;
+            isBasedOnVFOV = false;
         }
         
         void SetNearPlane(const float& cNearPlane)
@@ -100,7 +100,7 @@ namespace RyuRenderer::App::RenderPipeline
         glm::mat4 GetProjection() const
         {
             return glm::perspective(
-                glm::radians(vFOV),
+                glm::radians(GetVFOV()),
                 aspectRatio,
                 nearPlane,
                 farPlane
@@ -149,14 +149,26 @@ namespace RyuRenderer::App::RenderPipeline
 
         float GetVFOV() const
         {
-            return vFOV;
+            if (isBasedOnVFOV)
+            {
+                return vFOV;
+            }
+
+            float horizontalFovRad = glm::radians(hFOV);
+            float verticalFovRad = 2.0f * std::atan(std::tan(horizontalFovRad / 2.0f) / aspectRatio);
+            return glm::degrees(verticalFovRad);
         }
 
         float GetHFOV() const
         {
-            float verticalFovRad = glm::radians(vFOV);
-            float horizontalFovRad = 2.0f * atan(tan(verticalFovRad / 2.0f) * aspectRatio);
-            return glm::degrees(horizontalFovRad);
+            if (isBasedOnVFOV)
+            {
+                float verticalFovRad = glm::radians(vFOV);
+                float horizontalFovRad = 2.0f * atan(tan(verticalFovRad / 2.0f) * aspectRatio);
+                return glm::degrees(horizontalFovRad);
+            }
+            
+            return hFOV;
         }
 
         float GetNearPlane() const
@@ -173,7 +185,9 @@ namespace RyuRenderer::App::RenderPipeline
         glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f);
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
         float aspectRatio = 16.f / 9.f;
+        bool isBasedOnVFOV = true;
         float vFOV = 60.f;
+        float hFOV = 91.513f;
         float nearPlane = 0.001f;
         float farPlane = 1000000.f;
     };
