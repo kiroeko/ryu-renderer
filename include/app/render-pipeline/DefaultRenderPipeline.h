@@ -22,34 +22,64 @@ namespace RyuRenderer::App::RenderPipeline
     class World
     {
     public:
-        static glm::vec3 GetFront()
+        static glm::vec3 GetNegativeZAxisDirection()
         {
             return glm::vec3(0.0f, 0.0f, -1.0f);
         }
 
-        static glm::vec3 GetBack()
+        static glm::vec3 GetZAxisDirection()
         {
             return glm::vec3(0.0f, 0.0f, 1.0f);
         }
 
-        static glm::vec3 GetLeft()
+        static glm::vec3 GetNegativeXAxisDirection()
         {
             return glm::vec3(-1.0f, 0.0f, 0.0f);
         }
 
-        static glm::vec3 GetRight()
+        static glm::vec3 GetXAxisDirection()
         {
             return glm::vec3(1.0f, 0.0f, 0.0f);
         }
 
-        static glm::vec3 GetUp()
+        static glm::vec3 GetYAxisDirection()
         {
             return glm::vec3(0.0f, 1.0f, 0.0f);
         }
 
-        static glm::vec3 GetDown()
+        static glm::vec3 GetNegativeYAxisDirection()
         {
             return glm::vec3(0.0f, -1.0f, 0.0f);
+        }
+
+        static glm::vec3 GetFrontDirection()
+        {
+            return GetNegativeZAxisDirection();
+        }
+
+        static glm::vec3 GetBackDirection()
+        {
+            return GetZAxisDirection();
+        }
+
+        static glm::vec3 GetLeftDirection()
+        {
+            return GetNegativeXAxisDirection();
+        }
+
+        static glm::vec3 GetRightDirection()
+        {
+            return GetXAxisDirection();
+        }
+
+        static glm::vec3 GetUpDirection()
+        {
+            return GetYAxisDirection();
+        }
+
+        static glm::vec3 GetDownDirection()
+        {
+            return GetNegativeYAxisDirection();
         }
     };
 
@@ -417,8 +447,8 @@ namespace RyuRenderer::App::RenderPipeline
             float pitchDegree = pitchOffset * sensitivity;
             float yawDegree = -1 * yawOffset * sensitivity;
             
-            camera.Rotate(World::GetRight(), pitchDegree);
-            camera.Rotate(World::GetDown(), yawDegree);
+            camera.Rotate(World::GetRightDirection(), pitchDegree);
+            camera.Rotate(World::GetDownDirection(), yawDegree);
         }
 
         std::vector<RyuRenderer::Graphics::Mesh> boxMeshes;
