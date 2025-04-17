@@ -85,7 +85,7 @@ namespace RyuRenderer::App::RenderPipeline
             pos = cPos;
         }
 
-        void Rotate(float degree, const glm::vec3 rotateAxis)
+        void Rotate(const glm::vec3& rotateAxis, float degree)
         {
             float angle = glm::radians(degree);
             glm::quat rotation = glm::angleAxis(angle, rotateAxis);
