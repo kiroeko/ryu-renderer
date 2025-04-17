@@ -98,7 +98,8 @@ namespace RyuRenderer::App::RenderPipeline
             float cNearPlane = 0.001f,
             float cFarPlane = 1000000.f)
         {
-            LookAt(cPos, cFront, cUp);
+            pos = cPos;
+            RotateTo(cFront, cUp);
             vFOV = cVFOV;
             nearPlane = cNearPlane;
             farPlane = cFarPlane;
@@ -123,13 +124,19 @@ namespace RyuRenderer::App::RenderPipeline
             front = rotation * front;
         }
 
-        void LookAt(
-            const glm::vec3& cPos,
+        void RotateTo(
             const glm::vec3& cFront,
             const glm::vec3& cUp)
         {
-            pos = cPos;
             front = glm::normalize(cFront);
+            up = glm::normalize(cUp);
+        }
+
+        void LookAt(
+            const glm::vec3& targetPos,
+            const glm::vec3& cUp)
+        {
+            front = targetPos - pos;
             up = glm::normalize(cUp);
         }
 
