@@ -9,6 +9,7 @@
 
 #include "app/App.h"
 #include "app/events/WindowEvent.h"
+#include "app/events/MouseEvent.h"
 #include "app/render-pipeline/IRenderPipeline.h"
 #include "graphics/Frame.h"
 #include "graphics/Mesh.h"
@@ -352,6 +353,7 @@ namespace RyuRenderer::App::RenderPipeline
 
             // Other settings
             App::GetInstance().EventPublisher.RegisterHandler(this, &DefaultRenderPipeline::OnWindowResize);
+            App::GetInstance().EventPublisher.RegisterHandler(this, &DefaultRenderPipeline::OnMouseMove);
         }
 
         void tick(double deltaTimeInS) override
@@ -383,11 +385,40 @@ namespace RyuRenderer::App::RenderPipeline
     private:
         void OnWindowResize(const Events::WindowEvent& e)
         {
-            if (e.Event == Events::WindowEvent::EventType::WINDOW_RESIZE)
+            if (e.Event != Events::WindowEvent::EventType::WINDOW_RESIZE)
+                return;
+
+            camera.OnWindowResize(e.Width, e.Height);
+            projection = camera.GetProjection();
+        }
+
+        void OnMouseMove(const Events::MouseEvent& e)
+        {
+            if (e.Event != Events::MouseEvent::EventType::MOUSE_MOVE)
+                return;
+
+            static bool isFirstMove = true;
+            static float lastMouseX = 0.f;
+            static float lastMouseY = 0.f;
+
+            if (isFirstMove)
             {
-                camera.OnWindowResize(e.Width, e.Height);
-                projection = camera.GetProjection();
+                lastMouseX = e.MoveXPos;
+                lastMouseY = e.MoveYPos;
+                isFirstMove = false;
             }
+
+            float pitchOffset = e.MoveYPos - lastMouseY;
+            float yawOffset = e.MoveXPos - lastMouseX;
+            lastMouseX = e.MoveXPos;
+            lastMouseY = e.MoveYPos;
+
+            constexpr float sensitivity = 0.05f;
+            float pitchDegree = pitchOffset * sensitivity;
+            float yawDegree = -1 * yawOffset * sensitivity;
+            
+            camera.Rotate(World::GetRight(), pitchDegree);
+            camera.Rotate(World::GetDown(), yawDegree);
         }
 
         std::vector<RyuRenderer::Graphics::Mesh> boxMeshes;
