@@ -391,12 +391,42 @@ namespace RyuRenderer::App::RenderPipeline
             // Other settings
             App::GetInstance().EventPublisher.RegisterHandler(this, &DefaultRenderPipeline::OnWindowResize);
             App::GetInstance().EventPublisher.RegisterHandler(this, &DefaultRenderPipeline::OnMouseMove);
+            App::GetInstance().EventPublisher.RegisterHandler(this, &DefaultRenderPipeline::OnKeyEvent);
         }
 
         void tick(double deltaTimeInS) override
         {
             if (!boxShader)
                 return;
+
+            constexpr float speed = 10.f;
+            float distance = deltaTimeInS * speed;
+
+            constexpr float epsilon = 1e-6f;
+            glm::vec3 dir = glm::zero<glm::vec3>();
+            if (isWKeyHolding)
+            {
+                dir = camera.GetFront();
+            }
+            else if (isSKeyHolding)
+            {
+                dir = camera.GetBack();
+            }
+            else if (isAKeyHolding)
+            {
+                dir = camera.GetLeft();
+            }
+            else if (isDKeyHolding)
+            {
+                dir = camera.GetRight();
+            }
+            if (glm::length(dir) >= epsilon)
+            {
+                // 投影方向向量到x-z平面
+                dir.y = 0.f;
+
+                camera.Move(dir, distance);
+            }
 
             constexpr float degreesPerSecond = 60.0f;
             constexpr float rotationSpeed = glm::radians(degreesPerSecond);
@@ -458,6 +488,48 @@ namespace RyuRenderer::App::RenderPipeline
             camera.Rotate(World::GetDownDirection(), yawDegree);
         }
 
+        void OnKeyEvent(const Events::KeyEvent& e)
+        {
+            if (e.Action == Events::KeyEvent::ActionType::ACTION_PRESS)
+            {
+                if (e.Key == Events::KeyEvent::KeyType::KEY_W)
+                {
+                    isWKeyHolding = true;
+                }
+                else if (e.Key == Events::KeyEvent::KeyType::KEY_S)
+                {
+                    isSKeyHolding = true;
+                }
+                else if (e.Key == Events::KeyEvent::KeyType::KEY_A)
+                {
+                    isAKeyHolding = true;
+                }
+                else if (e.Key == Events::KeyEvent::KeyType::KEY_D)
+                {
+                    isDKeyHolding = true;
+                }
+            }
+            else if (e.Action == Events::KeyEvent::ActionType::ACTION_RELEASE)
+            {
+                if (e.Key == Events::KeyEvent::KeyType::KEY_W)
+                {
+                    isWKeyHolding = false;
+                }
+                else if (e.Key == Events::KeyEvent::KeyType::KEY_S)
+                {
+                    isSKeyHolding = false;
+                }
+                else if (e.Key == Events::KeyEvent::KeyType::KEY_A)
+                {
+                    isAKeyHolding = false;
+                }
+                else if (e.Key == Events::KeyEvent::KeyType::KEY_D)
+                {
+                    isDKeyHolding = false;
+                }
+            }
+        }
+
         std::vector<RyuRenderer::Graphics::Mesh> boxMeshes;
         RyuRenderer::Graphics::Texture2d boxTexture;
         std::shared_ptr<RyuRenderer::Graphics::Shader> boxShader;
@@ -465,7 +537,13 @@ namespace RyuRenderer::App::RenderPipeline
         glm::mat4 model = glm::identity<glm::mat4>();
         glm::mat4 view = glm::identity<glm::mat4>();
         glm::mat4 projection = glm::identity<glm::mat4>();
+
         PerspectiveCamera camera;
+
+        bool isWKeyHolding = false;
+        bool isSKeyHolding = false;
+        bool isAKeyHolding = false;
+        bool isDKeyHolding = false;
     };
 }
 
