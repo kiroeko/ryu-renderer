@@ -83,12 +83,12 @@ namespace RyuRenderer::App::RenderPipeline
         }
     };
 
-    class PerspectiveCamera
+    class Camera
     {
     public:
-        PerspectiveCamera() = default;
+        Camera() = default;
 
-        PerspectiveCamera(
+        Camera(
             const glm::vec3& cPos,
             const glm::vec3& cFront,
             const glm::vec3& cUp,
@@ -259,6 +259,117 @@ namespace RyuRenderer::App::RenderPipeline
         {
             return farPlane;
         }
+
+        // Controll
+        void OnTick(double deltaTimeInS)
+        {
+            constexpr float speed = 10.f;
+            float distance = deltaTimeInS * speed;
+
+            constexpr float epsilon = 1e-6f;
+            glm::vec3 dir = glm::zero<glm::vec3>();
+            if (isWKeyHolding)
+            {
+                dir = GetFrontDirection();
+            }
+            else if (isSKeyHolding)
+            {
+                dir = GetBackDirection();
+            }
+            else if (isAKeyHolding)
+            {
+                dir = GetLeftDirection();
+            }
+            else if (isDKeyHolding)
+            {
+                dir = GetRightDirection();
+            }
+            if (glm::length(dir) >= epsilon)
+            {
+                Move(dir, distance);
+            }
+        }
+
+        void OnMouseMove(const Events::MouseEvent& e)
+        {
+            if (e.Event != Events::MouseEvent::EventType::MOUSE_MOVE)
+                return;
+
+            static bool isFirstMove = true;
+            static float lastMouseX = 0.f;
+            static float lastMouseY = 0.f;
+
+            if (isFirstMove)
+            {
+                lastMouseX = e.MoveXPos;
+                lastMouseY = e.MoveYPos;
+                isFirstMove = false;
+            }
+
+            float pitchOffset = e.MoveYPos - lastMouseY;
+            float yawOffset = e.MoveXPos - lastMouseX;
+            lastMouseX = e.MoveXPos;
+            lastMouseY = e.MoveYPos;
+
+            constexpr float sensitivityP = 0.02f;
+            constexpr float sensitivityY = 0.05f;
+            float pitchDegree = -1 * pitchOffset * sensitivityP;
+            float yawDegree = yawOffset * sensitivityY;
+
+            Rotate(GetRightDirection(), pitchDegree);
+            Rotate(GetDownDirection(), yawDegree);
+        }
+
+        void OnKeyEvent(const Events::KeyEvent& e)
+        {
+            if (e.Action == Events::KeyEvent::ActionType::ACTION_PRESS)
+            {
+                if (e.Key == Events::KeyEvent::KeyType::KEY_R)
+                {
+                    MoveTo(glm::vec3(0.0f, 0.0f, 6.0f));
+                    LookAt(
+                        glm::vec3(0.0f, 0.0f, -1.0f),
+                        glm::vec3(0.0f, 1.0f, 0.0f)
+                    );
+                }
+
+                if (e.Key == Events::KeyEvent::KeyType::KEY_W)
+                {
+                    isWKeyHolding = true;
+                }
+                else if (e.Key == Events::KeyEvent::KeyType::KEY_S)
+                {
+                    isSKeyHolding = true;
+                }
+                else if (e.Key == Events::KeyEvent::KeyType::KEY_A)
+                {
+                    isAKeyHolding = true;
+                }
+                else if (e.Key == Events::KeyEvent::KeyType::KEY_D)
+                {
+                    isDKeyHolding = true;
+                }
+            }
+            else if (e.Action == Events::KeyEvent::ActionType::ACTION_RELEASE)
+            {
+                if (e.Key == Events::KeyEvent::KeyType::KEY_W)
+                {
+                    isWKeyHolding = false;
+                }
+                else if (e.Key == Events::KeyEvent::KeyType::KEY_S)
+                {
+                    isSKeyHolding = false;
+                }
+                else if (e.Key == Events::KeyEvent::KeyType::KEY_A)
+                {
+                    isAKeyHolding = false;
+                }
+                else if (e.Key == Events::KeyEvent::KeyType::KEY_D)
+                {
+                    isDKeyHolding = false;
+                }
+            }
+        }
     private:
         glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -269,6 +380,12 @@ namespace RyuRenderer::App::RenderPipeline
         float hFOV = 91.513f;
         float nearPlane = 0.01f;
         float farPlane = 1000000.f;
+
+        // Controll
+        bool isWKeyHolding = false;
+        bool isSKeyHolding = false;
+        bool isAKeyHolding = false;
+        bool isDKeyHolding = false;
     };
 
     class DefaultRenderPipeline : public IRenderPipeline
@@ -369,7 +486,7 @@ namespace RyuRenderer::App::RenderPipeline
             boxTexture = Graphics::Texture2d("res/textures/box.jpg", 0);
             boxTexture.Use();
 
-            boxShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-unlit-simple.vert", "res/shaders/3d-unlit-simple.frag");
+            boxShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-basic-texture.vert", "res/shaders/3d-basic-texture.frag");
             if (boxShader)
             {
                 boxShader->Use();
@@ -377,7 +494,7 @@ namespace RyuRenderer::App::RenderPipeline
             }
 
             // init camera
-            camera = PerspectiveCamera(
+            camera = Camera(
                 glm::vec3(0.0f, 0.0f, 6.0f),
                 glm::vec3(0.0f, 0.0f, -1.0f),
                 glm::vec3(0.0f, 1.0f, 0.0f),
@@ -399,31 +516,7 @@ namespace RyuRenderer::App::RenderPipeline
             if (!boxShader)
                 return;
 
-            constexpr float speed = 10.f;
-            float distance = deltaTimeInS * speed;
-
-            constexpr float epsilon = 1e-6f;
-            glm::vec3 dir = glm::zero<glm::vec3>();
-            if (isWKeyHolding)
-            {
-                dir = camera.GetFrontDirection();
-            }
-            else if (isSKeyHolding)
-            {
-                dir = camera.GetBackDirection();
-            }
-            else if (isAKeyHolding)
-            {
-                dir = camera.GetLeftDirection();
-            }
-            else if (isDKeyHolding)
-            {
-                dir = camera.GetRightDirection();
-            }
-            if (glm::length(dir) >= epsilon)
-            {
-                camera.Move(dir, distance);
-            }
+            camera.OnTick(deltaTimeInS);
 
             constexpr float degreesPerSecond = 60.0f;
             constexpr float rotationSpeed = glm::radians(degreesPerSecond);
@@ -458,83 +551,12 @@ namespace RyuRenderer::App::RenderPipeline
 
         void OnMouseMove(const Events::MouseEvent& e)
         {
-            if (e.Event != Events::MouseEvent::EventType::MOUSE_MOVE)
-                return;
-
-            static bool isFirstMove = true;
-            static float lastMouseX = 0.f;
-            static float lastMouseY = 0.f;
-
-            if (isFirstMove)
-            {
-                lastMouseX = e.MoveXPos;
-                lastMouseY = e.MoveYPos;
-                isFirstMove = false;
-            }
-
-            float pitchOffset = e.MoveYPos - lastMouseY;
-            float yawOffset = e.MoveXPos - lastMouseX;
-            lastMouseX = e.MoveXPos;
-            lastMouseY = e.MoveYPos;
-
-            constexpr float sensitivityP = 0.02f;
-            constexpr float sensitivityY = 0.05f;
-            float pitchDegree = -1 * pitchOffset * sensitivityP;
-            float yawDegree = yawOffset * sensitivityY;
-            
-            camera.Rotate(camera.GetRightDirection(), pitchDegree);
-            camera.Rotate(camera.GetDownDirection(), yawDegree);
+            camera.OnMouseMove(e);
         }
 
         void OnKeyEvent(const Events::KeyEvent& e)
         {
-            if (e.Action == Events::KeyEvent::ActionType::ACTION_PRESS)
-            {
-                if (e.Key == Events::KeyEvent::KeyType::KEY_R)
-                {
-                    camera.MoveTo(glm::vec3(0.0f, 0.0f, 6.0f));
-                    camera.LookAt(
-                        glm::vec3(0.0f, 0.0f, -1.0f),
-                        glm::vec3(0.0f, 1.0f, 0.0f)
-                    );
-                }
-
-                if (e.Key == Events::KeyEvent::KeyType::KEY_W)
-                {
-                    isWKeyHolding = true;
-                }
-                else if (e.Key == Events::KeyEvent::KeyType::KEY_S)
-                {
-                    isSKeyHolding = true;
-                }
-                else if (e.Key == Events::KeyEvent::KeyType::KEY_A)
-                {
-                    isAKeyHolding = true;
-                }
-                else if (e.Key == Events::KeyEvent::KeyType::KEY_D)
-                {
-                    isDKeyHolding = true;
-                }
-            }
-            else if (e.Action == Events::KeyEvent::ActionType::ACTION_RELEASE)
-            {
-                if (e.Key == Events::KeyEvent::KeyType::KEY_W)
-                {
-                    isWKeyHolding = false;
-                }
-                else if (e.Key == Events::KeyEvent::KeyType::KEY_S)
-                {
-                    isSKeyHolding = false;
-                }
-                else if (e.Key == Events::KeyEvent::KeyType::KEY_A)
-                {
-                    isAKeyHolding = false;
-                }
-                else if (e.Key == Events::KeyEvent::KeyType::KEY_D)
-                {
-                    isDKeyHolding = false;
-                }
-            }
+            camera.OnKeyEvent(e);
         }
 
         std::vector<RyuRenderer::Graphics::Mesh> boxMeshes;
@@ -545,12 +567,7 @@ namespace RyuRenderer::App::RenderPipeline
         glm::mat4 view = glm::identity<glm::mat4>();
         glm::mat4 projection = glm::identity<glm::mat4>();
 
-        PerspectiveCamera camera;
-
-        bool isWKeyHolding = false;
-        bool isSKeyHolding = false;
-        bool isAKeyHolding = false;
-        bool isDKeyHolding = false;
+        Camera camera;
     };
 }
 
