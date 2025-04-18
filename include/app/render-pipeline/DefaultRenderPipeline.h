@@ -95,7 +95,7 @@ namespace RyuRenderer::App::RenderPipeline
             int windowWidth,
             int windowHeight,
             float cVFOV = 60.f,
-            float cNearPlane = 0.001f,
+            float cNearPlane = 0.01f,
             float cFarPlane = 1000000.f)
         {
             pos = cPos;
@@ -191,32 +191,32 @@ namespace RyuRenderer::App::RenderPipeline
             return pos;
         }
 
-        glm::vec3 GetFront() const
+        glm::vec3 GetFrontDirection() const
         {
             return front;
         }
 
-        glm::vec3 GetBack() const
+        glm::vec3 GetBackDirection() const
         {
             return front * -1.f;
         }
 
-        glm::vec3 GetLeft() const
+        glm::vec3 GetLeftDirection() const
         {
-            return GetRight() * -1.f;
+            return GetRightDirection() * -1.f;
         }
 
-        glm::vec3 GetRight() const
+        glm::vec3 GetRightDirection() const
         {
             return glm::normalize(glm::cross(front, up));
         }
 
-        glm::vec3 GetUp() const
+        glm::vec3 GetUpDirection() const
         {
             return up;
         }
 
-        glm::vec3 GetDown() const
+        glm::vec3 GetDownDirection() const
         {
             return up * -1.f;
         }
@@ -267,7 +267,7 @@ namespace RyuRenderer::App::RenderPipeline
         bool isBasedOnVFOV = true;
         float vFOV = 60.f;
         float hFOV = 91.513f;
-        float nearPlane = 0.001f;
+        float nearPlane = 0.01f;
         float farPlane = 1000000.f;
     };
 
@@ -406,25 +406,22 @@ namespace RyuRenderer::App::RenderPipeline
             glm::vec3 dir = glm::zero<glm::vec3>();
             if (isWKeyHolding)
             {
-                dir = camera.GetFront();
+                dir = camera.GetFrontDirection();
             }
             else if (isSKeyHolding)
             {
-                dir = camera.GetBack();
+                dir = camera.GetBackDirection();
             }
             else if (isAKeyHolding)
             {
-                dir = camera.GetLeft();
+                dir = camera.GetLeftDirection();
             }
             else if (isDKeyHolding)
             {
-                dir = camera.GetRight();
+                dir = camera.GetRightDirection();
             }
             if (glm::length(dir) >= epsilon)
             {
-                // 投影方向向量到x-z平面
-                dir.y = 0.f;
-
                 camera.Move(dir, distance);
             }
 
@@ -480,12 +477,13 @@ namespace RyuRenderer::App::RenderPipeline
             lastMouseX = e.MoveXPos;
             lastMouseY = e.MoveYPos;
 
-            constexpr float sensitivity = 0.05f;
-            float pitchDegree = pitchOffset * sensitivity;
-            float yawDegree = -1 * yawOffset * sensitivity;
+            constexpr float sensitivityP = 0.02f;
+            constexpr float sensitivityY = 0.05f;
+            float pitchDegree = -1 * pitchOffset * sensitivityP;
+            float yawDegree = yawOffset * sensitivityY;
             
-            camera.Rotate(World::GetRightDirection(), pitchDegree);
-            camera.Rotate(World::GetDownDirection(), yawDegree);
+            camera.Rotate(camera.GetRightDirection(), pitchDegree);
+            camera.Rotate(camera.GetDownDirection(), yawDegree);
         }
 
         void OnKeyEvent(const Events::KeyEvent& e)
