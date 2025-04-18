@@ -89,21 +89,96 @@ namespace RyuRenderer::App::RenderPipeline
         Camera() = default;
 
         Camera(
-            const glm::vec3& cPos,
-            const glm::vec3& cFront,
-            const glm::vec3& cUp,
-            int windowWidth,
-            int windowHeight,
-            float cVFOV = 60.f,
-            float cNearPlane = 0.01f,
-            float cFarPlane = 1000000.f)
+            const glm::vec3& position,
+            const glm::vec3& frontDir,
+            const glm::vec3& upDir,
+            float nearPlaneDis = 0.01f,
+            float farPlaneDis = 1000000.f,
+            float fov = 60.f,
+            float aspect = 1.777777f,
+            bool isAspectPriority = false,
+            bool isVPriority = true
+        )
         {
-            pos = cPos;
-            RotateTo(cFront, cUp);
-            vFOV = cVFOV;
-            nearPlane = cNearPlane;
-            farPlane = cFarPlane;
-            aspectRatio = (float)windowWidth / windowHeight;
+            MoveTo(position);
+            RotateTo(frontDir, upDir);
+            nearPlane = nearPlaneDis;
+            farPlane = farPlaneDis;
+
+            isPerspective = true;
+
+            aspectRatio = aspect;
+
+            isAspectRatioPriority = isAspectPriority;
+            if (isAspectRatioPriority)
+            {
+                isVFOVPriority = isVPriority;
+                if (isVFOVPriority)
+                {
+                    vFOV = fov;
+                    hFOV = GetHFOV(vFOV, aspectRatio);
+                }
+                else
+                {
+                    hFOV = fov;
+                    vFOV = GetVFOV(hFOV, aspectRatio);
+                }
+            }
+            else
+            {
+                vFOV = fov;
+                hFOV = GetHFOV(vFOV, aspectRatio);
+            }
+        }
+
+        Camera(
+            const glm::vec3& position,
+            const glm::vec3& frontDir,
+            const glm::vec3& upDir,
+            float nearPlaneDis = 0.01f,
+            float farPlaneDis = 1000000.f,
+            float vfov = 60.f,
+            float hfov = 60.f
+        )
+        {
+            MoveTo(position);
+            RotateTo(frontDir, upDir);
+            nearPlane = nearPlaneDis;
+            farPlane = farPlaneDis;
+
+            isPerspective = true;
+
+            vFOV = vfov;
+            hFOV = hfov;
+            aspectRatio = std::tan(glm::radians(hFOV) / 2.0f) / std::tan(glm::radians(vFOV) / 2.0f);
+        }
+
+        Camera(
+            const glm::vec3& position,
+            const glm::vec3& frontDir,
+            const glm::vec3& upDir,
+            bool orthoMark,
+            float nearPlaneDis = 0.01f,
+            float farPlaneDis = 1000000.f,
+            float orthoW = 100.f,
+            float orthoH = 100.f,
+            bool isAspectPriority = false,
+            bool isOrthoWPriority = true
+        )
+        {
+            MoveTo(position);
+            RotateTo(frontDir, upDir);
+            nearPlane = nearPlaneDis;
+            farPlane = farPlaneDis;
+
+            isPerspective = false;
+
+            orthoWidth = orthoW;
+            orthoHeight = orthoH;
+            aspectRatio = orthoW / orthoH;
+
+            isAspectRatioPriority = isAspectPriority;
+            isOrthoWidthPriority = isOrthoWPriority;
         }
 
         void Move(const glm::vec3& direction, float distance)
@@ -112,9 +187,9 @@ namespace RyuRenderer::App::RenderPipeline
             pos += dir * distance;
         }
 
-        void MoveTo(const glm::vec3& cPos)
+        void MoveTo(const glm::vec3& position)
         {
-            pos = cPos;
+            pos = position;
         }
 
         void Rotate(const glm::vec3& rotateAxis, float degree)
@@ -125,46 +200,101 @@ namespace RyuRenderer::App::RenderPipeline
         }
 
         void RotateTo(
-            const glm::vec3& cFront,
-            const glm::vec3& cUp)
+            const glm::vec3& frontDir,
+            const glm::vec3& upDir)
         {
-            front = glm::normalize(cFront);
-            up = glm::normalize(cUp);
+            front = glm::normalize(frontDir);
+            up = glm::normalize(upDir);
         }
 
         void LookAt(
             const glm::vec3& targetPos,
-            const glm::vec3& cUp)
+            const glm::vec3& upDir)
         {
             front = targetPos - pos;
-            up = glm::normalize(cUp);
+            up = glm::normalize(upDir);
         }
 
-        void OnWindowResize(int windowWidth, int windowHeight)
+        void SetNearPlane(const float& nearPlaneDis)
         {
-            aspectRatio = (float)windowWidth / windowHeight;
+            nearPlane = nearPlaneDis;
         }
 
-        void SetVFov(float cVFOV)
+        void SetFarPlane(const float& farPlaneDis)
         {
-            vFOV = cVFOV;
-            isBasedOnVFOV = true;
+            farPlane = farPlaneDis;
         }
 
-        void SetHFov(float cHFOV)
+        void SetIsPerspective(bool isPerspect)
         {
-            hFOV = cHFOV;
-            isBasedOnVFOV = false;
-        }
-        
-        void SetNearPlane(const float& cNearPlane)
-        {
-            nearPlane = cNearPlane;
+            isPerspective = isPerspect;
         }
 
-        void SetFarPlane(const float& cFarPlane)
+        void SetVFov(float vfov)
         {
-            farPlane = cFarPlane;
+            if (isAspectRatioPriority && !isVFOVPriority)
+                return;
+
+            vFOV = vfov;
+            MaintenForAspectRatio();
+        }
+
+        void SetHFov(float hfov)
+        {
+            if (isAspectRatioPriority && isVFOVPriority)
+                return;
+
+            hFOV = hfov;
+            MaintenForAspectRatio();
+        }
+
+        void SetOrthoWidth(float orthoW)
+        {
+            if (isAspectRatioPriority && !isOrthoWidthPriority)
+                return;
+
+            orthoWidth = orthoW;
+            MaintenForAspectRatio();
+        }
+
+        void SetOrthoHeight(float orthoH)
+        {
+            if (isAspectRatioPriority && isOrthoWidthPriority)
+                return;
+
+            orthoHeight = orthoH;
+            MaintenForAspectRatio();
+        }
+
+        void SetIsAspectRatioPriority(bool isAspectPriority)
+        {
+            isAspectRatioPriority = isAspectPriority;
+            MaintenForAspectRatio();
+        }
+
+        void SetAspectRatio(float aspect)
+        {
+            if (!isAspectRatioPriority)
+                return;
+
+            if (aspect >= 0.f)
+                aspectRatio = aspect;
+            else
+                aspectRatio = 0.f;
+
+            MaintenForAspectRatio();
+        }
+
+        void SetIsVFOVPriority(bool isVPriority)
+        {
+            isVFOVPriority = isVPriority;
+            MaintenForAspectRatio();
+        }
+
+        void SetIsOrthoWidthPriority(bool isOrthoWPriority)
+        {
+            isOrthoWidthPriority = isOrthoWPriority;
+            MaintenForAspectRatio();
         }
 
         glm::mat4 GetView() const
@@ -178,12 +308,25 @@ namespace RyuRenderer::App::RenderPipeline
 
         glm::mat4 GetProjection() const
         {
-            return glm::perspective(
-                glm::radians(GetVFOV()),
-                aspectRatio,
-                nearPlane,
-                farPlane
-            );
+            if (isPerspective)
+            {
+                return glm::perspective(
+                    glm::radians(vFOV),
+                    aspectRatio,
+                    nearPlane,
+                    farPlane
+                );
+            }
+            else
+            {
+                return glm::ortho(
+                    -orthoWidth / 2,
+                    orthoWidth / 2,
+                    -orthoHeight / 2,
+                    orthoHeight / 2,
+                    nearPlane,
+                    farPlane);
+            }
         }
 
         glm::vec3 GetPos() const
@@ -221,35 +364,6 @@ namespace RyuRenderer::App::RenderPipeline
             return up * -1.f;
         }
 
-        float GetAspectRatio() const
-        {
-            return aspectRatio;
-        }
-
-        float GetVFOV() const
-        {
-            if (isBasedOnVFOV)
-            {
-                return vFOV;
-            }
-
-            float horizontalFovRad = glm::radians(hFOV);
-            float verticalFovRad = 2.0f * std::atan(std::tan(horizontalFovRad / 2.0f) / aspectRatio);
-            return glm::degrees(verticalFovRad);
-        }
-
-        float GetHFOV() const
-        {
-            if (isBasedOnVFOV)
-            {
-                float verticalFovRad = glm::radians(vFOV);
-                float horizontalFovRad = 2.0f * atan(tan(verticalFovRad / 2.0f) * aspectRatio);
-                return glm::degrees(horizontalFovRad);
-            }
-            
-            return hFOV;
-        }
-
         float GetNearPlane() const
         {
             return nearPlane;
@@ -258,6 +372,66 @@ namespace RyuRenderer::App::RenderPipeline
         float GetFarPlane() const
         {
             return farPlane;
+        }
+
+        bool GetIsPerspective() const
+        {
+            return isPerspective;
+        }
+
+        float GetVFov() const
+        {
+            return vFOV;
+        }
+
+        float GetHFov() const
+        {
+            return hFOV;
+        }
+
+        float GetOrthoWidth() const
+        {
+            return orthoWidth;
+        }
+
+        float GetOrthoHeight() const
+        {
+            return orthoHeight;
+        }
+
+        bool GetIsAspectRatioPriority()
+        {
+            return isAspectRatioPriority;
+        }
+
+        float GetAspectRatio() const
+        {
+            return aspectRatio;
+        }
+
+        bool GetIsVFOVPriority()
+        {
+            return isVFOVPriority;
+        }
+
+        bool GetIsOrthoWidthPriority()
+        {
+            return isOrthoWidthPriority;
+        }
+
+        bool IsAspectVaild()
+        {
+            constexpr float epsilon = 1e-6f;
+            if (isPerspective)
+            {
+                auto a = std::tan(glm::radians(hFOV) / 2.0f) / std::tan(glm::radians(vFOV) / 2.0f);
+                return std::abs(a - aspectRatio) < epsilon;
+            }
+            else
+            {
+                auto a = orthoWidth / orthoHeight;
+                return std::abs(a - aspectRatio) < epsilon;
+            }
         }
 
         // Controll
@@ -371,15 +545,77 @@ namespace RyuRenderer::App::RenderPipeline
             }
         }
     private:
+        static float GetHFOV(float vfovDegree, float aspectRatio)
+        {
+            float verticalFovRad = glm::radians(vfovDegree);
+            float horizontalFovRad = 2.0f * std::atan(std::tan(verticalFovRad / 2.0f) * aspectRatio);
+            return glm::degrees(horizontalFovRad);
+        }
+
+        static float GetVFOV(float hfovDegree, float aspectRatio)
+        {
+            float horizontalFovRad = glm::radians(hfovDegree);
+            float verticalFovRad = 2.0f * std::atan(std::tan(horizontalFovRad / 2.0f) / aspectRatio);
+            return glm::degrees(verticalFovRad);
+        }
+
+        void MaintenForAspectRatio()
+        {
+            if (isAspectRatioPriority)
+            {
+                if (aspectRatio <= 0.f)
+                    return;
+
+                if (isPerspective)
+                {
+                    if (isVFOVPriority)
+                        hFOV = GetHFOV(vFOV, aspectRatio);
+                    else
+                        vFOV = GetVFOV(hFOV, aspectRatio);
+                }
+                else
+                {
+                    if (isOrthoWidthPriority)
+                        orthoHeight = orthoWidth / aspectRatio;
+                    else
+                        orthoWidth = orthoHeight * aspectRatio;
+                }
+            }
+            else
+            {
+                if (isPerspective)
+                {
+                    aspectRatio = std::tan(glm::radians(hFOV) / 2.0f) / std::tan(glm::radians(vFOV) / 2.0f);
+                }
+                else
+                {
+                    aspectRatio = orthoWidth / orthoHeight;
+                }
+            }
+        }
+
+        // transform
         glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f);
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-        float aspectRatio = 16.f / 9.f;
-        bool isBasedOnVFOV = true;
-        float vFOV = 60.f;
-        float hFOV = 91.513f;
-        float nearPlane = 0.01f;
-        float farPlane = 1000000.f;
+
+        float nearPlane = 0.f;
+        float farPlane = 0.f;
+
+        bool isPerspective = true;
+
+        float vFOV = 0.f;
+        float hFOV = 0.f;
+
+        float orthoWidth = 0.f;
+        float orthoHeight = 0.f;
+
+        float aspectRatio = 0.f;
+        // 如果为真，当更改 aspectRatio 时，将自动调整 vFOV / hFOV / orthoWidth / orthoHeight 来让它们符合 aspectRatio 的值；
+        //     否则，则自动调整 aspectRatio 让它符合 vFOV / hFOV / orthoWidth / orthoHeight 的值。
+        bool isAspectRatioPriority = false;
+        bool isVFOVPriority = true;
+        bool isOrthoWidthPriority = true;
 
         // Controll
         bool isWKeyHolding = false;
@@ -498,8 +734,11 @@ namespace RyuRenderer::App::RenderPipeline
                 glm::vec3(0.0f, 0.0f, 6.0f),
                 glm::vec3(0.0f, 0.0f, -1.0f),
                 glm::vec3(0.0f, 1.0f, 0.0f),
-                App::GetInstance().GetWindowWidth(),
-                App::GetInstance().GetWindowHeight()
+                0.01f,
+                1000000.f,
+                60.f,
+                (float) App::GetInstance().GetWindowWidth() / App::GetInstance().GetWindowHeight(),
+                true
             );
 
             view = camera.GetView();
@@ -545,7 +784,7 @@ namespace RyuRenderer::App::RenderPipeline
             if (e.Event != Events::WindowEvent::EventType::WINDOW_RESIZE)
                 return;
 
-            camera.OnWindowResize(e.Width, e.Height);
+            camera.SetAspectRatio((float)e.Width / e.Height);
             projection = camera.GetProjection();
         }
 
