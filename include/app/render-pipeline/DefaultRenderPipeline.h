@@ -160,8 +160,8 @@ namespace RyuRenderer::App::RenderPipeline
             bool orthoMark,
             float nearPlaneDis = 0.01f,
             float farPlaneDis = 1000000.f,
-            float orthoW = 100.f,
-            float orthoH = 100.f,
+            float orthoW = 10.f,
+            float orthoH = 10.f,
             bool isAspectPriority = false,
             bool isOrthoWPriority = true
         )
