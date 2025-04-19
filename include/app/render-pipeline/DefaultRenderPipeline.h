@@ -38,93 +38,29 @@ namespace RyuRenderer::App::RenderPipeline
                     4, 5, 6,
                     6, 7, 4,
                     // 左面
-                    8, 9, 10,
-                    10, 11, 8,
+                    0, 3, 7,
+                    7, 4, 0,
                     // 右面
-                    12, 13, 14,
-                    14, 15, 12,
+                    1, 5, 6,
+                    6, 2, 1,
                     // 底面
-                    16, 17, 18,
-                    18, 19, 16,
+                    0, 1, 5,
+                    5, 4, 0,
                     // 顶面
-                    20, 21, 22,
-                    22, 23, 20
+                    3, 2, 6,
+                    6, 7, 3
                 }, // indexes
                 std::vector<std::array<float, 3>>{
-                    // 前面
-                    { -1.0f, -1.0f, -1.0f },
-                    { 1.0f, -1.0f, -1.0f },
-                    { 1.0f, 1.0f, -1.0f },
-                    { -1.0f, 1.0f, -1.0f },
-                    // 后面
-                    { -1.0f, -1.0f, 1.0f },
-                    { 1.0f, -1.0f, 1.0f },
-                    { 1.0f, 1.0f, 1.0f },
-                    { -1.0f, 1.0f, 1.0f },
-                    // 左面
-                    { -1.0f, -1.0f, -1.0f },
-                    { -1.0f, 1.0f, -1.0f },
-                    { -1.0f, 1.0f, 1.0f },
-                    { -1.0f, -1.0f, 1.0f },
-                    // 右面
-                    { 1.0f, -1.0f, -1.0f },
-                    { 1.0f, 1.0f, -1.0f },
-                    { 1.0f, 1.0f, 1.0f },
-                    { 1.0f, -1.0f, 1.0f },
-                    // 底面
-                    { -1.0f, -1.0f, -1.0f },
-                    { 1.0f, -1.0f, -1.0f },
-                    { 1.0f, -1.0f, 1.0f },
-                    { -1.0f, -1.0f, 1.0f },
-                    // 顶面
-                    { -1.0f, 1.0f, -1.0f },
-                    { 1.0f, 1.0f, -1.0f },
-                    { 1.0f, 1.0f, 1.0f },
-                    { -1.0f, 1.0f, 1.0f },
-                },// Position
-                std::vector<std::array<float, 2>>{
-                    // 前面
-                    { 0.0f, 0.0f },
-                    { 1.0f, 0.0f },
-                    { 1.0f, 1.0f },
-                    { 0.0f, 1.0f },
-                    // 后面
-                    { 0.0f, 0.0f },
-                    { 1.0f, 0.0f },
-                    { 1.0f, 1.0f },
-                    { 0.0f, 1.0f },
-                    // 左面
-                    { 0.0f, 1.0f },
-                    { 1.0f, 1.0f },
-                    { 1.0f, 0.0f },
-                    { 0.0f, 0.0f },
-                    // 右面
-                    { 0.0f, 1.0f },
-                    { 1.0f, 1.0f },
-                    { 1.0f, 0.0f },
-                    { 0.0f, 0.0f },
-                    // 底面
-                    { 0.0f, 1.0f },
-                    { 1.0f, 1.0f },
-                    { 1.0f, 0.0f },
-                    { 0.0f, 0.0f },
-                    // 顶面
-                    { 0.0f, 1.0f },
-                    { 1.0f, 1.0f },
-                    { 1.0f, 0.0f },
-                    { 0.0f, 0.0f }
-                } // TexCoord
+                    {  -0.5f, -0.5f, -0.5f },
+                    { 0.5f, -0.5f, -0.5f },
+                    { 0.5f,  0.5f, -0.5f },
+                    { -0.5f,  0.5f, -0.5f },
+                    { -0.5f, -0.5f,  0.5f },
+                    { 0.5f, -0.5f, 0.5f },
+                    { 0.5f, 0.5f, 0.5f },
+                    { -0.5f,  0.5f,  0.5f },
+                } // Position
             ));
-
-            boxTexture = Graphics::Texture2d("res/textures/box.jpg", 0);
-            boxTexture.Use();
-
-            boxShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-basic-texture.vert", "res/shaders/3d-basic-texture.frag");
-            if (boxShader)
-            {
-                boxShader->Use();
-                boxShader->SetUniform("diffuseTexture", 0);
-            }
 
             // init camera
             camera = Graphics::Scene::Camera(
@@ -134,9 +70,30 @@ namespace RyuRenderer::App::RenderPipeline
                 0.01f,
                 1000000.f,
                 60.f,
-                (float) App::GetInstance().GetWindowWidth() / App::GetInstance().GetWindowHeight(),
+                (float)App::GetInstance().GetWindowWidth() / App::GetInstance().GetWindowHeight(),
                 true
             );
+
+            // init light shader
+            lightShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-basic-color.vert", "res/shaders/3d-basic-color.frag");
+            if (lightShader)
+            {
+                lightShader->Use();
+                lightShader->SetUniform("color", lightColor.x, lightColor.y, lightColor.z);
+            }
+;
+            glm::vec3 lightPos(1.2f, 1.0f, -2.0f);
+            modelLight = glm::translate(modelLight, lightPos);
+            modelLight = glm::scale(modelLight, glm::vec3(0.2f));
+
+            // init box shader
+            boxShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-light-test-0.vert", "res/shaders/3d-light-test-0.frag");
+            if (boxShader)
+            {
+                boxShader->Use();
+                boxShader->SetUniform("objectColor", 1.0f, 0.5f, 0.31f);
+                boxShader->SetUniform("lightColor", lightColor.x, lightColor.y, lightColor.z);
+            }
 
             view = camera.GetView();
             projection = camera.GetProjection();
@@ -153,6 +110,7 @@ namespace RyuRenderer::App::RenderPipeline
                 return;
 
             camera.OnTick(deltaTimeInS);
+            view = camera.GetView();
 
             constexpr float degreesPerSecond = 60.0f;
             constexpr float rotationSpeed = glm::radians(degreesPerSecond);
@@ -163,12 +121,22 @@ namespace RyuRenderer::App::RenderPipeline
                 totalAngle,                                // 旋转角度（弧度）
                 glm::vec3(0.0f, 1.0f, 0.0f)                // 旋转轴（Y 轴）
             );
-            model = glm::mat4_cast(rotation);
-            view = camera.GetView();
+            modelBox = glm::mat4_cast(rotation);
 
-            boxShader->SetUniform("model", model);
+            boxShader->Use();
+            boxShader->SetUniform("model", modelBox);
             boxShader->SetUniform("view", view);
             boxShader->SetUniform("projection", projection);
+
+            for (int i = 0; i < boxMeshes.size(); ++i)
+            {
+                boxMeshes[i].Draw();
+            }
+
+            lightShader->Use();
+            lightShader->SetUniform("model", modelLight);
+            lightShader->SetUniform("view", view);
+            lightShader->SetUniform("projection", projection);
 
             for (int i = 0; i < boxMeshes.size(); ++i)
             {
@@ -196,10 +164,13 @@ namespace RyuRenderer::App::RenderPipeline
         }
 
         std::vector<RyuRenderer::Graphics::Mesh> boxMeshes;
-        RyuRenderer::Graphics::Texture2d boxTexture;
+        std::shared_ptr<RyuRenderer::Graphics::Shader> lightShader;
         std::shared_ptr<RyuRenderer::Graphics::Shader> boxShader;
+        glm::vec3 lightColor = { 1.0f, 1.0f, 1.0f };
 
-        glm::mat4 model = glm::identity<glm::mat4>();
+        glm::mat4 modelLight = glm::identity<glm::mat4>();
+        glm::mat4 modelBox = glm::identity<glm::mat4>();
+
         glm::mat4 view = glm::identity<glm::mat4>();
         glm::mat4 projection = glm::identity<glm::mat4>();
 
