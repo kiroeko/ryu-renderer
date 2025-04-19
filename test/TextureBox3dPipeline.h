@@ -1,5 +1,5 @@
-#ifndef __DEFAULTPIPELINE_H__
-#define __DEFAULTPIPELINE_H__
+#ifndef __TEXTUREBOX3DPIPELINE_H__
+#define __TEXTUREBOX3DPIPELINE_H__
 
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
@@ -21,10 +21,10 @@
 
 namespace RyuRenderer::App::RenderPipeline
 {
-    class DefaultRenderPipeline : public IRenderPipeline
+    class TextureBox3dPipeline : public IRenderPipeline
     {
     public:
-        DefaultRenderPipeline() = default;
+        TextureBox3dPipeline() = default;
 
         void init() override
         {
