@@ -428,15 +428,6 @@ namespace RyuRenderer::Graphics::Scene
         {
             if (e.Action == App::Events::KeyEvent::ActionType::ACTION_PRESS)
             {
-                if (e.Key == App::Events::KeyEvent::KeyType::KEY_R)
-                {
-                    MoveTo(glm::vec3(0.0f, 0.0f, 6.0f));
-                    LookAt(
-                        glm::vec3(0.0f, 0.0f, -1.0f),
-                        glm::vec3(0.0f, 1.0f, 0.0f)
-                    );
-                }
-    
                 if (e.Key == App::Events::KeyEvent::KeyType::KEY_W)
                 {
                     isWKeyHolding = true;
