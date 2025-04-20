@@ -469,6 +469,32 @@ namespace RyuRenderer::Graphics
             return true;
         }
 
+        bool SetUniform(const std::string& uniformName, const glm::mat2& mat)
+        {
+            if (!IsUsing())
+                return false;
+
+            GLint loc = GetUniformLocation(uniformName);
+            if (loc == -1)
+                return false;
+
+            glUniformMatrix2fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
+            return true;
+        }
+
+        bool SetUniform(const std::string& uniformName, const glm::mat3& mat)
+        {
+            if (!IsUsing())
+                return false;
+
+            GLint loc = GetUniformLocation(uniformName);
+            if (loc == -1)
+                return false;
+
+            glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
+            return true;
+        }
+
         bool SetUniform(const std::string& uniformName, const glm::mat4& mat)
         {
             if (!IsUsing())
