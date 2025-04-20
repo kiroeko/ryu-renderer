@@ -256,7 +256,7 @@ namespace RyuRenderer::App::RenderPipeline
         std::shared_ptr<RyuRenderer::Graphics::Shader> lightShader;
         std::shared_ptr<RyuRenderer::Graphics::Shader> boxShader;
 
-        glm::vec3 lightWorldPos = { 1.2f, 1.0f, -2.0f };
+        glm::vec3 lightWorldPos = { 2.0f, 1.0f, 0.0f };
         glm::vec3 lightColor = { 1.0f, 1.0f, 1.0f };
         glm::vec3 boxColor = { 1.0f, 0.5f, 0.31f };
 
