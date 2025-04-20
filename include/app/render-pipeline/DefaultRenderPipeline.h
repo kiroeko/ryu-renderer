@@ -165,7 +165,7 @@ namespace RyuRenderer::App::RenderPipeline
             lightShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-basic-color.vert", "res/shaders/3d-basic-color.frag");
 
             // init box shader
-            boxShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-phong-light.vert", "res/shaders/3d-phong-light.frag");
+            boxShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-phong-light.vert", "res/shaders/3d-blinn-phong-light.frag");
 
             // init mvp
             modelLight = glm::translate(modelLight, lightWorldPos);
@@ -221,8 +221,9 @@ namespace RyuRenderer::App::RenderPipeline
             boxShader->SetUniform("view", view);
             boxShader->SetUniform("projection", projection);
             boxShader->SetUniform("normalMatrix", normalMatrix);
+            boxShader->SetUniform("ambientStrength", 0.2f);
             boxShader->SetUniform("specularStrength", 1.f);
-            boxShader->SetUniform("shininess", 8.f);
+            boxShader->SetUniform("shininess", 128.f);
             boxShader->SetUniform("lightWorldPos", lightWorldPos.x, lightWorldPos.y, lightWorldPos.z);
             boxShader->SetUniform("lightColor", lightColor.x, lightColor.y, lightColor.z);
             auto cp = camera.GetPos();
@@ -260,9 +261,9 @@ namespace RyuRenderer::App::RenderPipeline
         std::shared_ptr<RyuRenderer::Graphics::Shader> lightShader;
         std::shared_ptr<RyuRenderer::Graphics::Shader> boxShader;
 
-        glm::vec3 lightWorldPos = { 2.0f, 1.0f, 0.0f };
+        glm::vec3 lightWorldPos = { 2.0f, 2.0f, 0.0f };
         glm::vec3 lightColor = { 1.0f, 1.0f, 1.0f };
-        glm::vec3 boxColor = { 1.0f, 0.5f, 0.31f };
+        glm::vec3 boxColor = { 0.0f, 0.678f, 0.937f };
 
         glm::mat4 modelLight = glm::identity<glm::mat4>();
         glm::mat4 modelBox = glm::identity<glm::mat4>();
