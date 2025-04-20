@@ -225,9 +225,9 @@ namespace RyuRenderer::App::RenderPipeline
             boxShader->SetUniform("lightColor", lightColor.x, lightColor.y, lightColor.z);
             boxShader->SetUniform("objectColor", boxColor.x, boxColor.y, boxColor.z);
 
-            for (int i = 0; i < lightMeshes.size(); ++i)
+            for (int i = 0; i < boxMeshes.size(); ++i)
             {
-                lightMeshes[i].Draw();
+                boxMeshes[i].Draw();
             }
         }
     private:
