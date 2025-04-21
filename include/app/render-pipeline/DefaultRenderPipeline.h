@@ -224,12 +224,11 @@ namespace RyuRenderer::App::RenderPipeline
             boxShader->SetUniform("projection", projection);
             boxShader->SetUniform("viewNormalMatrix", viewNormalMatrix);
             boxShader->SetUniform("lightWorldPos", lightWorldPos.x, lightWorldPos.y, lightWorldPos.z);
+            boxShader->SetUniform("lightColor", lightColor.x, lightColor.y, lightColor.z);
+            boxShader->SetUniform("objectColor", boxColor.x, boxColor.y, boxColor.z);
             boxShader->SetUniform("ambientStrength", 0.2f);
             boxShader->SetUniform("specularStrength", 1.f);
             boxShader->SetUniform("shininess", 128.f);
-            boxShader->SetUniform("lightColor", lightColor.x, lightColor.y, lightColor.z);
-            auto cp = camera.GetPos();
-            boxShader->SetUniform("objectColor", boxColor.x, boxColor.y, boxColor.z);
 
             for (int i = 0; i < boxMeshes.size(); ++i)
             {

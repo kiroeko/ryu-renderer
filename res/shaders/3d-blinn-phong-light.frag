@@ -4,11 +4,11 @@ in vec3 vViewPos;
 in vec3 vViewNormal;
 in vec3 vLightViewPos;
 
+uniform vec3 lightColor;
+uniform vec3 objectColor;
 uniform float ambientStrength;
 uniform float specularStrength;
 uniform float shininess;
-uniform vec3 lightColor;
-uniform vec3 objectColor;
 
 out vec4 FragColor;
 

@@ -3,11 +3,11 @@
 in vec3 vNormal;
 in vec3 vWorldPos;
 
+uniform vec3 lightWorldPos;
+uniform vec3 lightColor;
 uniform float ambientStrength;
 uniform float specularStrength;
 uniform float shininess;
-uniform vec3 lightWorldPos;
-uniform vec3 lightColor;
 uniform vec3 cameraWorldPos;
 uniform vec3 objectColor;
 
