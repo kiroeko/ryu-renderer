@@ -165,7 +165,7 @@ namespace RyuRenderer::App::RenderPipeline
             lightShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-basic-color.vert", "res/shaders/3d-basic-color.frag");
 
             // init box shader
-            boxShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-blinn-phong-light.vert", "res/shaders/3d-blinn-phong-light.frag");
+            boxShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-blinn-phong-material.vert", "res/shaders/3d-blinn-phong-material.frag");
 
             // init mvp
             view = camera.GetView();
@@ -223,12 +223,12 @@ namespace RyuRenderer::App::RenderPipeline
             boxShader->SetUniform("view", view);
             boxShader->SetUniform("projection", projection);
             boxShader->SetUniform("viewNormalMatrix", viewNormalMatrix);
-            boxShader->SetUniform("lightWorldPos", lightWorldPos.x, lightWorldPos.y, lightWorldPos.z);
-            boxShader->SetUniform("lightColor", lightColor.x, lightColor.y, lightColor.z);
-            boxShader->SetUniform("objectColor", boxColor.x, boxColor.y, boxColor.z);
-            boxShader->SetUniform("ambientStrength", 0.2f);
-            boxShader->SetUniform("specularStrength", 1.f);
-            boxShader->SetUniform("shininess", 128.f);
+            boxShader->SetUniform("lightWorldPos", lightWorldPos);
+            boxShader->SetUniform("lightColor", lightColor);
+            boxShader->SetUniform("material.ambient", boxAmbient);
+            boxShader->SetUniform("material.diffuse", boxDiffuse);
+            boxShader->SetUniform("material.specular", boxSpecular);
+            boxShader->SetUniform("material.shininess", shininess);
 
             for (int i = 0; i < boxMeshes.size(); ++i)
             {
@@ -263,7 +263,11 @@ namespace RyuRenderer::App::RenderPipeline
 
         glm::vec3 lightWorldPos = { 0.0f, 1.2f, 0.0f };
         glm::vec3 lightColor = { 1.0f, 1.0f, 1.0f };
-        glm::vec3 boxColor = { 0.0f, 0.678f, 0.937f };
+
+        glm::vec3 boxAmbient = { 0.2f, 0.1f, 0.065f };
+        glm::vec3 boxDiffuse = { 1.0f, 0.5f, 0.31f };
+        glm::vec3 boxSpecular = { 0.5f, 0.5f, 0.5f };
+        float shininess = 128.f;
 
         glm::mat4 modelLight = glm::identity<glm::mat4>();
         glm::mat4 modelBox = glm::identity<glm::mat4>();
