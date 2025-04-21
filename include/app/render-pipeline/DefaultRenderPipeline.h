@@ -146,7 +146,39 @@ namespace RyuRenderer::App::RenderPipeline
                     { 0.0f,  1.0f,  0.0f },  // 21
                     { 0.0f,  1.0f,  0.0f },  // 22
                     { 0.0f,  1.0f,  0.0f }   // 23
-                } // Normal
+                }, // Normal
+                std::vector<std::array<float, 2>>{
+                    // 前面
+                    { 0.0f, 0.0f },
+                    { 1.0f, 0.0f },
+                    { 1.0f, 1.0f },
+                    { 0.0f, 1.0f },
+                    // 后面
+                    { 0.0f, 0.0f },
+                    { 1.0f, 0.0f },
+                    { 1.0f, 1.0f },
+                    { 0.0f, 1.0f },
+                    // 左面
+                    { 0.0f, 1.0f },
+                    { 1.0f, 1.0f },
+                    { 1.0f, 0.0f },
+                    { 0.0f, 0.0f },
+                    // 右面
+                    { 0.0f, 1.0f },
+                    { 1.0f, 1.0f },
+                    { 1.0f, 0.0f },
+                    { 0.0f, 0.0f },
+                    // 底面
+                    { 0.0f, 1.0f },
+                    { 1.0f, 1.0f },
+                    { 1.0f, 0.0f },
+                    { 0.0f, 0.0f },
+                    // 顶面
+                    { 0.0f, 1.0f },
+                    { 1.0f, 1.0f },
+                    { 1.0f, 0.0f },
+                    { 0.0f, 0.0f }
+                } // TexCoord
             ));
 
             // init camera
@@ -161,11 +193,26 @@ namespace RyuRenderer::App::RenderPipeline
                 true
             );
 
+            // init textures
+            boxDiffuse = Graphics::Texture2d("res/textures/box_diffuse.jpg", 0);
+            boxDiffuse.Use();
+
+            boxSpecular = Graphics::Texture2d("res/textures/box_specular.jpg", 1);
+            boxSpecular.Use();
+
             // init light shader
             lightShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-basic-color.vert", "res/shaders/3d-basic-color.frag");
 
             // init box shader
             boxShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-blinn-phong-material.vert", "res/shaders/3d-blinn-phong-material.frag");
+            if (boxShader)
+            {
+                boxShader->Use();
+                boxShader->SetUniform("material.diffuse", 0);
+                boxShader->SetUniform("material.specular", 1);
+                boxShader->SetUniform("material.ambientStrength", boxAmbientStrength);
+                boxShader->SetUniform("material.shininess", boxShininess);
+            }
 
             // init mvp
             view = camera.GetView();
@@ -225,10 +272,6 @@ namespace RyuRenderer::App::RenderPipeline
             boxShader->SetUniform("viewNormalMatrix", viewNormalMatrix);
             boxShader->SetUniform("lightWorldPos", lightWorldPos);
             boxShader->SetUniform("lightColor", lightColor);
-            boxShader->SetUniform("material.ambient", boxAmbient);
-            boxShader->SetUniform("material.diffuse", boxDiffuse);
-            boxShader->SetUniform("material.specular", boxSpecular);
-            boxShader->SetUniform("material.shininess", shininess);
 
             for (int i = 0; i < boxMeshes.size(); ++i)
             {
@@ -264,10 +307,10 @@ namespace RyuRenderer::App::RenderPipeline
         glm::vec3 lightWorldPos = { 0.0f, 1.2f, 0.0f };
         glm::vec3 lightColor = { 1.0f, 1.0f, 1.0f };
 
-        glm::vec3 boxAmbient = { 0.2f, 0.1f, 0.065f };
-        glm::vec3 boxDiffuse = { 1.0f, 0.5f, 0.31f };
-        glm::vec3 boxSpecular = { 0.5f, 0.5f, 0.5f };
-        float shininess = 128.f;
+        float boxAmbientStrength = 0.2f;
+        Graphics::Texture2d boxDiffuse;
+        Graphics::Texture2d boxSpecular;
+        float boxShininess = 128.f;
 
         glm::mat4 modelLight = glm::identity<glm::mat4>();
         glm::mat4 modelBox = glm::identity<glm::mat4>();
