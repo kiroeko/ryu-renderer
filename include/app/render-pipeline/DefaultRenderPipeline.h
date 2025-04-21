@@ -165,7 +165,7 @@ namespace RyuRenderer::App::RenderPipeline
             lightShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-basic-color.vert", "res/shaders/3d-basic-color.frag");
 
             // init box shader
-            boxShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-phong-light.vert", "res/shaders/3d-blinn-phong-light.frag");
+            boxShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-blinn-phong-light.vert", "res/shaders/3d-blinn-phong-light.frag");
 
             // init mvp
             view = camera.GetView();
@@ -215,21 +215,20 @@ namespace RyuRenderer::App::RenderPipeline
             modelBox = glm::mat4_cast(rotation);
 
             // caculate normalMatrix
-            glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelBox)));
+            glm::mat3 viewNormalMatrix = glm::transpose(glm::inverse(glm::mat3(view * modelBox)));
 
             // draw box
             boxShader->Use();
             boxShader->SetUniform("model", modelBox);
             boxShader->SetUniform("view", view);
             boxShader->SetUniform("projection", projection);
-            boxShader->SetUniform("normalMatrix", normalMatrix);
+            boxShader->SetUniform("viewNormalMatrix", viewNormalMatrix);
+            boxShader->SetUniform("lightWorldPos", lightWorldPos.x, lightWorldPos.y, lightWorldPos.z);
             boxShader->SetUniform("ambientStrength", 0.2f);
             boxShader->SetUniform("specularStrength", 1.f);
             boxShader->SetUniform("shininess", 128.f);
-            boxShader->SetUniform("lightWorldPos", lightWorldPos.x, lightWorldPos.y, lightWorldPos.z);
             boxShader->SetUniform("lightColor", lightColor.x, lightColor.y, lightColor.z);
             auto cp = camera.GetPos();
-            boxShader->SetUniform("cameraWorldPos", cp.x, cp.y, cp.z);
             boxShader->SetUniform("objectColor", boxColor.x, boxColor.y, boxColor.z);
 
             for (int i = 0; i < boxMeshes.size(); ++i)
