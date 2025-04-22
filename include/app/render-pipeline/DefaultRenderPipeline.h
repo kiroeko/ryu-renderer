@@ -200,6 +200,9 @@ namespace RyuRenderer::App::RenderPipeline
             boxSpecular = Graphics::Texture2d("res/textures/box_specular.jpg", 1);
             boxSpecular.Use();
 
+            boxEmission = Graphics::Texture2d("res/textures/box_no_emission.jpg", 2);
+            boxEmission.Use();
+
             // init light shader
             lightShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-basic-color.vert", "res/shaders/3d-basic-color.frag");
 
@@ -210,6 +213,7 @@ namespace RyuRenderer::App::RenderPipeline
                 boxShader->Use();
                 boxShader->SetUniform("material.diffuse", 0);
                 boxShader->SetUniform("material.specular", 1);
+                boxShader->SetUniform("material.emission", 2);
                 boxShader->SetUniform("material.ambientStrength", boxAmbientStrength);
                 boxShader->SetUniform("material.shininess", boxShininess);
             }
@@ -310,6 +314,7 @@ namespace RyuRenderer::App::RenderPipeline
         float boxAmbientStrength = 0.2f;
         Graphics::Texture2d boxDiffuse;
         Graphics::Texture2d boxSpecular;
+        Graphics::Texture2d boxEmission;
         float boxShininess = 128.f;
 
         glm::mat4 modelLight = glm::identity<glm::mat4>();
