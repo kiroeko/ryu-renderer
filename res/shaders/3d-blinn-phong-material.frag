@@ -1,15 +1,27 @@
 #version 460 core
 
 #define MAX_POINT_LIGHTS 32
+#define MAX_SPOT_LIGHTS 32
 
 struct DirectionalLight {
     vec3 color;
-    vec3 direction;
+    vec3 viewDirection;
 };
 
 struct PointLight {
     vec3 color;
     vec3 viewPos;
+    float attenuationConstant;
+    float attenuationLinear;
+    float attenuationQuadratic;
+};
+
+struct SpotLight {
+    vec3 color;
+    vec3 viewPos;
+    vec3 viewDirection;
+    float innerCutOffCos;
+    float outerCutOffCos;
     float attenuationConstant;
     float attenuationLinear;
     float attenuationQuadratic;
@@ -31,14 +43,20 @@ uniform Material material;
 uniform DirectionalLight directionalLight;
 uniform int activePointLightCount;
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
+uniform int activeSpotLightCount;
+uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
 
 out vec4 FragColor;
 
+bool isEmissionCaculated = false;
+
 vec3 CalcDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir, vec3 diffuseTexture, vec3 specularTexture, vec3 emissionTexture);
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 viewPos, vec3 viewDir, vec3 diffuseTexture, vec3 specularTexture, vec3 emissionTexture);
+vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 viewPos, vec3 viewDir, vec3 diffuseTexture, vec3 specularTexture, vec3 emissionTexture);
 
 void main()
 {
+    vec3 viewPos = vViewPos;
     vec3 normal = vViewNormal;
     vec3 viewDir = normalize(-vViewPos);
 
@@ -53,16 +71,18 @@ void main()
         result += CalcDirectionalLight(directionalLight, normal, viewDir, diffuseTexture, specularTexture, emissionTexture);
     }
     
-    vec3 viewPos = vViewPos;
     for (int i = 0; i < activePointLightCount; ++i)
         result += CalcPointLight(pointLights[i], normal, viewPos, viewDir, diffuseTexture, specularTexture, emissionTexture);
+
+    for (int i = 0; i < activeSpotLightCount; ++i)
+        result += CalcSpotLight(spotLights[i], normal, viewPos, viewDir, diffuseTexture, specularTexture, emissionTexture);
 
     FragColor = vec4(result, 1.0);
 }
 
 vec3 CalcDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir, vec3 diffuseTexture, vec3 specularTexture, vec3 emissionTexture)
 {
-    vec3 lightDir = normalize(-light.direction);
+    vec3 lightDir = normalize(-light.viewDirection);
 
     vec3 ambient = material.ambient * diffuseTexture;
 
@@ -74,8 +94,12 @@ vec3 CalcDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir, vec
     vec3 specular = light.color * spec * specularTexture;
 
     vec3 emission = emissionTexture;
-
-    return ambient + diffuse + specular + emission;
+    if (!isEmissionCaculated && length(emission) > 0.0)
+    {
+        isEmissionCaculated = true;
+        return ambient + diffuse + specular + emission;
+    }
+    return ambient + diffuse + specular;
 }
 
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 viewPos, vec3 viewDir, vec3 diffuseTexture, vec3 specularTexture, vec3 emissionTexture)
@@ -95,7 +119,54 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 viewPos, vec3 viewDir, v
     float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
     vec3 specular = attenuation * light.color * spec * specularTexture;
 
-    vec3 emission = attenuation * emissionTexture;
+    vec3 emission = emissionTexture;
+    if (!isEmissionCaculated && length(emission) > 0.0)
+    {
+        isEmissionCaculated = true;
+        return ambient + diffuse + specular + emission;
+    }
+    return ambient + diffuse + specular;
+}
 
-    return ambient + diffuse + specular + emission;
+vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 viewPos, vec3 viewDir, vec3 diffuseTexture, vec3 specularTexture, vec3 emissionTexture)
+{
+    vec3 posToLight = light.viewPos - viewPos;
+    vec3 lightDir = normalize(posToLight);
+
+    float dis = length(posToLight);
+    float attenuation = 1.0 / (light.attenuationConstant + light.attenuationLinear * dis + light.attenuationQuadratic * (dis * dis));
+
+    float theta = dot(lightDir, normalize(-light.viewDirection));
+
+    vec3 ambient = attenuation * material.ambient * diffuseTexture;
+    vec3 emission = emissionTexture;
+    if(theta <= light.outerCutOffCos) 
+    {
+        if (!isEmissionCaculated && length(emission) > 0.0)
+        {
+            isEmissionCaculated = true;
+            return ambient + emission;
+        }
+        return ambient;
+    }
+    else
+    {
+        float epsilon = light.innerCutOffCos - light.outerCutOffCos;
+        float intensity = clamp((theta - light.outerCutOffCos) / epsilon, 0.0, 1.0);    
+
+        float diff = max(dot(normal, lightDir), 0.0);
+        vec3 diffuse = attenuation * intensity * light.color * diff * diffuseTexture;
+
+        vec3 halfwayDir = normalize(lightDir + viewDir);
+        float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
+        vec3 specular = attenuation * intensity * light.color * spec * specularTexture;
+
+        vec3 emission = emissionTexture;
+        if (!isEmissionCaculated && length(emission) > 0.0)
+        {
+            isEmissionCaculated = true;
+            return ambient + diffuse + specular + emission;
+        }
+        return ambient + diffuse + specular;
+    }
 }
