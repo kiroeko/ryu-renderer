@@ -136,6 +136,31 @@ namespace RyuRenderer::Graphics::Scene
             front = glm::normalize(frontDir);
             up = glm::normalize(upDir);
         }
+
+        void RotateTo(
+            float degreeX,
+            float degreeY,
+            float degreeZ)
+        {
+            glm::quat rotationX = glm::angleAxis(
+                glm::radians(degreeX),
+                glm::vec3(1.0f, 0.0f, 0.0f)
+            );
+            glm::quat rotationXUp = glm::angleAxis(
+                glm::radians(degreeX + 90),
+                glm::vec3(1.0f, 0.0f, 0.0f)
+            );
+            glm::quat rotationY = glm::angleAxis(
+                glm::radians(degreeY),
+                glm::vec3(0.0f, 1.0f, 0.0f)
+            );
+            glm::quat rotationZ = glm::angleAxis(
+                glm::radians(degreeY),
+                glm::vec3(0.0f, 0.0f, 1.0f)
+            );
+            front = rotationX * rotationY * rotationZ * glm::vec3(0.0f, 0.0f, -1.0f);
+            up = rotationXUp * rotationY * rotationZ * glm::vec3(0.0f, 0.0f, -1.0f);
+        }
     
         void LookAt(
             const glm::vec3& targetPos,

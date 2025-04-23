@@ -1,41 +1,101 @@
 #version 460 core
 
+#define MAX_POINT_LIGHTS 32
+
+struct DirectionalLight {
+    vec3 color;
+    vec3 direction;
+};
+
+struct PointLight {
+    vec3 color;
+    vec3 viewPos;
+    float attenuationConstant;
+    float attenuationLinear;
+    float attenuationQuadratic;
+}; 
+
 struct Material {
-    float ambientStrength;
+    vec3 ambient;
     sampler2D diffuse;
-    sampler2D specular;   
+    sampler2D specular;
     sampler2D emission;
     float shininess;
 }; 
 
 in vec3 vViewPos;
 in vec3 vViewNormal;
-in vec3 vLightViewPos;
 in vec2 vTexCoords;
 
-uniform vec3 lightColor;
 uniform Material material;
+uniform DirectionalLight directionalLight;
+uniform int activePointLightCount;
+uniform PointLight pointLights[MAX_POINT_LIGHTS];
 
 out vec4 FragColor;
 
+vec3 CalcDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir, vec3 diffuseTexture, vec3 specularTexture, vec3 emissionTexture);
+vec3 CalcPointLight(PointLight light, vec3 normal, vec3 viewPos, vec3 viewDir, vec3 diffuseTexture, vec3 specularTexture, vec3 emissionTexture);
+
 void main()
 {
-    vec3 diffuseTexture = vec3(texture(material.diffuse, vTexCoords));
-    vec3 ambient = material.ambientStrength * diffuseTexture;
-
-    vec3 norm = vViewNormal;
-    vec3 lightDir = normalize(vLightViewPos - vViewPos);
-
-    float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = lightColor * diff * diffuseTexture;
-
+    vec3 normal = vViewNormal;
     vec3 viewDir = normalize(-vViewPos);
-    vec3 halfwayDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(norm, halfwayDir), 0.0), material.shininess);
-    vec3 specular = lightColor * spec * vec3(texture(material.specular, vTexCoords));
 
-    vec3 emission = vec3(texture(material.emission, vTexCoords));
+    vec3 diffuseTexture = vec3(texture(material.diffuse, vTexCoords));
+    vec3 specularTexture = vec3(texture(material.specular, vTexCoords));
+    vec3 emissionTexture = vec3(texture(material.emission, vTexCoords));
 
-    vec3 result = ambient + diffuse + specular + emission;
+    vec3 result = vec3(0.0);
+    
+    if (length(directionalLight.color) > 0.0)
+    {
+        result += CalcDirectionalLight(directionalLight, normal, viewDir, diffuseTexture, specularTexture, emissionTexture);
+    }
+    
+    vec3 viewPos = vViewPos;
+    for (int i = 0; i < activePointLightCount; ++i)
+        result += CalcPointLight(pointLights[i], normal, viewPos, viewDir, diffuseTexture, specularTexture, emissionTexture);
+
     FragColor = vec4(result, 1.0);
+}
+
+vec3 CalcDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir, vec3 diffuseTexture, vec3 specularTexture, vec3 emissionTexture)
+{
+    vec3 lightDir = normalize(-light.direction);
+
+    vec3 ambient = material.ambient * diffuseTexture;
+
+    float diff = max(dot(normal, lightDir), 0.0);
+    vec3 diffuse = light.color * diff * diffuseTexture;
+
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
+    vec3 specular = light.color * spec * specularTexture;
+
+    vec3 emission = emissionTexture;
+
+    return ambient + diffuse + specular + emission;
+}
+
+vec3 CalcPointLight(PointLight light, vec3 normal, vec3 viewPos, vec3 viewDir, vec3 diffuseTexture, vec3 specularTexture, vec3 emissionTexture)
+{
+    vec3 posToLight = light.viewPos - viewPos;
+    vec3 lightDir = normalize(posToLight);
+
+    float dis = length(posToLight);
+    float attenuation = 1.0 / (light.attenuationConstant + light.attenuationLinear * dis + light.attenuationQuadratic * (dis * dis));
+
+    vec3 ambient = attenuation * material.ambient * diffuseTexture;
+
+    float diff = max(dot(normal, lightDir), 0.0);
+    vec3 diffuse = attenuation * light.color * diff * diffuseTexture;
+
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
+    vec3 specular = attenuation * light.color * spec * specularTexture;
+
+    vec3 emission = attenuation * emissionTexture;
+
+    return ambient + diffuse + specular + emission;
 }
