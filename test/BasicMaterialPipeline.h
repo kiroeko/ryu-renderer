@@ -21,6 +21,92 @@
 
 namespace RyuRenderer::App::RenderPipeline
 {
+    struct DirectionalLight
+    {
+        DirectionalLight() = default;
+
+        DirectionalLight(
+            const glm::vec3& color,
+            const glm::vec3& direction = glm::vec3(0.f, -1.f, 0.f)
+        )
+        {
+            Color = color;
+            Direction = direction;
+        }
+
+        glm::vec3 Color = { 0.0f, 0.0f, 0.0f };
+        glm::vec3 Direction = { 0.0f, -1.0f, 0.0f };
+    };
+
+    struct PointLight
+    {
+        PointLight() = default;
+
+        PointLight(
+            const glm::vec3& color,
+            const glm::vec3& worldPos = glm::zero<glm::vec3>(),
+            float modelScale = 0.2f,
+            float attenuationConstant = 1.f,
+            float attenuationLinear = 0.09f,
+            float attenuationQuadratic = 0.032f
+        )
+        {
+            Color = color;
+            WorldPos = worldPos;
+            AttenuationConstant = attenuationConstant;
+            AttenuationLinear = attenuationLinear;
+            AttenuationQuadratic = attenuationQuadratic;
+            Model = glm::translate(Model, worldPos);
+            Model = glm::scale(Model, glm::vec3(modelScale));
+        }
+
+        glm::vec3 Color = { 0.f, 0.f, 0.f };
+        glm::vec3 WorldPos = glm::zero<glm::vec3>();
+        float AttenuationConstant = 1.f;
+        float AttenuationLinear = 0.09f;
+        float AttenuationQuadratic = 0.032f;
+        glm::mat4 Model = glm::identity<glm::mat4>();
+    };
+
+    struct SpotLight
+    {
+        SpotLight() = default;
+
+        SpotLight(
+            const glm::vec3& color,
+            const glm::vec3& worldPos = glm::zero<glm::vec3>(),
+            const glm::vec3& direction = glm::vec3(0.f, -1.f, 0.f),
+            float innerCutOffDegree = 12.5f,
+            float outerCutOffDegree = 17.5f,
+            float modelScale = 0.2f,
+            float attenuationConstant = 1.f,
+            float attenuationLinear = 0.045f,
+            float attenuationQuadratic = 0.0075f
+        )
+        {
+            Color = color;
+            WorldPos = worldPos;
+            Direction = direction;
+            InnerCutOffCos = glm::cos(glm::radians(innerCutOffDegree));
+            OuterCutOffCos = glm::cos(glm::radians(outerCutOffDegree));
+            AttenuationConstant = attenuationConstant;
+            AttenuationLinear = attenuationLinear;
+            AttenuationQuadratic = attenuationQuadratic;
+            Model = glm::translate(Model, worldPos);
+            Model = glm::scale(Model, glm::vec3(modelScale));
+        }
+
+        glm::vec3 Color = { 0.f, 0.f, 0.f };
+        glm::vec3 WorldPos = glm::zero<glm::vec3>();
+        glm::vec3 Direction = { 0.f, -1.f, 0.f };
+        float InnerCutOffCos = 0.976296f;
+        float OuterCutOffCos = 0.953717f;
+        float AttenuationConstant = 1.f;
+        float AttenuationLinear = 0.045f;
+        float AttenuationQuadratic = 0.0075f;
+        glm::mat4 Model = glm::identity<glm::mat4>();
+    };
+
     class BasicMaterialPipeline : public IRenderPipeline
     {
     public:
@@ -211,16 +297,89 @@ namespace RyuRenderer::App::RenderPipeline
             if (boxShader)
             {
                 boxShader->Use();
+                boxShader->SetUniform("material.ambient", boxAmbient);
                 boxShader->SetUniform("material.diffuse", 0);
                 boxShader->SetUniform("material.specular", 1);
                 boxShader->SetUniform("material.emission", 2);
-                boxShader->SetUniform("material.ambientStrength", boxAmbientStrength);
                 boxShader->SetUniform("material.shininess", boxShininess);
             }
 
             // init mvp
             view = camera.GetView();
             projection = camera.GetProjection();
+
+            // init box objects
+            glm::vec3 cubePositions[] = {
+                glm::vec3(0.0f,  0.0f,  0.0f),
+                glm::vec3(2.0f,  5.0f, -15.0f),
+                glm::vec3(-1.5f, -2.2f, -2.5f),
+                glm::vec3(-3.8f, -2.0f, -12.3f),
+                glm::vec3(2.4f, -0.4f, -3.5f),
+                glm::vec3(-1.7f,  3.0f, -7.5f),
+                glm::vec3(1.3f, -5.0f, -2.5f),
+                glm::vec3(1.5f,  2.0f, -2.5f),
+                glm::vec3(1.5f,  0.2f, -1.5f),
+                glm::vec3(-1.3f,  1.0f, -1.5f)
+            };
+
+            for (size_t i = 0; i < 10; ++i)
+            {
+                glm::mat4 model = glm::identity<glm::mat4>();
+
+                float angle = 16.5f * i;
+                glm::quat rotationX = glm::angleAxis(
+                    glm::radians(angle),
+                    glm::vec3(1.0f, 0.0f, 0.0f)
+                );
+                glm::quat rotationY = glm::angleAxis(
+                    glm::radians(angle),
+                    glm::vec3(0.0f, 1.0f, 0.0f)
+                );
+                glm::quat rotationZ = glm::angleAxis(
+                    glm::radians(angle),
+                    glm::vec3(0.0f, 0.0f, 1.0f)
+                );
+                model = model * glm::mat4_cast(rotationX * rotationY * rotationZ);
+
+                model = glm::translate(model, cubePositions[i]);
+
+                modelBoxs.push_back(model);
+            }
+
+            // init light objects
+            //directionLight.Color = glm::vec3(1.0f, 1.0f, 1.0f);
+
+            pointLights.emplace_back(PointLight(
+                glm::vec3{ 1.0f, 1.0f, 1.0f },
+                glm::vec3{ 0.f, 0.f, -3.f }
+            ));
+            pointLights.emplace_back(PointLight(
+                glm::vec3{ 0.0f, 1.0f, 0.0f },
+                glm::vec3{ 0.f, 0.f, 3.f }
+            ));
+            pointLights.emplace_back(PointLight(
+                glm::vec3{ 0.0f, 0.0f, 1.0f },
+                glm::vec3{ -3.f, 0.f, 0.f }
+            ));
+            pointLights.emplace_back(PointLight(
+                glm::vec3{ 1.0f, 0.0f, 0.0f },
+                glm::vec3{ 3.f, 0.f, 0.f }
+            ));
+            pointLights.emplace_back(PointLight(
+                glm::vec3{ 0.42f, 0.167f, 0.32f },
+                glm::vec3{ 0.f, 3.f, 0.f }
+            ));
+            pointLights.emplace_back(PointLight(
+                glm::vec3{ 0.56f, 0.0f, 0.67f },
+                glm::vec3{ 0.f, -3.f, 0.f }
+            ));
+
+            // init spot lights
+            //spotLights.emplace_back(SpotLight(
+            //    glm::vec3{ 1.0f, 1.0f, 1.0f },
+            //    glm::vec3{ 0.f, 1.5f, 0.f },
+            //    glm::vec3{ 0.f, -1.f, 0.f }
+            //));
 
             // Other settings
             App::GetInstance().EventPublisher.RegisterHandler(this, &BasicMaterialPipeline::OnWindowResize);
@@ -238,48 +397,98 @@ namespace RyuRenderer::App::RenderPipeline
             view = camera.GetView();
 
             // draw light
-            lightWorldPos.x = std::cos(glfwGetTime() * 1.2f) * 2.0f;
-            lightWorldPos.z = std::sin(glfwGetTime() * 1.2f) * 2.0f;
-            modelLight = glm::translate(glm::identity<glm::mat4>(), lightWorldPos);
-            modelLight = glm::scale(modelLight, glm::vec3(0.2f));
-
             lightShader->Use();
-            lightShader->SetUniform("model", modelLight);
             lightShader->SetUniform("view", view);
             lightShader->SetUniform("projection", projection);
-            lightShader->SetUniform("color", lightColor.x, lightColor.y, lightColor.z);
 
-            for (int i = 0; i < lightMeshes.size(); ++i)
+            // light lights
+            size_t pointLightCount = pointLights.size();
+            constexpr size_t maxPointLightCount = 32;
+            pointLightCount = pointLightCount > maxPointLightCount ? 32 : pointLightCount;
+
+            for (size_t i = 0; i < pointLightCount; ++i)
             {
-                lightMeshes[i].Draw();
+                auto& l = pointLights[i];
+                lightShader->SetUniform("model", l.Model);
+                lightShader->SetUniform("color", l.Color);
+
+                for (int i = 0; i < lightMeshes.size(); ++i)
+                {
+                    lightMeshes[i].Draw();
+                }
             }
 
-            // rotate box
-            constexpr float degreesPerSecond = 60.0f;
-            constexpr float rotationSpeed = glm::radians(degreesPerSecond);
-            static float totalAngle = 0.0f;
-            totalAngle += rotationSpeed * (float)deltaTimeInS;
-            glm::quat rotation = glm::angleAxis(
-                totalAngle,                                // 旋转角度（弧度）
-                glm::vec3(0.0f, 1.0f, 0.0f)                // 旋转轴（Y 轴）
-            );
-            modelBox = glm::mat4_cast(rotation);
+            // spot lights
+            size_t spotLightCount = spotLights.size();
+            constexpr size_t maxSpotLightCount = 32;
+            spotLightCount = spotLightCount > maxSpotLightCount ? 32 : spotLightCount;
 
-            // caculate normalMatrix
-            glm::mat3 viewNormalMatrix = glm::transpose(glm::inverse(glm::mat3(view * modelBox)));
+            for (size_t i = 0; i < spotLightCount; ++i)
+            {
+                auto& l = spotLights[i];
+                lightShader->SetUniform("model", l.Model);
+                lightShader->SetUniform("color", l.Color);
 
-            // draw box
+                for (int i = 0; i < lightMeshes.size(); ++i)
+                {
+                    lightMeshes[i].Draw();
+                }
+            }
+
+            // handle scene objects
             boxShader->Use();
-            boxShader->SetUniform("model", modelBox);
             boxShader->SetUniform("view", view);
             boxShader->SetUniform("projection", projection);
-            boxShader->SetUniform("viewNormalMatrix", viewNormalMatrix);
-            boxShader->SetUniform("lightWorldPos", lightWorldPos);
-            boxShader->SetUniform("lightColor", lightColor);
 
-            for (int i = 0; i < boxMeshes.size(); ++i)
+            // set directional light
+            boxShader->SetUniform("directionalLight.color", directionLight.Color);
+            boxShader->SetUniform("directionalLight.viewDirection", glm::transpose(glm::inverse(glm::mat3(view))) * directionLight.Direction);
+
+            // set point light
+            boxShader->SetUniform("activePointLightCount", (int)pointLightCount);
+            for (size_t i = 0; i < pointLightCount; ++i)
             {
-                boxMeshes[i].Draw();
+                auto& l = pointLights[i];
+
+                std::string pointPrefix = "pointLights[" + std::to_string(i) + "].";
+                boxShader->SetUniform(pointPrefix + "color", l.Color);
+                boxShader->SetUniform(pointPrefix + "viewPos", glm::vec3(view * glm::vec4(l.WorldPos, 1.0f)));
+                boxShader->SetUniform(pointPrefix + "attenuationConstant", l.AttenuationConstant);
+                boxShader->SetUniform(pointPrefix + "attenuationLinear", l.AttenuationLinear);
+                boxShader->SetUniform(pointPrefix + "attenuationQuadratic", l.AttenuationQuadratic);
+            }
+
+            // set spot light
+            boxShader->SetUniform("activeSpotLightCount", (int)spotLightCount);
+            for (size_t i = 0; i < spotLightCount; ++i)
+            {
+                auto& l = spotLights[i];
+
+                std::string spotPrefix = "spotLights[" + std::to_string(i) + "].";
+                boxShader->SetUniform(spotPrefix + "color", l.Color);
+                boxShader->SetUniform(spotPrefix + "viewPos", glm::vec3(view * glm::vec4(l.WorldPos, 1.0f)));
+                boxShader->SetUniform(spotPrefix + "viewDirection", glm::transpose(glm::inverse(glm::mat3(view))) * l.Direction);
+                boxShader->SetUniform(spotPrefix + "innerCutOffCos", l.InnerCutOffCos);
+                boxShader->SetUniform(spotPrefix + "outerCutOffCos", l.OuterCutOffCos);
+                boxShader->SetUniform(spotPrefix + "attenuationConstant", l.AttenuationConstant);
+                boxShader->SetUniform(spotPrefix + "attenuationLinear", l.AttenuationLinear);
+                boxShader->SetUniform(spotPrefix + "attenuationQuadratic", l.AttenuationQuadratic);
+            }
+
+            // draw boxes
+            for (size_t i = 0; i < modelBoxs.size(); ++i)
+            {
+                auto& m = modelBoxs[i];
+
+                // caculate normalMatrix
+                glm::mat3 viewNormalMatrix = glm::transpose(glm::inverse(glm::mat3(view * m)));
+                boxShader->SetUniform("model", m);
+                boxShader->SetUniform("viewNormalMatrix", viewNormalMatrix);
+
+                for (size_t j = 0; j < boxMeshes.size(); ++j)
+                {
+                    boxMeshes[j].Draw();
+                }
             }
         }
     private:
@@ -308,17 +517,21 @@ namespace RyuRenderer::App::RenderPipeline
         std::shared_ptr<RyuRenderer::Graphics::Shader> lightShader;
         std::shared_ptr<RyuRenderer::Graphics::Shader> boxShader;
 
-        glm::vec3 lightWorldPos = { 0.0f, 1.2f, 0.0f };
-        glm::vec3 lightColor = { 1.0f, 1.0f, 1.0f };
+        // lights
+        DirectionalLight directionLight = { glm::vec3(0.0f, 0.0f, 0.0f) };
 
-        float boxAmbientStrength = 0.2f;
+        std::vector<PointLight> pointLights;
+        std::vector<SpotLight> spotLights;
+
+        // box
+        glm::vec3 boxAmbient = { 0.2f, 0.2f, 0.2f };
         Graphics::Texture2d boxDiffuse;
         Graphics::Texture2d boxSpecular;
         Graphics::Texture2d boxEmission;
         float boxShininess = 128.f;
+        std::vector<glm::mat4> modelBoxs;
 
-        glm::mat4 modelLight = glm::identity<glm::mat4>();
-        glm::mat4 modelBox = glm::identity<glm::mat4>();
+        // camera
         glm::mat4 view = glm::identity<glm::mat4>();
         glm::mat4 projection = glm::identity<glm::mat4>();
 
