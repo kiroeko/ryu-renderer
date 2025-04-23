@@ -335,7 +335,12 @@ namespace RyuRenderer::App::RenderPipeline
             lightShader->Use();
             lightShader->SetUniform("view", view);
             lightShader->SetUniform("projection", projection);
-            for (size_t i = 0; i < pointLights.size(); ++i)
+
+            size_t pointLightCount = pointLights.size();
+            constexpr size_t maxPointLightCount = 32;
+            pointLightCount = pointLightCount > maxPointLightCount ? 32 : pointLightCount;
+
+            for (size_t i = 0; i < pointLightCount; ++i)
             {
                 auto& l = pointLights[i];
                 lightShader->SetUniform("model", l.Model);
