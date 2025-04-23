@@ -295,26 +295,26 @@ namespace RyuRenderer::App::RenderPipeline
                 glm::vec3{ 1.0f, 1.0f, 1.0f },
                 glm::vec3{ 0.f, 0.f, -3.f }
             ));
-            //pointLights.emplace_back(PointLight(
-            //    glm::vec3{ 1.0f, 1.0f, 1.0f },
-            //    glm::vec3{ 0.f, 0.f, 6.f }
-            //));
-            //pointLights.emplace_back(PointLight(
-            //    glm::vec3{ 1.0f, 1.0f, 1.0f },
-            //    glm::vec3{ -6.f, 0.f, 0.f }
-            //));
-            //pointLights.emplace_back(PointLight(
-            //    glm::vec3{ 1.0f, 1.0f, 1.0f },
-            //    glm::vec3{ 6.f, 0.f, 0.f }
-            //));
-            //pointLights.emplace_back(PointLight(
-            //    glm::vec3{ 1.0f, 1.0f, 1.0f },
-            //    glm::vec3{ 0.f, 6.f, 0.f }
-            //));
-            //pointLights.emplace_back(PointLight(
-            //    glm::vec3{ 1.0f, 1.0f, 1.0f },
-            //    glm::vec3{ 0.f, -6.f, 0.f }
-            //));
+            pointLights.emplace_back(PointLight(
+                glm::vec3{ 0.0f, 1.0f, 0.0f },
+                glm::vec3{ 0.f, 0.f, 3.f }
+            ));
+            pointLights.emplace_back(PointLight(
+                glm::vec3{ 0.0f, 0.0f, 1.0f },
+                glm::vec3{ -3.f, 0.f, 0.f }
+            ));
+            pointLights.emplace_back(PointLight(
+                glm::vec3{ 1.0f, 0.0f, 0.0f },
+                glm::vec3{ 3.f, 0.f, 0.f }
+            ));
+            pointLights.emplace_back(PointLight(
+                glm::vec3{ 0.42f, 0.167f, 0.32f },
+                glm::vec3{ 0.f, 3.f, 0.f }
+            ));
+            pointLights.emplace_back(PointLight(
+                glm::vec3{ 0.56f, 0.0f, 0.67f },
+                glm::vec3{ 0.f, -3.f, 0.f }
+            ));
 
             // Other settings
             App::GetInstance().EventPublisher.RegisterHandler(this, &DefaultRenderPipeline::OnWindowResize);
