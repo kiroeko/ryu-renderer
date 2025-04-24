@@ -14,6 +14,7 @@ However, due to the complexity of implementation, ray tracing / global illuminat
 - [STB](https://github.com/nothings/stb): Used to handle image.
 - [GLM 1.0.1](https://github.com/g-truc/glm): Used to support mathematical geometric operations.
 - [Boost 1.87.0](https://www.boost.org/): Used for basic extensions to C++.
+- [Assimp](https://www.assimp.org/): Used to import and parse 3d models.
 
 ## Environment Preparation
 
@@ -28,7 +29,7 @@ The basic environment should meet the following requirements:
 - [CMake 3.26+](https://cmake.org/download/)
 - [Boost prebuilt windows binaries for msvc143](https://sourceforge.net/projects/boost/files/boost-binaries/)
 
-Please note that all other third-party C++ libraries required by the project are already embedded in this repository, so there is no need to download or install them separately.
+Please note that all other third-party C++ libraries required by the project that are not listed here are already embedded in this repository, so there is no need to download or install them separately.
 
 ### 3. Config Software
 

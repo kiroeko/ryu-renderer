@@ -142,9 +142,9 @@ namespace RyuRenderer::App::RenderPipeline
             projection = camera.GetProjection();
 
             // Other settings
-            App::GetInstance().EventPublisher.RegisterHandler(this, &DefaultRenderPipeline::OnWindowResize);
-            App::GetInstance().EventPublisher.RegisterHandler(this, &DefaultRenderPipeline::OnMouseMove);
-            App::GetInstance().EventPublisher.RegisterHandler(this, &DefaultRenderPipeline::OnKeyEvent);
+            App::GetInstance().EventPublisher.RegisterHandler(this, &TextureBox3dPipeline::OnWindowResize);
+            App::GetInstance().EventPublisher.RegisterHandler(this, &TextureBox3dPipeline::OnMouseMove);
+            App::GetInstance().EventPublisher.RegisterHandler(this, &TextureBox3dPipeline::OnKeyEvent);
         }
 
         void tick(double deltaTimeInS) override

@@ -76,12 +76,14 @@ add_executable(${PROJECT_NAME})
 
 # Find related libraries
 list(INSERT CMAKE_MODULE_PATH 0 ${PROJECT_SOURCE_DIR}/third-party/cmake-module)
+
 find_package(Boost REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(Glad REQUIRED)
 find_package(GLFW REQUIRED)
 find_package(STB REQUIRED)
 find_package(GLM REQUIRED)
+find_package(ASSIMP REQUIRED)
 
 set(Boost_USE_STATIC_LIBS ON)
 
@@ -129,11 +131,15 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     GLFW
     STB
     GLM
-    Boost::boost)
+    Boost::boost
+    ASSIMP
+)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E
         copy_if_different $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+        COMMAND_EXPAND_LISTS
     COMMAND ${CMAKE_COMMAND} -E
         copy_directory_if_different ${${PROJECT_NAME}_RES_DIRS} $<TARGET_FILE_DIR:${PROJECT_NAME}>/res
+        COMMAND_EXPAND_LISTS
 )
