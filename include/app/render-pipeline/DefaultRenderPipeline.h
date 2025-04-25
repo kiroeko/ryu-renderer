@@ -5,6 +5,7 @@
 #include "GLFW/glfw3.h"
 #include "stb/stb_image.h"
 
+#include <memory>
 #include <vector>
 
 #include "app/App.h"

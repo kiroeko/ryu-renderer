@@ -1,10 +1,11 @@
-#ifndef __BASICMATERIALPIPELINE_H__
-#define __BASICMATERIALPIPELINE_H__
+#ifndef __BASICPHONGBLINNMATERIALPIPELINE_H__
+#define __BASICPHONGBLINNMATERIALPIPELINE_H__
 
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
 #include "stb/stb_image.h"
 
+#include <memory>
 #include <vector>
 
 #include "app/App.h"
@@ -17,6 +18,7 @@
 #include "graphics/Shader.h"
 #include "graphics/ShaderManager.h"
 #include "graphics/Texture2D.h"
+#include "graphics/TextureManager.h"
 #include "graphics/scene/Camera.h"
 
 namespace RyuRenderer::App::RenderPipeline
@@ -107,10 +109,10 @@ namespace RyuRenderer::App::RenderPipeline
         glm::mat4 Model = glm::identity<glm::mat4>();
     };
 
-    class BasicMaterialPipeline : public IRenderPipeline
+    class BasicPhongBlinnMaterialPipeline : public IRenderPipeline
     {
     public:
-        BasicMaterialPipeline() = default;
+        BasicPhongBlinnMaterialPipeline() = default;
 
         void init() override
         {
@@ -280,14 +282,17 @@ namespace RyuRenderer::App::RenderPipeline
             );
 
             // init textures
-            boxDiffuse = Graphics::Texture2d("res/textures/box_diffuse.jpg", 0);
-            boxDiffuse.Use();
+            boxDiffuse = Graphics::TextureManager::GetInstance().FindOrCreate2d("res/textures/box_diffuse.jpg", 0);
+            if (boxDiffuse)
+                boxDiffuse->Use();
 
-            boxSpecular = Graphics::Texture2d("res/textures/box_specular.jpg", 1);
-            boxSpecular.Use();
+            boxSpecular = Graphics::TextureManager::GetInstance().FindOrCreate2d("res/textures/box_specular.jpg", 1);
+            if (boxSpecular)
+                boxSpecular->Use();
 
-            boxEmission = Graphics::Texture2d("res/textures/box_no_emission.jpg", 2);
-            boxEmission.Use();
+            boxEmission = Graphics::TextureManager::GetInstance().FindOrCreate2d("res/textures/box_no_emission.jpg", 2);
+            if (boxEmission)
+                boxEmission->Use();
 
             // init light shader
             lightShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-basic-color.vert", "res/shaders/3d-basic-color.frag");
@@ -382,9 +387,9 @@ namespace RyuRenderer::App::RenderPipeline
             //));
 
             // Other settings
-            App::GetInstance().EventPublisher.RegisterHandler(this, &BasicMaterialPipeline::OnWindowResize);
-            App::GetInstance().EventPublisher.RegisterHandler(this, &BasicMaterialPipeline::OnMouseMove);
-            App::GetInstance().EventPublisher.RegisterHandler(this, &BasicMaterialPipeline::OnKeyEvent);
+            App::GetInstance().EventPublisher.RegisterHandler(this, &BasicPhongBlinnMaterialPipeline::OnWindowResize);
+            App::GetInstance().EventPublisher.RegisterHandler(this, &BasicPhongBlinnMaterialPipeline::OnMouseMove);
+            App::GetInstance().EventPublisher.RegisterHandler(this, &BasicPhongBlinnMaterialPipeline::OnKeyEvent);
         }
 
         void tick(double deltaTimeInS) override
@@ -525,9 +530,9 @@ namespace RyuRenderer::App::RenderPipeline
 
         // box
         glm::vec3 boxAmbient = { 0.2f, 0.2f, 0.2f };
-        Graphics::Texture2d boxDiffuse;
-        Graphics::Texture2d boxSpecular;
-        Graphics::Texture2d boxEmission;
+        std::shared_ptr<Graphics::Texture2d> boxDiffuse;
+        std::shared_ptr<Graphics::Texture2d> boxSpecular;
+        std::shared_ptr<Graphics::Texture2d> boxEmission;
         float boxShininess = 128.f;
         std::vector<glm::mat4> modelBoxs;
 
