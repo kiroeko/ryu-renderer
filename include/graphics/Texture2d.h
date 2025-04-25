@@ -93,6 +93,7 @@ namespace RyuRenderer::Graphics
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+            source = textureFilePath;
             stbi_image_free(textureData);
             glBindTexture(GL_TEXTURE_2D, 0);
             lastestUsedTexture2dIds[unitId] = 0;

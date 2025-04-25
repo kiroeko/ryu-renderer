@@ -529,9 +529,9 @@ namespace RyuRenderer::App::RenderPipeline
 
         // box
         glm::vec3 boxAmbient = { 0.2f, 0.2f, 0.2f };
-        std::shared_ptr<Graphics::ITexture> boxDiffuse;
-        std::shared_ptr<Graphics::ITexture> boxSpecular;
-        std::shared_ptr<Graphics::ITexture> boxEmission;
+        std::shared_ptr<Graphics::Texture2d> boxDiffuse;
+        std::shared_ptr<Graphics::Texture2d> boxSpecular;
+        std::shared_ptr<Graphics::Texture2d> boxEmission;
         float boxShininess = 128.f;
         std::vector<glm::mat4> modelBoxs;
 

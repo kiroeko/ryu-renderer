@@ -17,12 +17,11 @@ namespace RyuRenderer::Graphics
         class TextureManagerImpl : public Common::Factory<ITexture, TextureManagerImpl>
         {
         public:
-            std::shared_ptr<ITexture> FindOrCreate2d(const std::string& source, GLint unitIdx = 0)
+            std::shared_ptr<Texture2d> FindOrCreate2d(const std::string& source, GLint unitIdx = 0)
             {
                 auto p = Find(source);
                 if (p)
-                    return p;
-
+                    return std::dynamic_pointer_cast<Texture2d>(p);
                 return Create2d(source, unitIdx);
             }
 
