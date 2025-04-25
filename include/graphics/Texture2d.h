@@ -215,10 +215,16 @@ namespace RyuRenderer::Graphics
         {
             if (source.empty())
             {
-                std::string noSourceTextureStr = "F:" + std::to_string(format) + "/W:" + std::to_string(width) + "/H:" + std::to_string(height);
+                std::string noSourceTextureStr =
+                    "/U:" + std::to_string(unitId) +
+                    "F:" + std::to_string(format) +
+                    "/W:" + std::to_string(width) +
+                    "/H:" + std::to_string(height);
                 return noSourceTextureStr;
             }
-            return source;
+            return
+                "/U:" + std::to_string(unitId) +
+                "/S:" + source;
         }
 
         inline static bool IsCleanMode = true;
