@@ -192,5 +192,4 @@ namespace RyuRenderer::Graphics
     class ShaderManager : public Common::Singleton<ShaderManagerImpl::ShaderManagerImpl>{};
 }
 
-
 #endif

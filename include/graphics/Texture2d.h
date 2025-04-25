@@ -11,10 +11,11 @@
 #include <unordered_map>
 
 #include "common/Macros.h"
+#include "graphics/ITexture.h"
 
 namespace RyuRenderer::Graphics
 {
-    class Texture2d
+    class Texture2d : public ITexture
     {
     public:
         Texture2d() = default;
@@ -50,7 +51,7 @@ namespace RyuRenderer::Graphics
             lastestUsedTexture2dIds[unitId] = 0;
         }
         
-        Texture2d(const std::string& textureFilePath, GLint unitIdx)
+        Texture2d(const std::string& textureFilePath, GLint unitIdx = 0)
         {
             FAILTEST_RTN(unitIdx >= 0 && unitIdx < GetMaxTextureAmount(), "Texture unit id is oversize for OpenGL.");
             
@@ -107,11 +108,13 @@ namespace RyuRenderer::Graphics
             format = other.format;
             width = other.width;
             height = other.height;
+            source = other.source;
             other.id = 0;
             other.unitId = 0;
             other.format = 0;
             other.width = 0;
             other.height = 0;
+            other.source.clear();
         }
 
         ~Texture2d()
@@ -132,15 +135,17 @@ namespace RyuRenderer::Graphics
             format = other.format;
             width = other.width;
             height = other.height;
+            source = other.source;
             other.id = 0;
             other.unitId = 0;
             other.format = GL_NONE;
             other.width = 0;
             other.height = 0;
+            other.source.clear();
             return *this;
         }
 
-        bool Use() const
+        bool Use() const override
         {
             if (!IsValid())
                 return false;
@@ -154,7 +159,7 @@ namespace RyuRenderer::Graphics
             return true;
         }
 
-        bool IsValid() const
+        bool IsValid() const override
         {
             return id != 0 &&
                 format != GL_NONE &&
@@ -164,7 +169,7 @@ namespace RyuRenderer::Graphics
                 height >= 0;
         }
 
-        bool IsUsing() const
+        bool IsUsing() const override
         {
             if (unitId == 0)
                 return false;
@@ -200,19 +205,19 @@ namespace RyuRenderer::Graphics
             return isUsing;
         }
 
-        GLuint GetId() const
+        GLuint GetId() const override
         {
             return id;
         }
 
-        static GLint GetTextureUnitId(GLint unitIdx)
+        const std::string GetSource() const override
         {
-            return GL_TEXTURE0 + unitIdx;
-        }
-
-        static GLint GetTextureUnitIdx(GLint unitId)
-        {
-            return unitId - GL_TEXTURE0;
+            if (source.empty())
+            {
+                std::string noSourceTextureStr = "F:" + std::to_string(format) + "/W:" + std::to_string(width) + "/H:" + std::to_string(height);
+                return noSourceTextureStr;
+            }
+            return source;
         }
 
         inline static bool IsCleanMode = true;
@@ -236,6 +241,7 @@ namespace RyuRenderer::Graphics
             format = GL_NONE;
             width = 0;
             height = 0;
+            source.clear();
         }
 
         static GLint GetMaxTextureAmount()
@@ -253,6 +259,7 @@ namespace RyuRenderer::Graphics
         GLenum format = GL_NONE;
         int width = 0;
         int height = 0;
+        std::string source;
 
         inline static GLint maxTextureAmount = -1;
         inline static std::unordered_map<GLint, GLuint> lastestUsedTexture2dIds;

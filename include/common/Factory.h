@@ -110,11 +110,11 @@ namespace RyuRenderer::Common
         virtual void AfterCreate(const std::shared_ptr<P>& p) noexcept {}
 
         std::list<std::shared_ptr<P>> products;
-    private:
-        // Derived class need to impl this member function:
-        // bool BeforeCreate(...) { /* do judgement */ }
 
         mutable std::shared_mutex mutex;
+    // private:
+        // Derived class need to impl this member function:
+        // bool BeforeCreate(...) { /* do judgement */ }
     };
 }
 
