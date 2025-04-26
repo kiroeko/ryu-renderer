@@ -8,6 +8,7 @@
 #include <cmath>
 
 #include "graphics/scene/Scene.h"
+#include "graphics/scene/Transform.h"
 #include "app/events/WindowEvent.h"
 #include "app/events/MouseEvent.h"
 #include "app/events/KeyEvent.h"
@@ -31,8 +32,8 @@ namespace RyuRenderer::Graphics::Scene
             bool isVPriority = true
         )
         {
-            MoveTo(position);
-            RotateTo(frontDir, upDir);
+            Transformer.MoveTo(position);
+            Transformer.RotateTo(frontDir, upDir);
             nearPlane = nearPlaneDis;
             farPlane = farPlaneDis;
     
@@ -72,8 +73,8 @@ namespace RyuRenderer::Graphics::Scene
             float hfov = 60.f
         )
         {
-            MoveTo(position);
-            RotateTo(frontDir, upDir);
+            Transformer.MoveTo(position);
+            Transformer.RotateTo(frontDir, upDir);
             nearPlane = nearPlaneDis;
             farPlane = farPlaneDis;
     
@@ -97,8 +98,8 @@ namespace RyuRenderer::Graphics::Scene
             bool isOrthoWPriority = true
         )
         {
-            MoveTo(position);
-            RotateTo(frontDir, upDir);
+            Transformer.MoveTo(position);
+            Transformer.RotateTo(frontDir, upDir);
             nearPlane = nearPlaneDis;
             farPlane = farPlaneDis;
     
@@ -110,74 +111,6 @@ namespace RyuRenderer::Graphics::Scene
     
             isAspectRatioPriority = isAspectPriority;
             isOrthoWidthPriority = isOrthoWPriority;
-        }
-    
-        void Move(const glm::vec3& direction, float distance)
-        {
-            glm::vec3 moveDir = glm::normalize(direction);
-            pos += moveDir * distance;
-        }
-    
-        void MoveTo(const glm::vec3& position)
-        {
-            pos = position;
-        }
-    
-        void Rotate(const glm::vec3& rotateAxis, float degree)
-        {
-            float angle = glm::radians(degree);
-            glm::quat rotation = glm::angleAxis(angle, rotateAxis);
-            dir = rotation * dir;
-        }
-    
-        void RotateTo(
-            const glm::vec3& frontDir,
-            const glm::vec3& upDir)
-        {
-            glm::vec3 front = glm::normalize(frontDir);
-            glm::vec3 up = glm::normalize(upDir);
-            glm::vec3 right = glm::normalize(glm::cross(front, up));
-            up = glm::normalize(glm::cross(right, front));
-
-            glm::mat3 rotationMatrix = glm::mat3(right, up, -front);
-            dir = glm::quat(rotationMatrix);
-        }
-
-        void RotateTo(
-            float degreeX,
-            float degreeY,
-            float degreeZ)
-        {
-            glm::quat rotationX = glm::angleAxis(
-                glm::radians(degreeX),
-                glm::vec3(1.0f, 0.0f, 0.0f)
-            );
-            glm::quat rotationXUp = glm::angleAxis(
-                glm::radians(degreeX + 90),
-                glm::vec3(1.0f, 0.0f, 0.0f)
-            );
-            glm::quat rotationY = glm::angleAxis(
-                glm::radians(degreeY),
-                glm::vec3(0.0f, 1.0f, 0.0f)
-            );
-            glm::quat rotationZ = glm::angleAxis(
-                glm::radians(degreeY),
-                glm::vec3(0.0f, 0.0f, 1.0f)
-            );
-            dir = rotationX * rotationY * rotationZ;
-        }
-    
-        void LookAt(
-            const glm::vec3& targetPos,
-            const glm::vec3& upDir)
-        {
-            glm::vec3 front = glm::normalize(pos - targetPos);
-            glm::vec3 up = glm::normalize(upDir);
-            glm::vec3 right = glm::normalize(glm::cross(front, up));
-            up = glm::normalize(glm::cross(right, front));
-
-            glm::mat3 rotationMatrix = glm::mat3(right, up, -front);
-            dir = glm::quat(rotationMatrix);
         }
     
         void SetNearPlane(const float& nearPlaneDis)
@@ -265,9 +198,9 @@ namespace RyuRenderer::Graphics::Scene
         glm::mat4 GetView() const
         {
             return glm::lookAt(
-                pos,
-                pos + GetFrontDirection(),
-                GetUpDirection()
+                Transformer.GetPosition(),
+                Transformer.GetPosition() + Transformer.GetFrontDirection(),
+                Transformer.GetUpDirection()
             );
         }
     
@@ -292,41 +225,6 @@ namespace RyuRenderer::Graphics::Scene
                     nearPlane,
                     farPlane);
             }
-        }
-    
-        glm::vec3 GetPos() const
-        {
-            return pos;
-        }
-    
-        glm::vec3 GetFrontDirection() const
-        {
-            return dir * glm::vec3(0.f, 0.f, -1.f);
-        }
-    
-        glm::vec3 GetBackDirection() const
-        {
-            return dir * glm::vec3(0.f, 0.f, 1.f);
-        }
-    
-        glm::vec3 GetLeftDirection() const
-        {
-            return dir * glm::vec3(-1.f, 0.f, 0.f);
-        }
-    
-        glm::vec3 GetRightDirection() const
-        {
-            return dir * glm::vec3(1.f, 0.f, 0.f);
-        }
-    
-        glm::vec3 GetUpDirection() const
-        {
-            return dir * glm::vec3(0.f, 1.f, 0.f);
-        }
-    
-        glm::vec3 GetDownDirection() const
-        {
-            return dir * glm::vec3(0.f, -1.f, 0.f);
         }
     
         float GetNearPlane() const
@@ -409,23 +307,23 @@ namespace RyuRenderer::Graphics::Scene
             glm::vec3 moveDir = glm::zero<glm::vec3>();
             if (isWKeyHolding)
             {
-                moveDir = GetFrontDirection();
+                moveDir = Transformer.GetFrontDirection();
             }
             else if (isSKeyHolding)
             {
-                moveDir = GetBackDirection();
+                moveDir = Transformer.GetBackDirection();
             }
             else if (isAKeyHolding)
             {
-                moveDir = GetLeftDirection();
+                moveDir = Transformer.GetLeftDirection();
             }
             else if (isDKeyHolding)
             {
-                moveDir = GetRightDirection();
+                moveDir = Transformer.GetRightDirection();
             }
             if (glm::length(moveDir) >= epsilon)
             {
-                Move(moveDir, distance);
+                Transformer.Move(moveDir, distance);
             }
         }
     
@@ -453,10 +351,16 @@ namespace RyuRenderer::Graphics::Scene
             constexpr float sensitivityP = 0.02f;
             constexpr float sensitivityY = 0.05f;
             float pitchDegree = -1 * pitchOffset * sensitivityP;
+
+            if (pitchDegree <= -90.f)
+                pitchDegree = -89.f;
+            else if (pitchDegree >= 90.f)
+                pitchDegree = 89.f;
+
             float yawDegree = yawOffset * sensitivityY;
     
-            Rotate(GetRightDirection(), pitchDegree);
-            Rotate(Graphics::Scene::Scene::GetDownDirection(), yawDegree);
+            Transformer.Rotate(Transformer.GetRightDirection(), pitchDegree);
+            Transformer.Rotate(Graphics::Scene::Scene::GetDownDirection(), yawDegree);
         }
     
         void OnKeyEvent(const App::Events::KeyEvent& e)
@@ -500,6 +404,8 @@ namespace RyuRenderer::Graphics::Scene
                 }
             }
         }
+
+        Transform Transformer;
     private:
         static float GetHFOV(float vfovDegree, float aspectRatio)
         {
@@ -549,10 +455,6 @@ namespace RyuRenderer::Graphics::Scene
                 }
             }
         }
-    
-        // transform
-        glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f);
-        glm::quat dir = glm::identity<glm::quat>();
     
         float nearPlane = 0.f;
         float farPlane = 0.f;

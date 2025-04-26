@@ -20,95 +20,12 @@
 #include "graphics/Texture2D.h"
 #include "graphics/TextureManager.h"
 #include "graphics/scene/Camera.h"
+#include "graphics/scene/DirectionalLight.h"
+#include "graphics/scene/PointLight.h"
+#include "graphics/scene/SpotLight.h"
 
 namespace RyuRenderer::App::RenderPipeline
 {
-    struct DirectionalLight
-    {
-        DirectionalLight() = default;
-
-        DirectionalLight(
-            const glm::vec3& color,
-            const glm::vec3& direction = glm::vec3(0.f, -1.f, 0.f)
-        )
-        {
-            Color = color;
-            Direction = direction;
-        }
-
-        glm::vec3 Color = { 0.0f, 0.0f, 0.0f };
-        glm::vec3 Direction = { 0.0f, -1.0f, 0.0f };
-    };
-
-    struct PointLight
-    {
-        PointLight() = default;
-
-        PointLight(
-            const glm::vec3& color,
-            const glm::vec3& worldPos = glm::zero<glm::vec3>(),
-            float modelScale = 0.2f,
-            float attenuationConstant = 1.f,
-            float attenuationLinear = 0.09f,
-            float attenuationQuadratic = 0.032f
-        )
-        {
-            Color = color;
-            WorldPos = worldPos;
-            AttenuationConstant = attenuationConstant;
-            AttenuationLinear = attenuationLinear;
-            AttenuationQuadratic = attenuationQuadratic;
-            Model = glm::translate(Model, worldPos);
-            Model = glm::scale(Model, glm::vec3(modelScale));
-        }
-
-        glm::vec3 Color = { 0.f, 0.f, 0.f };
-        glm::vec3 WorldPos = glm::zero<glm::vec3>();
-        float AttenuationConstant = 1.f;
-        float AttenuationLinear = 0.09f;
-        float AttenuationQuadratic = 0.032f;
-        glm::mat4 Model = glm::identity<glm::mat4>();
-    };
-
-    struct SpotLight
-    {
-        SpotLight() = default;
-
-        SpotLight(
-            const glm::vec3& color,
-            const glm::vec3& worldPos = glm::zero<glm::vec3>(),
-            const glm::vec3& direction = glm::vec3(0.f, -1.f, 0.f),
-            float innerCutOffDegree = 12.5f,
-            float outerCutOffDegree = 17.5f,
-            float modelScale = 0.2f,
-            float attenuationConstant = 1.f,
-            float attenuationLinear = 0.045f,
-            float attenuationQuadratic = 0.0075f
-        )
-        {
-            Color = color;
-            WorldPos = worldPos;
-            Direction = direction;
-            InnerCutOffCos = glm::cos(glm::radians(innerCutOffDegree));
-            OuterCutOffCos = glm::cos(glm::radians(outerCutOffDegree));
-            AttenuationConstant = attenuationConstant;
-            AttenuationLinear = attenuationLinear;
-            AttenuationQuadratic = attenuationQuadratic;
-            Model = glm::translate(Model, worldPos);
-            Model = glm::scale(Model, glm::vec3(modelScale));
-        }
-
-        glm::vec3 Color = { 0.f, 0.f, 0.f };
-        glm::vec3 WorldPos = glm::zero<glm::vec3>();
-        glm::vec3 Direction = { 0.f, -1.f, 0.f };
-        float InnerCutOffCos = 0.976296f;
-        float OuterCutOffCos = 0.953717f;
-        float AttenuationConstant = 1.f;
-        float AttenuationLinear = 0.045f;
-        float AttenuationQuadratic = 0.0075f;
-        glm::mat4 Model = glm::identity<glm::mat4>();
-    };
-
     class DefaultRenderPipeline : public IRenderPipeline
     {
     public:
@@ -354,33 +271,33 @@ namespace RyuRenderer::App::RenderPipeline
             // init light objects
             //directionLight.Color = glm::vec3(1.0f, 1.0f, 1.0f);
 
-            pointLights.emplace_back(PointLight(
+            pointLights.emplace_back(Graphics::Scene::PointLight(
                 glm::vec3{ 1.0f, 1.0f, 1.0f },
                 glm::vec3{ 0.f, 0.f, -3.f }
             ));
-            pointLights.emplace_back(PointLight(
+            pointLights.emplace_back(Graphics::Scene::PointLight(
                 glm::vec3{ 0.0f, 1.0f, 0.0f },
                 glm::vec3{ 0.f, 0.f, 3.f }
             ));
-            pointLights.emplace_back(PointLight(
+            pointLights.emplace_back(Graphics::Scene::PointLight(
                 glm::vec3{ 0.0f, 0.0f, 1.0f },
                 glm::vec3{ -3.f, 0.f, 0.f }
             ));
-            pointLights.emplace_back(PointLight(
+            pointLights.emplace_back(Graphics::Scene::PointLight(
                 glm::vec3{ 1.0f, 0.0f, 0.0f },
                 glm::vec3{ 3.f, 0.f, 0.f }
             ));
-            pointLights.emplace_back(PointLight(
+            pointLights.emplace_back(Graphics::Scene::PointLight(
                 glm::vec3{ 0.42f, 0.167f, 0.32f },
                 glm::vec3{ 0.f, 3.f, 0.f }
             ));
-            pointLights.emplace_back(PointLight(
+            pointLights.emplace_back(Graphics::Scene::PointLight(
                 glm::vec3{ 0.56f, 0.0f, 0.67f },
                 glm::vec3{ 0.f, -3.f, 0.f }
             ));
 
             // init spot lights
-            //spotLights.emplace_back(SpotLight(
+            //spotLights.emplace_back(Graphics::Scene::SpotLight(
             //    glm::vec3{ 1.0f, 1.0f, 1.0f },
             //    glm::vec3{ 0.f, 1.5f, 0.f },
             //    glm::vec3{ 0.f, -1.f, 0.f }
@@ -414,7 +331,7 @@ namespace RyuRenderer::App::RenderPipeline
             for (size_t i = 0; i < pointLightCount; ++i)
             {
                 auto& l = pointLights[i];
-                lightShader->SetUniform("model", l.Model);
+                lightShader->SetUniform("model", l.GetModel());
                 lightShader->SetUniform("color", l.Color);
 
                 for (int i = 0; i < lightMeshes.size(); ++i)
@@ -431,7 +348,7 @@ namespace RyuRenderer::App::RenderPipeline
             for (size_t i = 0; i < spotLightCount; ++i)
             {
                 auto& l = spotLights[i];
-                lightShader->SetUniform("model", l.Model);
+                lightShader->SetUniform("model", l.GetModel());
                 lightShader->SetUniform("color", l.Color);
 
                 for (int i = 0; i < lightMeshes.size(); ++i)
@@ -447,7 +364,7 @@ namespace RyuRenderer::App::RenderPipeline
 
             // set directional light
             boxShader->SetUniform("directionalLight.color", directionLight.Color);
-            boxShader->SetUniform("directionalLight.viewDirection", glm::transpose(glm::inverse(glm::mat3(view))) * directionLight.Direction);
+            boxShader->SetUniform("directionalLight.viewDirection", glm::transpose(glm::inverse(glm::mat3(view))) * directionLight.Transformer.GetFrontDirection());
 
             // set point light
             boxShader->SetUniform("activePointLightCount", (int)pointLightCount);
@@ -457,7 +374,7 @@ namespace RyuRenderer::App::RenderPipeline
 
                 std::string pointPrefix = "pointLights[" + std::to_string(i) + "].";
                 boxShader->SetUniform(pointPrefix + "color", l.Color);
-                boxShader->SetUniform(pointPrefix + "viewPos", glm::vec3(view * glm::vec4(l.WorldPos, 1.0f)));
+                boxShader->SetUniform(pointPrefix + "viewPos", glm::vec3(view * glm::vec4(l.Transformer.GetPosition(), 1.0f)));
                 boxShader->SetUniform(pointPrefix + "attenuationConstant", l.AttenuationConstant);
                 boxShader->SetUniform(pointPrefix + "attenuationLinear", l.AttenuationLinear);
                 boxShader->SetUniform(pointPrefix + "attenuationQuadratic", l.AttenuationQuadratic);
@@ -471,8 +388,8 @@ namespace RyuRenderer::App::RenderPipeline
 
                 std::string spotPrefix = "spotLights[" + std::to_string(i) + "].";
                 boxShader->SetUniform(spotPrefix + "color", l.Color);
-                boxShader->SetUniform(spotPrefix + "viewPos", glm::vec3(view * glm::vec4(l.WorldPos, 1.0f)));
-                boxShader->SetUniform(spotPrefix + "viewDirection", glm::transpose(glm::inverse(glm::mat3(view))) * l.Direction);
+                boxShader->SetUniform(spotPrefix + "viewPos", glm::vec3(view * glm::vec4(l.Transformer.GetPosition(), 1.0f)));
+                boxShader->SetUniform(spotPrefix + "viewDirection", glm::transpose(glm::inverse(glm::mat3(view))) * l.Transformer.GetFrontDirection());
                 boxShader->SetUniform(spotPrefix + "innerCutOffCos", l.InnerCutOffCos);
                 boxShader->SetUniform(spotPrefix + "outerCutOffCos", l.OuterCutOffCos);
                 boxShader->SetUniform(spotPrefix + "attenuationConstant", l.AttenuationConstant);
@@ -516,17 +433,17 @@ namespace RyuRenderer::App::RenderPipeline
             camera.OnKeyEvent(e);
         }
 
-        std::vector<RyuRenderer::Graphics::Mesh> lightMeshes;
-        std::vector<RyuRenderer::Graphics::Mesh> boxMeshes;
+        std::vector<Graphics::Mesh> lightMeshes;
+        std::vector<Graphics::Mesh> boxMeshes;
 
-        std::shared_ptr<RyuRenderer::Graphics::Shader> lightShader;
-        std::shared_ptr<RyuRenderer::Graphics::Shader> boxShader;
+        std::shared_ptr<Graphics::Shader> lightShader;
+        std::shared_ptr<Graphics::Shader> boxShader;
 
         // lights
-        DirectionalLight directionLight = { glm::vec3(0.0f, 0.0f, 0.0f) };
+        Graphics::Scene::DirectionalLight directionLight = { glm::vec3(0.0f, 0.0f, 0.0f) };
 
-        std::vector<PointLight> pointLights;
-        std::vector<SpotLight> spotLights;
+        std::vector<Graphics::Scene::PointLight> pointLights;
+        std::vector<Graphics::Scene::SpotLight> spotLights;
 
         // box
         glm::vec3 boxAmbient = { 0.2f, 0.2f, 0.2f };
