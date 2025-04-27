@@ -22,9 +22,9 @@ namespace RyuRenderer::Graphics::Scene
             position += moveDir * distance;
         }
 
-        void MoveTo(const glm::vec3& poa)
+        void MoveTo(const glm::vec3& pos)
         {
-            position = poa;
+            position = pos;
         }
 
         void Rotate(const glm::vec3& rotateAxis, float degree)
