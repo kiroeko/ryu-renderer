@@ -26,7 +26,7 @@ namespace RyuRenderer::App::RenderPipeline
     public:
         PhongBlinnPipeline() = default;
 
-        void init() override
+        void Init() override
         {
             // init meshes
             lightMeshes.emplace_back(Graphics::Mesh(
@@ -177,7 +177,7 @@ namespace RyuRenderer::App::RenderPipeline
             App::GetInstance().EventPublisher.RegisterHandler(this, &PhongBlinnPipeline::OnKeyEvent);
         }
 
-        void tick(double deltaTimeInS) override
+        void Tick(double deltaTimeInS) override
         {
             if (!boxShader)
                 return;

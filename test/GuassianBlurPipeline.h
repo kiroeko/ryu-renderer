@@ -21,14 +21,14 @@ namespace RyuRenderer::App::RenderPipeline
     public:
         GuassianBlurPipeline() = default;
 
-        void init() override
+        void Init() override
         {
             initRenderer();
 
             App::GetInstance().EventPublisher.RegisterHandler(this, &GuassianBlurPipeline::OnWindowResize);
         }
 
-        void tick(double deltaTimeInS) override
+        void Tick(double deltaTimeInS) override
         {
             renderTick();
         }

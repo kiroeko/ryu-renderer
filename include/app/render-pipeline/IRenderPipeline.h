@@ -6,8 +6,8 @@ namespace RyuRenderer::App::RenderPipeline
     class IRenderPipeline
     {
     public:
-        virtual void init() = 0;
-        virtual void tick(double deltaTimeInS) = 0;
+        virtual void Init() = 0;
+        virtual void Tick(double deltaTimeInS) = 0;
     };
 }
 

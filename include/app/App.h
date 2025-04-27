@@ -106,7 +106,7 @@ namespace RyuRenderer::App
             }
 
             renderPipeline = p;
-            renderPipeline->init();
+            renderPipeline->Init();
 
             // main loop
             while (!glfwWindowShouldClose(window))
@@ -123,7 +123,7 @@ namespace RyuRenderer::App
                 lastTickTimeInS = currentTimeInS;
 
                 // render
-                renderPipeline->tick(deltaTime);
+                renderPipeline->Tick(deltaTime);
 
                 // show render result
                 glfwSwapBuffers(window);

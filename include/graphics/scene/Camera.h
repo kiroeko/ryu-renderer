@@ -300,10 +300,9 @@ namespace RyuRenderer::Graphics::Scene
         // Controll
         void OnTick(double deltaTimeInS)
         {
-            constexpr float speed = 10.f;
-            float distance = deltaTimeInS * speed;
+            float distance = deltaTimeInS * MoveSpeed;
     
-            constexpr float epsilon = 1e-6f;
+            constexpr float epsilon = glm::epsilon<float>();
             glm::vec3 moveDir = glm::zero<glm::vec3>();
             if (isWKeyHolding)
             {
@@ -348,16 +347,14 @@ namespace RyuRenderer::Graphics::Scene
             lastMouseX = e.MoveXPos;
             lastMouseY = e.MoveYPos;
     
-            constexpr float sensitivityP = 0.02f;
-            constexpr float sensitivityY = 0.05f;
-            float pitchDegree = -1 * pitchOffset * sensitivityP;
+            float pitchDegree = -1 * pitchOffset * YawSensitivity;
 
             if (pitchDegree <= -90.f)
                 pitchDegree = -89.f;
             else if (pitchDegree >= 90.f)
                 pitchDegree = 89.f;
 
-            float yawDegree = yawOffset * sensitivityY;
+            float yawDegree = yawOffset * YawSensitivity;
     
             Transformer.Rotate(Transformer.GetRightDirection(), pitchDegree);
             Transformer.Rotate(Graphics::Scene::Scene::GetDownDirection(), yawDegree);
@@ -406,6 +403,10 @@ namespace RyuRenderer::Graphics::Scene
         }
 
         Transform Transformer;
+
+        float MoveSpeed = 10.f;
+        float PitchSensitivity = 0.02f;
+        float YawSensitivity = 0.05f;
     private:
         static float GetHFOV(float vfovDegree, float aspectRatio)
         {

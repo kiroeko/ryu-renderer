@@ -26,7 +26,7 @@ namespace RyuRenderer::App::RenderPipeline
     public:
         TextureBox3dPipeline() = default;
 
-        void init() override
+        void Init() override
         {
             // Box
             boxMeshes.emplace_back(Graphics::Mesh(
@@ -147,7 +147,7 @@ namespace RyuRenderer::App::RenderPipeline
             App::GetInstance().EventPublisher.RegisterHandler(this, &TextureBox3dPipeline::OnKeyEvent);
         }
 
-        void tick(double deltaTimeInS) override
+        void Tick(double deltaTimeInS) override
         {
             if (!boxShader)
                 return;

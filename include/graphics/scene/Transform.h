@@ -54,19 +54,19 @@ namespace RyuRenderer::Graphics::Scene
         {
             glm::quat rotationX = glm::angleAxis(
                 glm::radians(degreeX),
-                glm::vec3(1.0f, 0.0f, 0.0f)
+                Scene::GetXAxisDirection()
             );
             glm::quat rotationXUp = glm::angleAxis(
                 glm::radians(degreeX + 90),
-                glm::vec3(1.0f, 0.0f, 0.0f)
+                Scene::GetXAxisDirection()
             );
             glm::quat rotationY = glm::angleAxis(
                 glm::radians(degreeY),
-                glm::vec3(0.0f, 1.0f, 0.0f)
+                Scene::GetYAxisDirection()
             );
             glm::quat rotationZ = glm::angleAxis(
                 glm::radians(degreeY),
-                glm::vec3(0.0f, 0.0f, 1.0f)
+                Scene::GetZAxisDirection()
             );
             direction = rotationX * rotationY * rotationZ;
         }
@@ -82,10 +82,10 @@ namespace RyuRenderer::Graphics::Scene
             if (glm::dot(newFront, GetFrontDirection()) > (1.f - epsilon))
                 return;
 
-            glm::vec3 tempUp = glm::vec3(0.0f, 1.0f, 0.0f);
+            glm::vec3 tempUp = Scene::GetYAxisDirection();
             if (glm::abs(glm::dot(newFront, tempUp)) > (1.f - epsilon))
             {
-                tempUp = glm::vec3(0.0f, 0.0f, 1.0f);
+                tempUp = Scene::GetZAxisDirection();
             }
 
             RotateTo(targetDirection, tempUp);
@@ -116,35 +116,35 @@ namespace RyuRenderer::Graphics::Scene
 
         glm::vec3 GetFrontDirection() const
         {
-            return direction * glm::vec3(0.f, 0.f, -1.f);
+            return direction * Scene::GetFrontDirection();
         }
 
         glm::vec3 GetBackDirection() const
         {
-            return direction * glm::vec3(0.f, 0.f, 1.f);
+            return direction * Scene::GetBackDirection();
         }
 
         glm::vec3 GetLeftDirection() const
         {
-            return direction * glm::vec3(-1.f, 0.f, 0.f);
+            return direction * Scene::GetLeftDirection();
         }
 
         glm::vec3 GetRightDirection() const
         {
-            return direction * glm::vec3(1.f, 0.f, 0.f);
+            return direction * Scene::GetRightDirection();
         }
 
         glm::vec3 GetUpDirection() const
         {
-            return direction * glm::vec3(0.f, 1.f, 0.f);
+            return direction * Scene::GetUpDirection();
         }
 
         glm::vec3 GetDownDirection() const
         {
-            return direction * glm::vec3(0.f, -1.f, 0.f);
+            return direction * Scene::GetDownDirection();
         }
     private:
-        glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3 position = glm::zero<glm::vec3>();
         glm::quat direction = glm::identity<glm::quat>();
     };
 }
