@@ -89,7 +89,6 @@ set(Boost_USE_STATIC_LIBS ON)
 
 # Set definitions
 target_compile_definitions(${PROJECT_NAME} PRIVATE
-    ${Glad_DEFINITIONS}
     ${GLFW_DEFINITIONS})
 
 # Set complie options
@@ -108,21 +107,23 @@ set_target_properties(${PROJECT_NAME}
     RUNTIME_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_BIN_DIR_RELEASE}
 )
 
+# Set include directories
+target_include_directories(${PROJECT_NAME} PRIVATE
+                           ${PROJECT_SOURCE_DIR}/include)
+
 # Collect all source files
 file(GLOB_RECURSE SRC_LIST
     ${PROJECT_SOURCE_DIR}/include/*.h
     ${PROJECT_SOURCE_DIR}/include/*.hpp
     ${PROJECT_SOURCE_DIR}/src/*.c
     ${PROJECT_SOURCE_DIR}/src/*.cpp)
+list(APPEND SRC_LIST ${GLAD_SRC_LIST})
+list(APPEND SRC_LIST ${STB_SRC_LIST})
 source_group_by_dir(SRC_LIST)
 
 # Set sources
 target_sources(${PROJECT_NAME} PRIVATE
                ${SRC_LIST})
-
-# Set include directories
-target_include_directories(${PROJECT_NAME} PRIVATE
-                           ${PROJECT_SOURCE_DIR}/include)
 
 # Set linked libs
 target_link_libraries(${PROJECT_NAME} PRIVATE

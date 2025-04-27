@@ -19,6 +19,10 @@ if (NOT TARGET STB)
         set(SOURCE_DIR ${PROJECT_ROOT}/third-party/stb)
         # Set include directories
         set(INCLUDE_DIRS ${SOURCE_DIR}/include)
+        # Set source
+        set(STB_SRC_LIST
+            ${SOURCE_DIR}/src/stb_image.cpp
+            CACHE INTERNAL "STB Source list")
 
         add_library(STB INTERFACE IMPORTED)
         set_target_properties(STB PROPERTIES

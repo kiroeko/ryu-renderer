@@ -1,7 +1,6 @@
 #ifndef __STB_IMAGE_H__
 #define __STB_IMAGE_H__
 
-#define STB_IMAGE_IMPLEMENTATION
 /* stb_image - v2.30 - public domain image loader - http://nothings.org/stb
                                   no warranty implied; use at your own risk
 

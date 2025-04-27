@@ -19,10 +19,10 @@ if (NOT TARGET Glad)
         set(SOURCE_DIR ${PROJECT_ROOT}/third-party/glad-2)
         # Set include directories
         set(INCLUDE_DIRS ${SOURCE_DIR}/include)
-        # Set definitions
-        set(Glad_DEFINITIONS
-            "GLAD_GL_IMPLEMENTATION"
-            CACHE INTERNAL "Glad Definitions")
+        # Set source
+        set(GLAD_SRC_LIST
+            ${SOURCE_DIR}/src/glad.cpp
+            CACHE INTERNAL "GLFW Source list")
 
         add_library(Glad INTERFACE IMPORTED)
         set_target_properties(Glad PROPERTIES
