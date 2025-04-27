@@ -1,5 +1,5 @@
-#ifndef __DEFAULTPIPELINE_H__
-#define __DEFAULTPIPELINE_H__
+#ifndef __MODELVIEWPHONGBLINNPIPELINE_H__
+#define __MODELVIEWPHONGBLINNPIPELINE_H__
 
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
@@ -26,10 +26,10 @@
 
 namespace RyuRenderer::App::RenderPipeline
 {
-    class DefaultRenderPipeline : public IRenderPipeline
+    class ModelViewPhongBlinnPipeline : public IRenderPipeline
     {
     public:
-        DefaultRenderPipeline() = default;
+        ModelViewPhongBlinnPipeline() = default;
 
         void Init() override
         {
@@ -304,9 +304,9 @@ namespace RyuRenderer::App::RenderPipeline
             //));
 
             // Other settings
-            App::GetInstance().EventPublisher.RegisterHandler(this, &DefaultRenderPipeline::OnWindowResize);
-            App::GetInstance().EventPublisher.RegisterHandler(this, &DefaultRenderPipeline::OnMouseMove);
-            App::GetInstance().EventPublisher.RegisterHandler(this, &DefaultRenderPipeline::OnKeyEvent);
+            App::GetInstance().EventPublisher.RegisterHandler(this, &ModelViewPhongBlinnPipeline::OnWindowResize);
+            App::GetInstance().EventPublisher.RegisterHandler(this, &ModelViewPhongBlinnPipeline::OnMouseMove);
+            App::GetInstance().EventPublisher.RegisterHandler(this, &ModelViewPhongBlinnPipeline::OnKeyEvent);
         }
 
         void Tick(double deltaTimeInS) override
