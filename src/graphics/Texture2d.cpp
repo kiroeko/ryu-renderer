@@ -195,20 +195,17 @@ namespace RyuRenderer::Graphics
         return id;
     }
 
-    const std::string Texture2d::GetSource() const
+    std::string Texture2d::GetSource() const
     {
         if (source.empty())
         {
             std::string noSourceTextureStr =
-                "/U:" + std::to_string(unitId) +
                 "F:" + std::to_string(format) +
                 "/W:" + std::to_string(width) +
                 "/H:" + std::to_string(height);
             return noSourceTextureStr;
         }
-        return
-            "/U:" + std::to_string(unitId) +
-            "/S:" + source;
+        return source;
     }
 
     void Texture2d::Clear()

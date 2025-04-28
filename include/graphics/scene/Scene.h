@@ -3,11 +3,42 @@
 
 #include "glm/glm.hpp"
 
+#include <list>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "app/events/MouseEvent.h"
+#include "app/events/KeyEvent.h"
+#include "graphics/Mesh.h"
+#include "graphics/Shader.h"
+#include "graphics/scene/Camera.h"
+#include "graphics/scene/DirectionalLight.h"
+#include "graphics/scene/PointLight.h"
+#include "graphics/scene/SpotLight.h"
+#include "graphics/scene/ShadedMesh.h"
+
 namespace RyuRenderer::Graphics::Scene
 {
     class Scene
     {
     public:
+        Scene();
+
+        bool Load(const std::string& modelFilePath);
+
+        void Draw() const;
+
+        void ClearObjects();
+
+        void OnTick(double deltaTimeInS);
+
+        void OnWindowResize(float aspectRatio);
+
+        void OnMouseMove(const App::Events::MouseEvent& e);
+
+        void OnKeyEvent(const App::Events::KeyEvent& e);
+
         static glm::vec3 GetNegativeZAxisDirection();
 
         static glm::vec3 GetZAxisDirection();
@@ -31,6 +62,16 @@ namespace RyuRenderer::Graphics::Scene
         static glm::vec3 GetUpDirection();
 
         static glm::vec3 GetDownDirection();
+
+        Camera Camera;
+        DirectionalLight DirectionLight;
+        std::vector<PointLight> PointLights;
+        std::vector<SpotLight> SpotLights;
+    private:
+        std::list<Graphics::Mesh> lightMeshes;
+        std::shared_ptr<Graphics::Shader> lightShader;
+
+        std::list<ShadedMesh> objectMeshes;
     };
 }
 

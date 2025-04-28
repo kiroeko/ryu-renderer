@@ -37,7 +37,7 @@ namespace RyuRenderer::Graphics
 
         GLuint GetId() const override;
 
-        const std::string GetSource() const override;
+        std::string GetSource() const override;
 
         inline static bool IsCleanMode = true;
     private:

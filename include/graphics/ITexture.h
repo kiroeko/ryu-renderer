@@ -18,7 +18,7 @@ namespace RyuRenderer::Graphics
 
         virtual GLuint GetId() const = 0;
 
-        virtual const std::string GetSource() const = 0;
+        virtual std::string GetSource() const = 0;
 
         static GLint GetTextureUnitId(GLint unitIdx)
         {

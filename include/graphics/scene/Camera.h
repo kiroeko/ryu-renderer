@@ -131,8 +131,8 @@ namespace RyuRenderer::Graphics::Scene
         float orthoHeight = 0.f;
     
         float aspectRatio = 0.f;
-        // 如果为真，当更改 aspectRatio 时，将自动调整 vFOV / hFOV / orthoWidth / orthoHeight 来让它们符合 aspectRatio 的值；
-        //     否则，则自动调整 aspectRatio 让它符合 vFOV / hFOV / orthoWidth / orthoHeight 的值。
+        // If true, when aspectRatio is changed, vFOV / hFOV / orthoWidth / orthoHeight will be automatically adjusted to match the aspectRatio value;
+        //     otherwise, aspectRatio will be automatically adjusted to match the values of vFOV / hFOV / orthoWidth / orthoHeight.
         bool isAspectRatioPriority = false;
         bool isVFOVPriority = true;
         bool isOrthoWidthPriority = true;

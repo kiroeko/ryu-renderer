@@ -59,8 +59,8 @@ namespace RyuRenderer::Graphics
 
         glDeleteShader(vs);
         glDeleteShader(fs);
-        vertexSource = vs;
-        fragmentSource = fs;
+        vertexSource = vertexShaderFilePath;
+        fragmentSource = fragmentShaderFilePath;
     }
 
     Shader::Shader(const std::string& localGPUBinaryFilePath)
