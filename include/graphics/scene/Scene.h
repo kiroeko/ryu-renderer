@@ -8,65 +8,29 @@ namespace RyuRenderer::Graphics::Scene
     class Scene
     {
     public:
-        static glm::vec3 GetNegativeZAxisDirection()
-        {
-            return glm::vec3(0.0f, 0.0f, -1.0f);
-        }
+        static glm::vec3 GetNegativeZAxisDirection();
 
-        static glm::vec3 GetZAxisDirection()
-        {
-            return glm::vec3(0.0f, 0.0f, 1.0f);
-        }
+        static glm::vec3 GetZAxisDirection();
 
-        static glm::vec3 GetNegativeXAxisDirection()
-        {
-            return glm::vec3(-1.0f, 0.0f, 0.0f);
-        }
+        static glm::vec3 GetNegativeXAxisDirection();
 
-        static glm::vec3 GetXAxisDirection()
-        {
-            return glm::vec3(1.0f, 0.0f, 0.0f);
-        }
+        static glm::vec3 GetXAxisDirection();
 
-        static glm::vec3 GetYAxisDirection()
-        {
-            return glm::vec3(0.0f, 1.0f, 0.0f);
-        }
+        static glm::vec3 GetYAxisDirection();
 
-        static glm::vec3 GetNegativeYAxisDirection()
-        {
-            return glm::vec3(0.0f, -1.0f, 0.0f);
-        }
+        static glm::vec3 GetNegativeYAxisDirection();
 
-        static glm::vec3 GetFrontDirection()
-        {
-            return GetNegativeZAxisDirection();
-        }
+        static glm::vec3 GetFrontDirection();
 
-        static glm::vec3 GetBackDirection()
-        {
-            return GetZAxisDirection();
-        }
+        static glm::vec3 GetBackDirection();
 
-        static glm::vec3 GetLeftDirection()
-        {
-            return GetNegativeXAxisDirection();
-        }
+        static glm::vec3 GetLeftDirection();
 
-        static glm::vec3 GetRightDirection()
-        {
-            return GetXAxisDirection();
-        }
+        static glm::vec3 GetRightDirection();
 
-        static glm::vec3 GetUpDirection()
-        {
-            return GetYAxisDirection();
-        }
+        static glm::vec3 GetUpDirection();
 
-        static glm::vec3 GetDownDirection()
-        {
-            return GetNegativeYAxisDirection();
-        }
+        static glm::vec3 GetDownDirection();
     };
 }
 
