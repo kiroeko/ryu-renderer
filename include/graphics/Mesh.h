@@ -215,4 +215,6 @@ namespace RyuRenderer::Graphics
     };
 }
 
+#include "common/MacrosOff.h"
+
 #endif
