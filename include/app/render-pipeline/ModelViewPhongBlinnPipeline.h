@@ -296,7 +296,6 @@ namespace RyuRenderer::App::RenderPipeline
                 glm::vec3{ 0.f, -3.f, 0.f }
             ));
 
-            // init spot lights
             //spotLights.emplace_back(Graphics::Scene::SpotLight(
             //    glm::vec3{ 1.0f, 1.0f, 1.0f },
             //    glm::vec3{ 0.f, 1.5f, 0.f },
