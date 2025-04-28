@@ -36,7 +36,7 @@ namespace RyuRenderer::App
         windowWidth = settings.WindowWidth;
         windowHeight = settings.WindowHeight;
 
-        setWindowIcon(settings.WindowIconPath);
+        SetWindowIcon(settings.WindowIconPath);
 
         glfwMakeContextCurrent(window);
 
@@ -57,8 +57,8 @@ namespace RyuRenderer::App
         glfwSwapInterval(settings.VSyncInterval);
 
         // Window state
-        glfwSetFramebufferSizeCallback(window, onWindowSizeChanged);
-        glfwSetWindowFocusCallback(window, onWindowFocusChanged);
+        glfwSetFramebufferSizeCallback(window, OnWindowSizeChanged);
+        glfwSetWindowFocusCallback(window, OnWindowFocusChanged);
 
         // Inputs
         if (!settings.HideCursor && !settings.LockCursorToCenter)
@@ -69,11 +69,11 @@ namespace RyuRenderer::App
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // FPS game
         else if (!settings.HideCursor && settings.LockCursorToCenter)
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
-        glfwSetCursorPosCallback(window, onMouseMove);
-        glfwSetScrollCallback(window, onMouseScroll);
-        glfwSetMouseButtonCallback(window, onMouseButton);
-        glfwSetCursorEnterCallback(window, onMouseEnter);
-        glfwSetKeyCallback(window, onKeyEvent);
+        glfwSetCursorPosCallback(window, OnMouseMove);
+        glfwSetScrollCallback(window, OnMouseScroll);
+        glfwSetMouseButtonCallback(window, OnMouseButton);
+        glfwSetCursorEnterCallback(window, OnMouseEnter);
+        glfwSetKeyCallback(window, OnKeyEvent);
 
         stbi_set_flip_vertically_on_load(true);
 
@@ -139,7 +139,7 @@ namespace RyuRenderer::App
         window = nullptr;
     }
 
-    void App::setWindowIcon(const std::string& iconPath)
+    void App::SetWindowIcon(const std::string& iconPath)
     {
         int width, height, channels;
         unsigned char* pixels = stbi_load(iconPath.c_str(), &width, &height, &channels, 4);
@@ -155,7 +155,7 @@ namespace RyuRenderer::App
         stbi_image_free(pixels);
     }
 
-    void App::onWindowSizeChanged(GLFWwindow* window, int width, int height)
+    void App::OnWindowSizeChanged(GLFWwindow* window, int width, int height)
     {
         if (!window)
             return;
@@ -175,7 +175,7 @@ namespace RyuRenderer::App
         App::GetInstance().EventPublisher.Dispatch(event);
     }
 
-    void App::onWindowFocusChanged(GLFWwindow* window, int focused)
+    void App::OnWindowFocusChanged(GLFWwindow* window, int focused)
     {
         if (!window)
             return;
@@ -192,7 +192,7 @@ namespace RyuRenderer::App
         App::GetInstance().EventPublisher.Dispatch(event);
     }
 
-    void App::onMouseMove(GLFWwindow* window, double xpos, double ypos)
+    void App::OnMouseMove(GLFWwindow* window, double xpos, double ypos)
     {
         if (!window)
             return;
@@ -208,7 +208,7 @@ namespace RyuRenderer::App
         App::GetInstance().EventPublisher.Dispatch(event);
     }
 
-    void App::onMouseScroll(GLFWwindow* window, double xoffset, double yoffset)
+    void App::OnMouseScroll(GLFWwindow* window, double xoffset, double yoffset)
     {
         if (!window)
             return;
@@ -224,7 +224,7 @@ namespace RyuRenderer::App
         App::GetInstance().EventPublisher.Dispatch(event);
     }
 
-    void App::onMouseButton(GLFWwindow* window, int button, int action, int mods)
+    void App::OnMouseButton(GLFWwindow* window, int button, int action, int mods)
     {
         if (!window)
             return;
@@ -281,7 +281,7 @@ namespace RyuRenderer::App
         App::GetInstance().EventPublisher.Dispatch(event);
     }
 
-    void App::onMouseEnter(GLFWwindow* window, int entered)
+    void App::OnMouseEnter(GLFWwindow* window, int entered)
     {
         if (!window)
             return;
@@ -296,7 +296,7 @@ namespace RyuRenderer::App
         App::GetInstance().EventPublisher.Dispatch(event);
     }
 
-    void App::onKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods)
+    void App::OnKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods)
     {
         if (!window)
             return;

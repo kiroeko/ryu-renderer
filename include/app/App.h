@@ -29,21 +29,21 @@ namespace RyuRenderer::App
     private:
         void Clear();
 
-        void setWindowIcon(const std::string& iconPath);
+        void SetWindowIcon(const std::string& iconPath);
 
-        static void onWindowSizeChanged(GLFWwindow* window, int width, int height);
+        static void OnWindowSizeChanged(GLFWwindow* window, int width, int height);
 
-        static void onWindowFocusChanged(GLFWwindow* window, int focused);
+        static void OnWindowFocusChanged(GLFWwindow* window, int focused);
 
-        static void onMouseMove(GLFWwindow* window, double xpos, double ypos);
+        static void OnMouseMove(GLFWwindow* window, double xpos, double ypos);
 
-        static void onMouseScroll(GLFWwindow* window, double xoffset, double yoffset);
+        static void OnMouseScroll(GLFWwindow* window, double xoffset, double yoffset);
 
-        static void onMouseButton(GLFWwindow* window, int button, int action, int mods);
+        static void OnMouseButton(GLFWwindow* window, int button, int action, int mods);
 
-        static void onMouseEnter(GLFWwindow* window, int entered);
+        static void OnMouseEnter(GLFWwindow* window, int entered);
 
-        static void onKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods);
+        static void OnKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods);
 
         GLFWwindow* window = nullptr;
         RyuRenderer::App::RenderPipeline::IRenderPipeline* renderPipeline = nullptr;
