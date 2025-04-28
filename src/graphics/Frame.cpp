@@ -1,5 +1,7 @@
 #include "graphics/Frame.h"
 
+#include <iostream>
+
 namespace RyuRenderer::Graphics
 {
     Frame::Frame(Texture2d* initTexture, GLint initColorAttachmentIdx)

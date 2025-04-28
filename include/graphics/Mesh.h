@@ -1,8 +1,6 @@
 #ifndef __MESH_H__
 #define __MESH_H__
 
-#define RYU_RENDERER_MACROS
-
 #include "glad/gl.h"
 
 #include <array>
@@ -216,7 +214,5 @@ namespace RyuRenderer::Graphics
         inline static GLuint lastestUsedVAOId = 0;
     };
 }
-
-#undef RYU_RENDERER_MACROS
 
 #endif
