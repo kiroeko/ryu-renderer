@@ -18,8 +18,8 @@ namespace RyuRenderer::Graphics::Scene
     void Transform::Rotate(const glm::vec3& rotateAxis, float degree)
     {
         float angle = glm::radians(degree);
-        glm::quat rotation = glm::angleAxis(angle, rotateAxis);
-        direction = rotation * direction;
+        glm::quat r = glm::angleAxis(angle, rotateAxis);
+        rotation = r * rotation;
     }
 
     void Transform::RotateTo(
@@ -32,7 +32,7 @@ namespace RyuRenderer::Graphics::Scene
         up = glm::normalize(glm::cross(right, front));
 
         glm::mat3 rotationMatrix = glm::mat3(right, up, -front);
-        direction = glm::quat(rotationMatrix);
+        rotation = glm::quat(rotationMatrix);
     }
 
     void Transform::RotateTo(
@@ -56,7 +56,7 @@ namespace RyuRenderer::Graphics::Scene
             glm::radians(degreeY),
             Scene::GetZAxisDirection()
         );
-        direction = rotationX * rotationY * rotationZ;
+        rotation = rotationX * rotationY * rotationZ;
     }
 
     void Transform::RotateTo(const glm::vec3& targetDirection)
@@ -89,7 +89,29 @@ namespace RyuRenderer::Graphics::Scene
         up = glm::normalize(glm::cross(right, front));
 
         glm::mat3 rotationMatrix = glm::mat3(right, up, -front);
-        direction = glm::quat(rotationMatrix);
+        rotation = glm::quat(rotationMatrix);
+    }
+
+    void Transform::Scale(const glm::vec3& s)
+    {
+        scale.x *= s.x;
+        scale.y *= s.y;
+        scale.z *= s.z;
+    }
+
+    void Transform::ScaleTo(const glm::vec3& scaleTarget)
+    {
+        scale = scaleTarget;
+    }
+
+    glm::mat4 Transform::GetMatrix() const
+    {
+        glm::mat4 model = glm::identity<glm::mat4>();
+        model = glm::translate(model, position);
+        glm::mat4 rotationMatrix = glm::mat4_cast(rotation);
+        model = model * rotationMatrix;
+        model = glm::scale(model, scale);
+        return model;
     }
 
     glm::vec3 Transform::GetPosition() const
@@ -97,38 +119,43 @@ namespace RyuRenderer::Graphics::Scene
         return position;
     }
 
-    glm::quat Transform::GetDirection() const
+    glm::quat Transform::GetRotation() const
     {
-        return direction;
+        return rotation;
+    }
+
+    glm::vec3 Transform::GetScale() const
+    {
+        return scale;
     }
 
     glm::vec3 Transform::GetFrontDirection() const
     {
-        return direction * Scene::GetFrontDirection();
+        return rotation * Scene::GetFrontDirection();
     }
 
     glm::vec3 Transform::GetBackDirection() const
     {
-        return direction * Scene::GetBackDirection();
+        return rotation * Scene::GetBackDirection();
     }
 
     glm::vec3 Transform::GetLeftDirection() const
     {
-        return direction * Scene::GetLeftDirection();
+        return rotation * Scene::GetLeftDirection();
     }
 
     glm::vec3 Transform::GetRightDirection() const
     {
-        return direction * Scene::GetRightDirection();
+        return rotation * Scene::GetRightDirection();
     }
 
     glm::vec3 Transform::GetUpDirection() const
     {
-        return direction * Scene::GetUpDirection();
+        return rotation * Scene::GetUpDirection();
     }
 
     glm::vec3 Transform::GetDownDirection() const
     {
-        return direction * Scene::GetDownDirection();
+        return rotation * Scene::GetDownDirection();
     }
 }

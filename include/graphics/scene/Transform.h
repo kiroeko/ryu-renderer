@@ -33,9 +33,17 @@ namespace RyuRenderer::Graphics::Scene
             const glm::vec3& targetPos,
             const glm::vec3& upDir);
 
+        void Scale(const glm::vec3& s);
+
+        void ScaleTo(const glm::vec3& scaleTarget);
+
+        glm::mat4 GetMatrix() const;
+
         glm::vec3 GetPosition() const;
 
-        glm::quat GetDirection() const;
+        glm::quat GetRotation() const;
+
+        glm::vec3 GetScale() const;
 
         glm::vec3 GetFrontDirection() const;
 
@@ -50,7 +58,8 @@ namespace RyuRenderer::Graphics::Scene
         glm::vec3 GetDownDirection() const;
     private:
         glm::vec3 position = glm::zero<glm::vec3>();
-        glm::quat direction = glm::identity<glm::quat>();
+        glm::quat rotation = glm::identity<glm::quat>();
+        glm::vec3 scale = glm::vec3(1.f);
     };
 }
 

@@ -41,10 +41,14 @@ in vec2 vTexCoords;
 
 uniform Material material;
 uniform DirectionalLight directionalLight;
-uniform int activePointLightCount;
+uniform int activePointLightCount = 0;
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
-uniform int activeSpotLightCount;
+uniform int activeSpotLightCount = 0;
 uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
+
+uniform bool hasDiffuse = false;
+uniform bool hasSpecular = false;
+uniform bool hasEmission = false;
 
 out vec4 FragColor;
 
@@ -58,9 +62,15 @@ void main()
     vec3 normal = vViewNormal;
     vec3 viewDir = normalize(-vViewPos);
 
-    vec3 diffuseTexture = vec3(texture(material.diffuse, vTexCoords));
-    vec3 specularTexture = vec3(texture(material.specular, vTexCoords));
-    vec3 emissionTexture = vec3(texture(material.emission, vTexCoords));
+    vec3 diffuseTexture = vec3(0.0);
+    if (hasDiffuse)
+        diffuseTexture = vec3(texture(material.diffuse, vTexCoords));
+    vec3 specularTexture = vec3(0.0);
+    if (hasSpecular)
+        specularTexture = vec3(texture(material.specular, vTexCoords));
+    vec3 emissionTexture = vec3(0.0);
+    if (hasEmission)
+        emissionTexture = vec3(texture(material.emission, vTexCoords));
 
     vec3 result = vec3(0.0);
     

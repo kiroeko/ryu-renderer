@@ -18,11 +18,4 @@ namespace RyuRenderer::Graphics::Scene
         AttenuationLinear = attenuationLinear;
         AttenuationQuadratic = attenuationQuadratic;
     }
-
-    glm::mat4 PointLight::GetModel() const
-    {
-        glm::mat4 model = glm::identity<glm::mat4>();
-        model = glm::translate(model, Transformer.GetPosition());
-        return model;
-    }
 }

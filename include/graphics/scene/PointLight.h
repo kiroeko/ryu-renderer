@@ -19,8 +19,6 @@ namespace RyuRenderer::Graphics::Scene
             float attenuationQuadratic = 0.032f
         );
 
-        glm::mat4 GetModel() const;
-
         glm::vec3 Color = { 0.f, 0.f, 0.f };
         Transform Transformer;
         float AttenuationConstant = 1.f;

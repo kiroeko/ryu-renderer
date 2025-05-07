@@ -1,13 +1,14 @@
 #include "graphics/scene/Scene.h"
 
-#include "assimp/Importer.hpp"
-#include "assimp/scene.h"
-#include "assimp/postprocess.h"
-
 #include <filesystem>
 #include <iostream>
+#include <typeinfo>
 
 #include "graphics/ShaderManager.h"
+#include "graphics/TextureManager.h"
+#include "graphics/scene/IMaterial.h"
+#include "graphics/scene/PhongBlinnMaterial.h"
+#include "graphics/scene/Transform.h"
 
 namespace RyuRenderer::Graphics::Scene
 {
@@ -87,16 +88,112 @@ namespace RyuRenderer::Graphics::Scene
             if (!material)
                 continue;
 
-            objectMeshes.emplace_back(
-                ShadedMesh(
-                    mesh,
-                    material,
-                    textureFileRootPath.string(),
-                    &DirectionLight,
-                    &PointLights,
-                    &SpotLights
-                )
-            );
+            // load mesh
+            std::vector<GLuint> indices;
+            for (unsigned int i = 0; i < mesh->mNumFaces; ++i)
+            {
+                const auto& face = mesh->mFaces[i];
+                for (unsigned int j = 0; j < face.mNumIndices; ++j)
+                    indices.push_back(face.mIndices[j]);
+            }
+            std::vector<std::array<float, 3>> positions;
+            std::vector<std::array<float, 3>> normals;
+            std::vector<std::array<float, 2>> texCoords;
+            bool isMeshVaild = true;
+            for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
+            {
+                if (!mesh->HasNormals())
+                {
+                    std::cerr << "Model mesh data has no normals." << std::endl;
+                    isMeshVaild = false;
+                    break;
+                }
+                if (!(mesh->mTextureCoords[0]))
+                {
+                    std::cerr << "Model mesh data has no texture coords." << std::endl;
+                    isMeshVaild = false;
+                    break;
+                }
+
+                const auto& v = mesh->mVertices[i];
+                positions.push_back({ v.x, v.y, v.z });
+                const auto& n = mesh->mNormals[i];
+                normals.push_back({ n.x, n.y, n.z });
+                const auto& t = mesh->mTextureCoords[0][i];
+                texCoords.push_back({ t.x, t.y });
+            }
+            if (!isMeshVaild)
+                continue;
+
+            Mesh m = Mesh(indices, positions, normals, texCoords);
+            if (!m.IsValid())
+            {
+                std::cerr << "Model mesh data is invaild." << std::endl;
+                continue;
+            }
+
+            // load material
+            std::string trp = textureFileRootPath.string();
+            auto diffuse = GetTexture(material, aiTextureType_DIFFUSE, trp);
+            if (!diffuse)
+            {
+                std::clog << "Model diffuse texture data is invaild." << std::endl;
+                continue;
+            }
+            auto specular = GetTexture(material, aiTextureType_SPECULAR, trp);
+            if (!specular)
+            {
+                std::clog << "Model specular texture data is invaild." << std::endl;
+            }
+            auto emission = GetTexture(material, aiTextureType_EMISSIVE, trp);
+            if (!emission)
+            {
+                std::clog << "Model emission texture data is invaild." << std::endl;
+            }
+
+            // Build dynamic material
+            size_t materialType = 0;
+            std::shared_ptr<IMaterial> newMaterial = nullptr;
+            std::any materialData;
+            if (diffuse)
+            {
+                materialType = typeid(PhongBlinnMaterial).hash_code();
+
+                newMaterial = std::make_shared<PhongBlinnMaterial>();
+
+                PhongBlinnMaterialData d = PhongBlinnMaterialData();
+                d.Diffuse = diffuse;
+                d.Specular = specular;
+                d.Emission = emission;
+                d.DirectionLight = &DirectionLight;
+                d.PointLights = &PointLights;
+                d.SpotLights = &SpotLights;
+                materialData = d;
+            }
+
+            bool isMatch = false;
+            for (auto& mb : meshBatches)
+            {
+                if (!mb.IsVaild())
+                    continue;
+                if (!mb.Match(materialType))
+                    continue;
+
+                mb.Meshes.emplace_back(std::move(m));
+                mb.Transformers.push_back(Transform());
+                mb.MaterialDatas.push_back(materialData);
+                isMatch = true;
+                break;
+            }
+
+            if (!isMatch)
+            {
+                meshBatches.push_back(MeshBatch(newMaterial));
+                auto& last = meshBatches.back();
+                last.Meshes.emplace_back(std::move(m));
+                last.Transformers.push_back(Transform());
+                last.MaterialDatas.push_back(materialData);
+            }
         }
 
         return true;
@@ -107,15 +204,15 @@ namespace RyuRenderer::Graphics::Scene
         glm::mat4 view = Camera.GetView();
         glm::mat4 projection = Camera.GetProjection();
 
-        // draw light
+        /// draw lights
         lightShader->Use();
         lightShader->SetUniform("view", view);
         lightShader->SetUniform("projection", projection);
 
-        // point lights
+        // Point lights
         for (const auto& l : PointLights)
         {
-            lightShader->SetUniform("model", l.GetModel());
+            lightShader->SetUniform("model", l.Transformer.GetMatrix());
             lightShader->SetUniform("color", l.Color);
 
             for (const auto& lm : lightMeshes)
@@ -124,10 +221,10 @@ namespace RyuRenderer::Graphics::Scene
             }
         }
 
-        // spot lights
+        // Spot lights
         for (const auto& l : SpotLights)
         {
-            lightShader->SetUniform("model", l.GetModel());
+            lightShader->SetUniform("model", l.Transformer.GetMatrix());
             lightShader->SetUniform("color", l.Color);
 
             for (const auto& lm : lightMeshes)
@@ -136,16 +233,19 @@ namespace RyuRenderer::Graphics::Scene
             }
         }
 
-        // draw objects
-        for (const auto& o : objectMeshes)
+        /// Draw mesh batches
+        for (auto& o : meshBatches)
         {
+            if (!o.IsVaild())
+                continue;
+
             o.Draw(view, projection);
         }
     }
 
     void Scene::ClearObjects()
     {
-        objectMeshes.clear();
+        meshBatches.clear();
     }
 
     void Scene::OnTick(double deltaTimeInS)
@@ -226,5 +326,36 @@ namespace RyuRenderer::Graphics::Scene
     glm::vec3 Scene::GetDownDirection()
     {
         return GetNegativeYAxisDirection();
+    }
+
+    std::shared_ptr<Graphics::Texture2d> Scene::GetTexture(
+        const aiMaterial* mat, aiTextureType t, const std::string& textureFileRootPath) const
+    {
+        if (!mat)
+            return nullptr;
+        if (t == aiTextureType_NONE)
+            return nullptr;
+        if (textureFileRootPath.empty())
+            return nullptr;
+        if (mat->GetTextureCount(t) <= 0)
+            return nullptr;
+
+        aiString textureFileName;
+        mat->GetTexture(t, 0, &textureFileName);
+        if (textureFileName.length == 0)
+            return nullptr;
+        std::string textureFileNameStr = textureFileName.C_Str();
+        std::filesystem::path fullPath = std::filesystem::path(textureFileRootPath).append(textureFileNameStr);
+        if (!std::filesystem::exists(fullPath))
+            return nullptr;
+
+        return TextureManager::GetInstance().FindOrCreate2d(fullPath.string(), GetTextureUnitIdxByType(t));
+    }
+
+    GLint Scene::GetTextureUnitIdxByType(aiTextureType t)
+    {
+        if (textureTypeUnitIdxMap.find(t) == textureTypeUnitIdxMap.end())
+            return 0;
+        return textureTypeUnitIdxMap[t];
     }
 }

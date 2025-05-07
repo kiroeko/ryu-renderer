@@ -22,8 +22,6 @@ namespace RyuRenderer::Graphics::Scene
             float attenuationQuadratic = 0.0075f
         );
 
-        glm::mat4 GetModel() const;
-
         glm::vec3 Color = { 0.f, 0.f, 0.f };
         Transform Transformer;
         float InnerCutOffCos = 0.976296f;

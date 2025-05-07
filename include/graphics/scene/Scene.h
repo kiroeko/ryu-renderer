@@ -1,10 +1,14 @@
 #ifndef __SCENE_H__
 #define __SCENE_H__
 
+#include "assimp/Importer.hpp"
+#include "assimp/scene.h"
+#include "assimp/postprocess.h"
 #include "glm/glm.hpp"
 
 #include <list>
 #include <memory>
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -12,11 +16,12 @@
 #include "app/events/KeyEvent.h"
 #include "graphics/Mesh.h"
 #include "graphics/Shader.h"
+#include "graphics/Texture2d.h"
 #include "graphics/scene/Camera.h"
 #include "graphics/scene/DirectionalLight.h"
 #include "graphics/scene/PointLight.h"
 #include "graphics/scene/SpotLight.h"
-#include "graphics/scene/ShadedMesh.h"
+#include "graphics/scene/MeshBatch.h"
 
 namespace RyuRenderer::Graphics::Scene
 {
@@ -63,15 +68,26 @@ namespace RyuRenderer::Graphics::Scene
 
         static glm::vec3 GetDownDirection();
 
+        static GLint GetTextureUnitIdxByType(aiTextureType t);
+
         Camera Camera;
         DirectionalLight DirectionLight;
         std::vector<PointLight> PointLights;
         std::vector<SpotLight> SpotLights;
     private:
+        std::shared_ptr<Graphics::Texture2d> GetTexture(
+            const aiMaterial* mat, aiTextureType t, const std::string& textureFileRootPath) const;
+
         std::list<Graphics::Mesh> lightMeshes;
         std::shared_ptr<Graphics::Shader> lightShader;
 
-        std::list<ShadedMesh> objectMeshes;
+        std::list<MeshBatch> meshBatches;
+
+        inline static std::unordered_map<aiTextureType, GLint> textureTypeUnitIdxMap = {
+            { aiTextureType_DIFFUSE, 0 },
+            { aiTextureType_SPECULAR, 1 },
+            { aiTextureType_EMISSIVE, 2 }
+        };
     };
 }
 

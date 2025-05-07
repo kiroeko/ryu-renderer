@@ -1,5 +1,5 @@
-#ifndef __MODELVIEWPHONGBLINNPIPELINE_H__
-#define __MODELVIEWPHONGBLINNPIPELINE_H__
+#ifndef __STENCILDEPTHPHONGBLINNPIPELINE_H__
+#define __STENCILDEPTHPHONGBLINNPIPELINE_H__
 
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
@@ -17,10 +17,10 @@
 
 namespace RyuRenderer::App::RenderPipeline
 {
-    class ModelViewPhongBlinnPipeline : public IRenderPipeline
+    class StencilDepthPhongBlinnPipeline : public IRenderPipeline
     {
     public:
-        ModelViewPhongBlinnPipeline() = default;
+        StencilDepthPhongBlinnPipeline() = default;
 
         void Init() override
         {
@@ -75,9 +75,9 @@ namespace RyuRenderer::App::RenderPipeline
             MainScene.Load("res/models/backpack/backpack.obj");
 
             // Other settings
-            App::GetInstance().EventPublisher.RegisterHandler(this, &ModelViewPhongBlinnPipeline::OnWindowResize);
-            App::GetInstance().EventPublisher.RegisterHandler(this, &ModelViewPhongBlinnPipeline::OnMouseMove);
-            App::GetInstance().EventPublisher.RegisterHandler(this, &ModelViewPhongBlinnPipeline::OnKeyEvent);
+            App::GetInstance().EventPublisher.RegisterHandler(this, &StencilDepthPhongBlinnPipeline::OnWindowResize);
+            App::GetInstance().EventPublisher.RegisterHandler(this, &StencilDepthPhongBlinnPipeline::OnMouseMove);
+            App::GetInstance().EventPublisher.RegisterHandler(this, &StencilDepthPhongBlinnPipeline::OnKeyEvent);
         }
 
         void Tick(double deltaTimeInS) override
