@@ -197,12 +197,18 @@ namespace RyuRenderer::Graphics::Scene
                         auto md0 = std::any_cast<PhongBlinnMaterialData>(materialData);
                         auto md1 = std::any_cast<PhongBlinnMaterialData>(mo.MaterialData);
 
-                        if (md0 == md1 &&
-                            mo.Transformer == defaultTransformer)
-                        {
-                            mo.Meshes.emplace_back(std::move(m));
-                            isObjectMatch = true;
-                        }
+                        if (md0 != md1)
+                            continue;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                    if (mo.Transformer == defaultTransformer)
+                    {
+                        mo.Meshes.emplace_back(std::move(m));
+                        isObjectMatch = true;
                     }
                 }
 
