@@ -14,9 +14,24 @@ namespace RyuRenderer::Graphics::Scene
     {
         PhongBlinnMaterialData() = default;
 
+        bool operator==(const PhongBlinnMaterialData& other) const
+        {
+            return Model == other.Model &&
+                   View == other.View &&
+                   Projection == other.Projection &&
+                   DirectionLight == other.DirectionLight &&
+                   PointLights == other.PointLights &&
+                   SpotLights == other.SpotLights &&
+                   Ambient == other.Ambient &&
+                   Diffuse == other.Diffuse &&
+                   Specular == other.Specular &&
+                   Shininess == other.Shininess &&
+                   Emission == other.Emission;
+        }
+
+        glm::mat4 Model = glm::identity<glm::mat4>();
         glm::mat4 View = glm::identity<glm::mat4>();
         glm::mat4 Projection = glm::identity<glm::mat4>();
-        glm::mat4 Model = glm::identity<glm::mat4>();
 
         const DirectionalLight* DirectionLight = nullptr;
         const std::vector<PointLight>* PointLights = nullptr;

@@ -12,6 +12,13 @@ namespace RyuRenderer::Graphics::Scene
     public:
         Transform() = default;
 
+        bool operator==(const Transform& other) const
+        {
+            return position == other.position &&
+                   rotation == other.rotation &&
+                   scale == other.scale;
+        }
+
         void Move(const glm::vec3& dir, float distance);
 
         void MoveTo(const glm::vec3& pos);
