@@ -74,14 +74,14 @@ namespace RyuRenderer::Graphics::Scene
         DirectionalLight DirectionLight;
         std::vector<PointLight> PointLights;
         std::vector<SpotLight> SpotLights;
+
+        std::list<MeshObjectBatch> MeshObjectBatches;
     private:
         std::shared_ptr<Graphics::Texture2d> GetTexture(
             const aiMaterial* mat, aiTextureType t, const std::string& textureFileRootPath) const;
 
         std::list<Graphics::Mesh> lightMeshes;
         std::shared_ptr<Graphics::Shader> lightShader;
-
-        std::list<MeshObjectBatch> meshObjectBatches;
 
         inline static std::unordered_map<aiTextureType, GLint> textureTypeUnitIdxMap = {
             { aiTextureType_DIFFUSE, 0 },

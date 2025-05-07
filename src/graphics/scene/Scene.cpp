@@ -179,7 +179,7 @@ namespace RyuRenderer::Graphics::Scene
                 continue;
 
             bool isBatchMatch = false;
-            for (auto& mb : meshObjectBatches)
+            for (auto& mb : MeshObjectBatches)
             {
                 if (!mb.IsVaild())
                     continue;
@@ -231,7 +231,7 @@ namespace RyuRenderer::Graphics::Scene
                 tmo.Transformer = defaultTransformer;
                 tmo.MaterialData = materialData;
                 tmob.MeshObjects.emplace_back(std::move(tmo));
-                meshObjectBatches.emplace_back(std::move(tmob));
+                MeshObjectBatches.emplace_back(std::move(tmob));
             }
         }
 
@@ -273,7 +273,7 @@ namespace RyuRenderer::Graphics::Scene
         }
 
         /// Draw mesh batches
-        for (auto& o : meshObjectBatches)
+        for (auto& o : MeshObjectBatches)
         {
             if (!o.IsVaild())
                 continue;
@@ -284,7 +284,7 @@ namespace RyuRenderer::Graphics::Scene
 
     void Scene::ClearObjects()
     {
-        meshObjectBatches.clear();
+        MeshObjectBatches.clear();
     }
 
     void Scene::OnTick(double deltaTimeInS)
