@@ -169,6 +169,8 @@ namespace RyuRenderer::Graphics::Scene
                 d.PointLights = &PointLights;
                 d.SpotLights = &SpotLights;
                 materialData = d;
+
+                newMaterial->SetData(materialData);
             }
 
             bool isMatch = false;

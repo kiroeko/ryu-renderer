@@ -23,7 +23,7 @@ namespace RyuRenderer::Graphics::Scene
 
         virtual void SetData(const std::any& d) = 0;
 
-        bool IsVaild() const;
+        virtual bool IsVaild() const;
 
         std::string GetName() const;
     protected:
