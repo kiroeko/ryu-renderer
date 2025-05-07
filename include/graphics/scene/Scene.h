@@ -21,7 +21,7 @@
 #include "graphics/scene/DirectionalLight.h"
 #include "graphics/scene/PointLight.h"
 #include "graphics/scene/SpotLight.h"
-#include "graphics/scene/MeshBatch.h"
+#include "graphics/scene/MeshObjectBatch.h"
 
 namespace RyuRenderer::Graphics::Scene
 {
@@ -81,7 +81,7 @@ namespace RyuRenderer::Graphics::Scene
         std::list<Graphics::Mesh> lightMeshes;
         std::shared_ptr<Graphics::Shader> lightShader;
 
-        std::list<MeshBatch> meshBatches;
+        std::list<MeshObjectBatch> meshObjectBatches;
 
         inline static std::unordered_map<aiTextureType, GLint> textureTypeUnitIdxMap = {
             { aiTextureType_DIFFUSE, 0 },

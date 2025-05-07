@@ -9,6 +9,7 @@
 #include "graphics/scene/IMaterial.h"
 #include "graphics/scene/PhongBlinnMaterial.h"
 #include "graphics/scene/Transform.h"
+#include "graphics/scene/MeshObject.h"
 
 namespace RyuRenderer::Graphics::Scene
 {
@@ -77,6 +78,7 @@ namespace RyuRenderer::Graphics::Scene
         if (scene->mNumMeshes <= 0)
             return false;
 
+        Transform defaultTransformer;
         for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
         {
             aiMesh* mesh = scene->mMeshes[i];
@@ -152,12 +154,12 @@ namespace RyuRenderer::Graphics::Scene
             }
 
             // Build dynamic material
-            size_t materialType = 0;
+            const type_info* materialType = nullptr;
             std::shared_ptr<IMaterial> newMaterial = nullptr;
             std::any materialData;
             if (diffuse)
             {
-                materialType = typeid(PhongBlinnMaterial).hash_code();
+                materialType = &typeid(PhongBlinnMaterial);
 
                 newMaterial = std::make_shared<PhongBlinnMaterial>();
 
@@ -172,29 +174,58 @@ namespace RyuRenderer::Graphics::Scene
 
                 newMaterial->SetData(materialData);
             }
+            if (!materialType ||
+                !newMaterial)
+                continue;
 
-            bool isMatch = false;
-            for (auto& mb : meshBatches)
+            bool isBatchMatch = false;
+            for (auto& mb : meshObjectBatches)
             {
                 if (!mb.IsVaild())
                     continue;
-                if (!mb.Match(materialType))
+                if (!mb.Match(*materialType))
                     continue;
 
-                mb.Meshes.emplace_back(std::move(m));
-                mb.Transformers.push_back(Transform());
-                mb.MaterialDatas.push_back(materialData);
-                isMatch = true;
+                isBatchMatch = true;
+
+                bool isObjectMatch = false;
+                for (auto& mo : mb.MeshObjects)
+                {
+                    if (mo.MaterialData.type() == typeid(PhongBlinnMaterialData) &&
+                        materialData.type() == typeid(PhongBlinnMaterialData))
+                    {
+                        auto md0 = std::any_cast<PhongBlinnMaterialData>(materialData);
+                        auto md1 = std::any_cast<PhongBlinnMaterialData>(mo.MaterialData);
+
+                        if (md0 == md1 &&
+                            mo.Transformer == defaultTransformer)
+                        {
+                            mo.Meshes.emplace_back(std::move(m));
+                            isObjectMatch = true;
+                        }
+                    }
+                }
+
+                if (!isObjectMatch)
+                {
+                    MeshObject tmo;
+                    tmo.Meshes.emplace_back(std::move(m));
+                    tmo.Transformer = defaultTransformer;
+                    tmo.MaterialData = materialData;
+                    mb.MeshObjects.emplace_back(std::move(tmo));
+                }
                 break;
             }
 
-            if (!isMatch)
+            if (!isBatchMatch)
             {
-                meshBatches.push_back(MeshBatch(newMaterial));
-                auto& last = meshBatches.back();
-                last.Meshes.emplace_back(std::move(m));
-                last.Transformers.push_back(Transform());
-                last.MaterialDatas.push_back(materialData);
+                MeshObjectBatch tmob(newMaterial);
+                MeshObject tmo;
+                tmo.Meshes.emplace_back(std::move(m));
+                tmo.Transformer = defaultTransformer;
+                tmo.MaterialData = materialData;
+                tmob.MeshObjects.emplace_back(std::move(tmo));
+                meshObjectBatches.emplace_back(std::move(tmob));
             }
         }
 
@@ -236,7 +267,7 @@ namespace RyuRenderer::Graphics::Scene
         }
 
         /// Draw mesh batches
-        for (auto& o : meshBatches)
+        for (auto& o : meshObjectBatches)
         {
             if (!o.IsVaild())
                 continue;
@@ -247,7 +278,7 @@ namespace RyuRenderer::Graphics::Scene
 
     void Scene::ClearObjects()
     {
-        meshBatches.clear();
+        meshObjectBatches.clear();
     }
 
     void Scene::OnTick(double deltaTimeInS)
