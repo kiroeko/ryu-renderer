@@ -54,17 +54,17 @@ namespace RyuRenderer::App::RenderPipeline
                     // 顶面
                     3, 2, 6,
                     6, 7, 3
-                }, // indexes
+            }, // indexes
                 std::vector<std::array<float, 3>>{
-                    {  -0.5f, -0.5f, -0.5f },
-                    { 0.5f, -0.5f, -0.5f },
-                    { 0.5f,  0.5f, -0.5f },
-                    { -0.5f,  0.5f, -0.5f },
-                    { -0.5f, -0.5f,  0.5f },
-                    { 0.5f, -0.5f, 0.5f },
-                    { 0.5f, 0.5f, 0.5f },
-                    { -0.5f,  0.5f,  0.5f },
-                } // Position
+                    {  -0.1f, -0.1f, -0.1f },
+                    { 0.1f, -0.1f, -0.1f },
+                    { 0.1f,  0.1f, -0.1f },
+                    { -0.1f,  0.1f, -0.1f },
+                    { -0.1f, -0.1f,  0.1f },
+                    { 0.1f, -0.1f, 0.1f },
+                    { 0.1f, 0.1f, 0.1f },
+                    { -0.1f,  0.1f,  0.1f },
+            } // Position
             ));
 
             boxMeshes.emplace_back(Graphics::Mesh(
@@ -94,91 +94,91 @@ namespace RyuRenderer::App::RenderPipeline
                     { 0.5f, -0.5f, -0.5f },   // 1
                     { 0.5f,  0.5f, -0.5f },   // 2
                     { -0.5f,  0.5f, -0.5f },  // 3
-                    // 后面
+                        // 后面
                     { -0.5f, -0.5f,  0.5f },  // 4
                     { 0.5f, -0.5f,  0.5f },   // 5
                     { 0.5f,  0.5f,  0.5f },   // 6
                     { -0.5f,  0.5f,  0.5f },  // 7
-                    // 左面
+                        // 左面
                     { -0.5f,  0.5f,  0.5f },  // 8
                     { -0.5f,  0.5f, -0.5f },  // 9
                     { -0.5f, -0.5f, -0.5f },  // 10
                     { -0.5f, -0.5f,  0.5f },  // 11
-                    // 右面
+                        // 右面
                     { 0.5f,  0.5f,  0.5f },   // 12
                     { 0.5f,  0.5f, -0.5f },   // 13
                     { 0.5f, -0.5f, -0.5f },   // 14
                     { 0.5f, -0.5f,  0.5f },   // 15
-                    // 底面
+                        // 底面
                     { -0.5f, -0.5f, -0.5f },  // 16
                     { 0.5f, -0.5f, -0.5f },   // 17
                     { 0.5f, -0.5f,  0.5f },   // 18
                     { -0.5f, -0.5f,  0.5f },  // 19
-                    // 顶面
+                        // 顶面
                     { -0.5f,  0.5f, -0.5f },  // 20
                     { 0.5f,  0.5f, -0.5f },   // 21
                     { 0.5f,  0.5f,  0.5f },   // 22
                     { -0.5f,  0.5f,  0.5f }   // 23
                 }, // Position
                 std::vector<std::array<float, 3>>{
-                    // 前面 (法线)
+                // 前面 (法线)
                     { 0.0f, 0.0f, -1.0f },   // 0
                     { 0.0f,  0.0f, -1.0f },  // 1
                     { 0.0f,  0.0f, -1.0f },  // 2
                     { 0.0f,  0.0f, -1.0f },  // 3
-                    // 后面 (法线)
+                        // 后面 (法线)
                     { 0.0f,  0.0f,  1.0f },  // 4
                     { 0.0f,  0.0f,  1.0f },  // 5
                     { 0.0f,  0.0f,  1.0f },  // 6
                     { 0.0f,  0.0f,  1.0f },  // 7
-                    // 左面 (法线)
+                        // 左面 (法线)
                     { -1.0f,  0.0f,  0.0f },  // 8
                     { -1.0f,  0.0f,  0.0f },  // 9
                     { -1.0f,  0.0f,  0.0f },  // 10
                     { -1.0f,  0.0f,  0.0f },  // 11
-                    // 右面 (法线)
+                        // 右面 (法线)
                     { 1.0f,  0.0f,  0.0f },  // 12
                     { 1.0f,  0.0f,  0.0f },  // 13
                     { 1.0f,  0.0f,  0.0f },  // 14
                     { 1.0f,  0.0f,  0.0f },  // 15
-                    // 底面 (法线)
+                        // 底面 (法线)
                     { 0.0f, -1.0f,  0.0f },  // 16
                     { 0.0f, -1.0f,  0.0f },  // 17
                     { 0.0f, -1.0f,  0.0f },  // 18
                     { 0.0f, -1.0f,  0.0f },  // 19
-                    // 顶面 (法线)
+                        // 顶面 (法线)
                     { 0.0f,  1.0f,  0.0f },  // 20
                     { 0.0f,  1.0f,  0.0f },  // 21
                     { 0.0f,  1.0f,  0.0f },  // 22
                     { 0.0f,  1.0f,  0.0f }   // 23
                 }, // Normal
                 std::vector<std::array<float, 2>>{
-                    // 前面
+                // 前面
                     { 0.0f, 0.0f },
                     { 1.0f, 0.0f },
                     { 1.0f, 1.0f },
                     { 0.0f, 1.0f },
-                    // 后面
+                        // 后面
                     { 0.0f, 0.0f },
                     { 1.0f, 0.0f },
                     { 1.0f, 1.0f },
                     { 0.0f, 1.0f },
-                    // 左面
+                        // 左面
                     { 0.0f, 1.0f },
                     { 1.0f, 1.0f },
                     { 1.0f, 0.0f },
                     { 0.0f, 0.0f },
-                    // 右面
+                        // 右面
                     { 0.0f, 1.0f },
                     { 1.0f, 1.0f },
                     { 1.0f, 0.0f },
                     { 0.0f, 0.0f },
-                    // 底面
+                        // 底面
                     { 0.0f, 1.0f },
                     { 1.0f, 1.0f },
                     { 1.0f, 0.0f },
                     { 0.0f, 0.0f },
-                    // 顶面
+                        // 顶面
                     { 0.0f, 1.0f },
                     { 1.0f, 1.0f },
                     { 1.0f, 0.0f },
@@ -220,8 +220,11 @@ namespace RyuRenderer::App::RenderPipeline
             {
                 boxShader->Use();
                 boxShader->SetUniform("material.ambient", boxAmbient);
+                boxShader->SetUniform("hasDiffuse", true);
                 boxShader->SetUniform("material.diffuse", 0);
+                boxShader->SetUniform("hasSpecular", true);
                 boxShader->SetUniform("material.specular", 1);
+                boxShader->SetUniform("hasEmission", true);
                 boxShader->SetUniform("material.emission", 2);
                 boxShader->SetUniform("material.shininess", boxShininess);
             }
@@ -331,7 +334,7 @@ namespace RyuRenderer::App::RenderPipeline
             for (size_t i = 0; i < pointLightCount; ++i)
             {
                 auto& l = pointLights[i];
-                lightShader->SetUniform("model", l.GetModel());
+                lightShader->SetUniform("model", l.Transformer.GetMatrix());
                 lightShader->SetUniform("color", l.Color);
 
                 for (int i = 0; i < lightMeshes.size(); ++i)
@@ -348,7 +351,7 @@ namespace RyuRenderer::App::RenderPipeline
             for (size_t i = 0; i < spotLightCount; ++i)
             {
                 auto& l = spotLights[i];
-                lightShader->SetUniform("model", l.GetModel());
+                lightShader->SetUniform("model", l.Transformer.GetMatrix());
                 lightShader->SetUniform("color", l.Color);
 
                 for (int i = 0; i < lightMeshes.size(); ++i)
