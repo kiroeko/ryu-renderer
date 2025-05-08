@@ -21,8 +21,8 @@
 #include "graphics/TextureManager.h"
 #include "graphics/scene/Camera.h"
 #include "graphics/scene/DirectionalLight.h"
-#include "graphics/scene/PointLight.h"
-#include "graphics/scene/SpotLight.h"
+#include "graphics/scene/Transform.h"
+#include "graphics/scene/Scene.h"
 
 namespace RyuRenderer::App::RenderPipeline
 {
@@ -33,40 +33,6 @@ namespace RyuRenderer::App::RenderPipeline
 
         void Init() override
         {
-            // init meshes
-            lightMeshes.emplace_back(Graphics::Mesh(
-                std::vector<GLuint>{
-                    // front
-                    0, 1, 2,
-                    2, 3, 0,
-                    // back
-                    4, 5, 6,
-                    6, 7, 4,
-                    // left
-                    0, 3, 7,
-                    7, 4, 0,
-                    // right
-                    1, 5, 6,
-                    6, 2, 1,
-                    // bottom
-                    0, 1, 5,
-                    5, 4, 0,
-                    // top
-                    3, 2, 6,
-                    6, 7, 3
-                }, // indexes
-                std::vector<std::array<float, 3>>{
-                    {  -0.1f, -0.1f, -0.1f },
-                    { 0.1f, -0.1f, -0.1f },
-                    { 0.1f,  0.1f, -0.1f },
-                    { -0.1f,  0.1f, -0.1f },
-                    { -0.1f, -0.1f,  0.1f },
-                    { 0.1f, -0.1f, 0.1f },
-                    { 0.1f, 0.1f, 0.1f },
-                    { -0.1f,  0.1f,  0.1f },
-                } // Position
-            ));
-
             boxMeshes.emplace_back(Graphics::Mesh(
                 std::vector<GLuint>{
                     // front
@@ -186,18 +152,6 @@ namespace RyuRenderer::App::RenderPipeline
                 } // TexCoord
             ));
 
-            // init camera
-            camera = Graphics::Scene::Camera(
-                glm::vec3(0.0f, 1.0f, 6.0f),
-                glm::vec3(0.0f, 0.0f, -1.0f),
-                glm::vec3(0.0f, 1.0f, 0.0f),
-                0.01f,
-                1000000.f,
-                60.f,
-                (float)App::GetInstance().GetWindowWidth() / App::GetInstance().GetWindowHeight(),
-                true
-            );
-
             // init textures
             boxDiffuse = Graphics::TextureManager::GetInstance().FindOrCreate2d("res/textures/box_diffuse.jpg", 0);
             if (boxDiffuse)
@@ -211,10 +165,7 @@ namespace RyuRenderer::App::RenderPipeline
             if (boxEmission)
                 boxEmission->Use();
 
-            // init light shader
-            lightShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-basic-color.vert", "res/shaders/3d-basic-color.frag");
-
-            // init box shader
+            // init shader
             boxShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-blinn-phong-material.vert", "res/shaders/3d-blinn-phong-material.frag");
             if (boxShader)
             {
@@ -228,83 +179,38 @@ namespace RyuRenderer::App::RenderPipeline
                 boxShader->SetUniform("material.emission", 2);
                 boxShader->SetUniform("material.shininess", boxShininess);
             }
+            outlineShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/3d-basic-color.vert", "res/shaders/3d-basic-color.frag");
+            if (outlineShader)
+            {
+                outlineShader->Use();
+                outlineShader->SetUniform("color", glm::vec3(0.4f, 0.2f, 0.8f));
+            }
+
+            // init camera
+            camera = Graphics::Scene::Camera(
+                glm::vec3(0.0f, 1.0f, 6.0f),
+                glm::vec3(0.0f, 0.0f, -1.0f),
+                glm::vec3(0.0f, 1.0f, 0.0f),
+                0.01f,
+                1000000.f,
+                60.f,
+                (float)App::GetInstance().GetWindowWidth() / App::GetInstance().GetWindowHeight(),
+                true
+            );
 
             // init mvp
             view = camera.GetView();
             projection = camera.GetProjection();
 
-            // init box objects
-            glm::vec3 cubePositions[] = {
-                glm::vec3(0.0f,  0.0f,  0.0f),
-                glm::vec3(2.0f,  5.0f, -15.0f),
-                glm::vec3(-1.5f, -2.2f, -2.5f),
-                glm::vec3(-3.8f, -2.0f, -12.3f),
-                glm::vec3(2.4f, -0.4f, -3.5f),
-                glm::vec3(-1.7f,  3.0f, -7.5f),
-                glm::vec3(1.3f, -5.0f, -2.5f),
-                glm::vec3(1.5f,  2.0f, -2.5f),
-                glm::vec3(1.5f,  0.2f, -1.5f),
-                glm::vec3(-1.3f,  1.0f, -1.5f)
-            };
-
-            for (size_t i = 0; i < 10; ++i)
-            {
-                glm::mat4 model = glm::identity<glm::mat4>();
-
-                float angle = 16.5f * i;
-                glm::quat rotationX = glm::angleAxis(
-                    glm::radians(angle),
-                    glm::vec3(1.0f, 0.0f, 0.0f)
-                );
-                glm::quat rotationY = glm::angleAxis(
-                    glm::radians(angle),
-                    glm::vec3(0.0f, 1.0f, 0.0f)
-                );
-                glm::quat rotationZ = glm::angleAxis(
-                    glm::radians(angle),
-                    glm::vec3(0.0f, 0.0f, 1.0f)
-                );
-                model = model * glm::mat4_cast(rotationX * rotationY * rotationZ);
-
-                model = glm::translate(model, cubePositions[i]);
-
-                modelBoxs.push_back(model);
-            }
+            // init object trs
+            boxATramsform.Rotate(Graphics::Scene::Scene::GetZAxisDirection(), 30.f);
+            boxBTramsform.Rotate(Graphics::Scene::Scene::GetZAxisDirection(), 30.f);
+            boxBTramsform.ScaleTo(glm::vec3(1.1f));
+            planeTramsform.MoveTo(glm::vec3(0.f, -0.4f, 0.f));
+            planeTramsform.ScaleTo(glm::vec3(10.f, 0.01f, 10.f));
 
             // init light objects
-            //directionLight.Color = glm::vec3(1.0f, 1.0f, 1.0f);
-
-            pointLights.emplace_back(Graphics::Scene::PointLight(
-                glm::vec3{ 1.0f, 1.0f, 1.0f },
-                glm::vec3{ 0.f, 0.f, -3.f }
-            ));
-            pointLights.emplace_back(Graphics::Scene::PointLight(
-                glm::vec3{ 0.0f, 1.0f, 0.0f },
-                glm::vec3{ 0.f, 0.f, 3.f }
-            ));
-            pointLights.emplace_back(Graphics::Scene::PointLight(
-                glm::vec3{ 0.0f, 0.0f, 1.0f },
-                glm::vec3{ -3.f, 0.f, 0.f }
-            ));
-            pointLights.emplace_back(Graphics::Scene::PointLight(
-                glm::vec3{ 1.0f, 0.0f, 0.0f },
-                glm::vec3{ 3.f, 0.f, 0.f }
-            ));
-            pointLights.emplace_back(Graphics::Scene::PointLight(
-                glm::vec3{ 0.42f, 0.167f, 0.32f },
-                glm::vec3{ 0.f, 3.f, 0.f }
-            ));
-            pointLights.emplace_back(Graphics::Scene::PointLight(
-                glm::vec3{ 0.56f, 0.0f, 0.67f },
-                glm::vec3{ 0.f, -3.f, 0.f }
-            ));
-
-            // init spot lights
-            //spotLights.emplace_back(Graphics::Scene::SpotLight(
-            //    glm::vec3{ 1.0f, 1.0f, 1.0f },
-            //    glm::vec3{ 0.f, 1.5f, 0.f },
-            //    glm::vec3{ 0.f, -1.f, 0.f }
-            //));
+            directionLight.Color = glm::vec3(1.0f, 1.0f, 1.0f);
 
             // Other settings
             App::GetInstance().EventPublisher.RegisterHandler(this, &StencilDepthPhongBlinnPipeline::OnWindowResize);
@@ -317,104 +223,64 @@ namespace RyuRenderer::App::RenderPipeline
             if (!boxShader)
                 return;
 
-            // Update camear
+            // Update camera
             camera.OnTick(deltaTimeInS);
             view = camera.GetView();
 
-            // draw light
-            lightShader->Use();
-            lightShader->SetUniform("view", view);
-            lightShader->SetUniform("projection", projection);
+            glStencilMask(0x00);
 
-            // light lights
-            size_t pointLightCount = pointLights.size();
-            constexpr size_t maxPointLightCount = 32;
-            pointLightCount = pointLightCount > maxPointLightCount ? 32 : pointLightCount;
-
-            for (size_t i = 0; i < pointLightCount; ++i)
-            {
-                auto& l = pointLights[i];
-                lightShader->SetUniform("model", l.Transformer.GetMatrix());
-                lightShader->SetUniform("color", l.Color);
-
-                for (int i = 0; i < lightMeshes.size(); ++i)
-                {
-                    lightMeshes[i].Draw();
-                }
-            }
-
-            // spot lights
-            size_t spotLightCount = spotLights.size();
-            constexpr size_t maxSpotLightCount = 32;
-            spotLightCount = spotLightCount > maxSpotLightCount ? 32 : spotLightCount;
-
-            for (size_t i = 0; i < spotLightCount; ++i)
-            {
-                auto& l = spotLights[i];
-                lightShader->SetUniform("model", l.Transformer.GetMatrix());
-                lightShader->SetUniform("color", l.Color);
-
-                for (int i = 0; i < lightMeshes.size(); ++i)
-                {
-                    lightMeshes[i].Draw();
-                }
-            }
-
-            // handle scene objects
+            // draw plane
+            const auto mp = planeTramsform.GetMatrix();
             boxShader->Use();
             boxShader->SetUniform("view", view);
             boxShader->SetUniform("projection", projection);
-
-            // set directional light
             boxShader->SetUniform("directionalLight.color", directionLight.Color);
             boxShader->SetUniform("directionalLight.viewDirection", glm::transpose(glm::inverse(glm::mat3(view))) * directionLight.Transformer.GetFrontDirection());
-
-            // set point light
-            boxShader->SetUniform("activePointLightCount", (int)pointLightCount);
-            for (size_t i = 0; i < pointLightCount; ++i)
+            glm::mat3 viewNormalMatrix = glm::transpose(glm::inverse(glm::mat3(view * mp)));
+            boxShader->SetUniform("model", mp);
+            boxShader->SetUniform("viewNormalMatrix", viewNormalMatrix);
+            for (size_t j = 0; j < boxMeshes.size(); ++j)
             {
-                auto& l = pointLights[i];
-
-                std::string pointPrefix = "pointLights[" + std::to_string(i) + "].";
-                boxShader->SetUniform(pointPrefix + "color", l.Color);
-                boxShader->SetUniform(pointPrefix + "viewPos", glm::vec3(view * glm::vec4(l.Transformer.GetPosition(), 1.0f)));
-                boxShader->SetUniform(pointPrefix + "attenuationConstant", l.AttenuationConstant);
-                boxShader->SetUniform(pointPrefix + "attenuationLinear", l.AttenuationLinear);
-                boxShader->SetUniform(pointPrefix + "attenuationQuadratic", l.AttenuationQuadratic);
+                boxMeshes[j].Draw();
             }
 
-            // set spot light
-            boxShader->SetUniform("activeSpotLightCount", (int)spotLightCount);
-            for (size_t i = 0; i < spotLightCount; ++i)
-            {
-                auto& l = spotLights[i];
+            glStencilFunc(GL_ALWAYS, 1, 0xFF);
+            glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+            glStencilMask(0xFF);
 
-                std::string spotPrefix = "spotLights[" + std::to_string(i) + "].";
-                boxShader->SetUniform(spotPrefix + "color", l.Color);
-                boxShader->SetUniform(spotPrefix + "viewPos", glm::vec3(view * glm::vec4(l.Transformer.GetPosition(), 1.0f)));
-                boxShader->SetUniform(spotPrefix + "viewDirection", glm::transpose(glm::inverse(glm::mat3(view))) * l.Transformer.GetFrontDirection());
-                boxShader->SetUniform(spotPrefix + "innerCutOffCos", l.InnerCutOffCos);
-                boxShader->SetUniform(spotPrefix + "outerCutOffCos", l.OuterCutOffCos);
-                boxShader->SetUniform(spotPrefix + "attenuationConstant", l.AttenuationConstant);
-                boxShader->SetUniform(spotPrefix + "attenuationLinear", l.AttenuationLinear);
-                boxShader->SetUniform(spotPrefix + "attenuationQuadratic", l.AttenuationQuadratic);
+            // draw box a
+            const auto ma = boxATramsform.GetMatrix();
+            boxShader->Use();
+            boxShader->SetUniform("view", view);
+            boxShader->SetUniform("projection", projection);
+            boxShader->SetUniform("directionalLight.color", directionLight.Color);
+            boxShader->SetUniform("directionalLight.viewDirection", glm::transpose(glm::inverse(glm::mat3(view))) * directionLight.Transformer.GetFrontDirection());
+            viewNormalMatrix = glm::transpose(glm::inverse(glm::mat3(view * ma)));
+            boxShader->SetUniform("model", ma);
+            boxShader->SetUniform("viewNormalMatrix", viewNormalMatrix);
+            for (size_t j = 0; j < boxMeshes.size(); ++j)
+            {
+                boxMeshes[j].Draw();
             }
 
-            // draw boxes
-            for (size_t i = 0; i < modelBoxs.size(); ++i)
+            glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+            glStencilMask(0x00);
+            glDisable(GL_DEPTH_TEST);
+
+            // draw box b
+            const auto mb = boxBTramsform.GetMatrix();
+            outlineShader->Use();
+            outlineShader->SetUniform("view", view);
+            outlineShader->SetUniform("projection", projection);
+            outlineShader->SetUniform("model", mb);
+
+            for (size_t j = 0; j < boxMeshes.size(); ++j)
             {
-                auto& m = modelBoxs[i];
-
-                // caculate normalMatrix
-                glm::mat3 viewNormalMatrix = glm::transpose(glm::inverse(glm::mat3(view * m)));
-                boxShader->SetUniform("model", m);
-                boxShader->SetUniform("viewNormalMatrix", viewNormalMatrix);
-
-                for (size_t j = 0; j < boxMeshes.size(); ++j)
-                {
-                    boxMeshes[j].Draw();
-                }
+                boxMeshes[j].Draw();
             }
+
+            glEnable(GL_DEPTH_TEST);
+            glStencilMask(0xFF);
         }
     private:
         void OnWindowResize(const Events::WindowEvent& e)
@@ -436,17 +302,13 @@ namespace RyuRenderer::App::RenderPipeline
             camera.OnKeyEvent(e);
         }
 
-        std::vector<Graphics::Mesh> lightMeshes;
-        std::vector<Graphics::Mesh> boxMeshes;
-
-        std::shared_ptr<Graphics::Shader> lightShader;
         std::shared_ptr<Graphics::Shader> boxShader;
+        std::shared_ptr<Graphics::Shader> outlineShader;
+
+        std::vector<Graphics::Mesh> boxMeshes;
 
         // lights
         Graphics::Scene::DirectionalLight directionLight = { glm::vec3(0.0f, 0.0f, 0.0f) };
-
-        std::vector<Graphics::Scene::PointLight> pointLights;
-        std::vector<Graphics::Scene::SpotLight> spotLights;
 
         // box
         glm::vec3 boxAmbient = { 0.2f, 0.2f, 0.2f };
@@ -454,12 +316,14 @@ namespace RyuRenderer::App::RenderPipeline
         std::shared_ptr<Graphics::Texture2d> boxSpecular;
         std::shared_ptr<Graphics::Texture2d> boxEmission;
         float boxShininess = 128.f;
-        std::vector<glm::mat4> modelBoxs;
+
+        Graphics::Scene::Transform planeTramsform;
+        Graphics::Scene::Transform boxATramsform;
+        Graphics::Scene::Transform boxBTramsform;
 
         // camera
         glm::mat4 view = glm::identity<glm::mat4>();
         glm::mat4 projection = glm::identity<glm::mat4>();
-
         Graphics::Scene::Camera camera;
     };
 }

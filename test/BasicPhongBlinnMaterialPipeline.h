@@ -317,7 +317,7 @@ namespace RyuRenderer::App::RenderPipeline
             if (!boxShader)
                 return;
 
-            // Update camear
+            // Update camera
             camera.OnTick(deltaTimeInS);
             view = camera.GetView();
 
