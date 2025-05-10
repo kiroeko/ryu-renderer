@@ -17,7 +17,7 @@ namespace RyuRenderer::Graphics
 
         Texture2d(GLenum f, GLint uIdx, int w, int h);
         
-        Texture2d(const std::string& textureFilePath, GLint unitIdx = 0);
+        Texture2d(const std::string& textureFilePath, GLint unitIdx = 0, GLenum sWrapping = GL_REPEAT, GLenum tWrapping = GL_REPEAT);
 
         Texture2d(const Texture2d& other) = delete;
 

@@ -4,18 +4,18 @@
 
 namespace RyuRenderer::Graphics::TextureManagerImpl
 {
-    std::shared_ptr<Texture2d> TextureManagerImpl::FindOrCreate2d(const std::string& source, GLint unitIdx)
+    std::shared_ptr<Texture2d> TextureManagerImpl::FindOrCreate2d(const std::string& source, GLint unitIdx, GLenum sWrapping, GLenum tWrapping)
     {
         auto p = Find(source);
         if (p)
             return std::dynamic_pointer_cast<Texture2d>(p);
-        return Create2d(source, unitIdx);
+        return Create2d(source, unitIdx, sWrapping, tWrapping);
     }
 
-    std::shared_ptr<Texture2d> TextureManagerImpl::Create2d(const std::string& source, GLint unitIdx)
+    std::shared_ptr<Texture2d> TextureManagerImpl::Create2d(const std::string& source, GLint unitIdx, GLenum sWrapping, GLenum tWrapping)
     {
         std::unique_lock<std::shared_mutex> lock(mutex);
-        std::shared_ptr<Texture2d> p = std::make_shared<Texture2d>(source, unitIdx);
+        std::shared_ptr<Texture2d> p = std::make_shared<Texture2d>(source, unitIdx, sWrapping, tWrapping);
         if (p)
         {
             products.emplace_back(p);

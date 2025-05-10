@@ -16,9 +16,9 @@ namespace RyuRenderer::Graphics
         class TextureManagerImpl : public Common::Factory<ITexture, TextureManagerImpl>
         {
         public:
-            std::shared_ptr<Texture2d> FindOrCreate2d(const std::string& source, GLint unitIdx = 0);
+            std::shared_ptr<Texture2d> FindOrCreate2d(const std::string& source, GLint unitIdx = 0, GLenum sWrapping = GL_REPEAT, GLenum tWrapping = GL_REPEAT);
 
-            std::shared_ptr<Texture2d> Create2d(const std::string& source, GLint unitIdx = 0);
+            std::shared_ptr<Texture2d> Create2d(const std::string& source, GLint unitIdx = 0, GLenum sWrapping = GL_REPEAT, GLenum tWrapping = GL_REPEAT);
 
             bool BeforeCreate(const std::string& source);
 
