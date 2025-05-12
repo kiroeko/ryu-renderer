@@ -156,9 +156,6 @@ namespace RyuRenderer::App::RenderPipeline
 
         std::vector<Graphics::Mesh> quadMeshes;
 
-        // lights
-        Graphics::Scene::DirectionalLight directionLight = { glm::vec3(0.0f, 0.0f, 0.0f) };
-
         // box
         glm::vec3 boxAmbient = { 0.2f, 0.2f, 0.2f };
         std::shared_ptr<Graphics::Texture2d> grass;
