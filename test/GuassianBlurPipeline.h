@@ -56,7 +56,7 @@ namespace RyuRenderer::App::RenderPipeline
             // 加载场景贴图
             sceneTexture = Graphics::Texture2d("res/textures/cantarella.jpg", 0);
 
-            simpleShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/2d-texture.vert", "res/shaders/2d-texture.frag");
+            simpleShader = Graphics::ShaderManager::GetInstance().Create("res/shaders/2d-texture-vp.vert", "res/shaders/2d-texture-vp.frag");
             if (simpleShader)
             {
                 simpleShader->Use();
