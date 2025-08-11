@@ -1,4 +1,4 @@
-#ifndef __APPSETTINGS_H__
+﻿#ifndef __APPSETTINGS_H__
 #define __APPSETTINGS_H__
 
 #include <string>

@@ -1,4 +1,4 @@
-#ifndef __SCENE_H__
+﻿#ifndef __SCENE_H__
 #define __SCENE_H__
 
 #include "assimp/Importer.hpp"
@@ -28,9 +28,18 @@ namespace RyuRenderer::Graphics::Scene
     class Scene
     {
     public:
+        enum SceneMaterialTypeEnum {
+            AUTO = 0,
+            PBR = 1,
+            PHONG_BLINN = 2
+        };
+
         Scene();
 
-        bool Load(const std::string& modelFilePath);
+        bool Load(
+            const std::string& modelFilePath,
+            bool isFilpUVs = true,
+            SceneMaterialTypeEnum sceneMaterialType = SceneMaterialTypeEnum::AUTO);
 
         void Draw() const;
 
@@ -77,6 +86,28 @@ namespace RyuRenderer::Graphics::Scene
 
         std::list<MeshObjectBatch> MeshObjectBatches;
     private:
+        void LoadMaterial(
+            const SceneMaterialTypeEnum& sceneMaterialType,
+            const aiMaterial* const material,
+            const std::string& textureFileRootPath,
+            const type_info*& outMaterialType,
+            std::any& outMaterialData,
+            std::shared_ptr<IMaterial>& outNewMaterial);
+
+        void LoadMaterialPBR(
+            const aiMaterial* const material,
+            const std::string& textureFileRootPath,
+            const type_info*& outMaterialType,
+            std::any& outMaterialData,
+            std::shared_ptr<IMaterial>& outNewMaterial);
+
+        void LoadMaterialPhongBlinn(
+            const aiMaterial* const material,
+            const std::string& textureFileRootPath,
+            const type_info*& outMaterialType,
+            std::any& outMaterialData,
+            std::shared_ptr<IMaterial>& outNewMaterial);
+
         std::shared_ptr<Graphics::Texture2d> GetTexture(
             const aiMaterial* mat, aiTextureType t, const std::string& textureFileRootPath) const;
 
@@ -86,7 +117,11 @@ namespace RyuRenderer::Graphics::Scene
         inline static std::unordered_map<aiTextureType, GLint> textureTypeUnitIdxMap = {
             { aiTextureType_DIFFUSE, 0 },
             { aiTextureType_SPECULAR, 1 },
-            { aiTextureType_EMISSIVE, 2 }
+            { aiTextureType_EMISSIVE, 2 },
+            { aiTextureType_BASE_COLOR, 3 },
+            { aiTextureType_METALNESS, 4 },
+            { aiTextureType_DIFFUSE_ROUGHNESS, 5 },
+            { aiTextureType_AMBIENT_OCCLUSION, 6 }
         };
     };
 }

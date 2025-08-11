@@ -1,4 +1,4 @@
-#include "graphics/scene/Scene.h"
+﻿#include "graphics/scene/Scene.h"
 
 #include <filesystem>
 #include <iostream>
@@ -53,7 +53,10 @@ namespace RyuRenderer::Graphics::Scene
         lightShader = Graphics::ShaderManager::GetInstance().FindOrCreate("res/shaders/3d-basic-color.vert", "res/shaders/3d-basic-color.frag");
     }
 
-    bool Scene::Load(const std::string& modelFilePath)
+    bool Scene::Load(
+        const std::string& modelFilePath,
+        bool isFilpUVs,
+        SceneMaterialTypeEnum sceneMaterialType)
     {
         if (!std::filesystem::exists(modelFilePath))
             return false;
@@ -65,9 +68,20 @@ namespace RyuRenderer::Graphics::Scene
         }
 
         Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(
-            modelFilePath,
-            aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+        const aiScene* scene = nullptr;
+        if (isFilpUVs)
+        {
+            scene = importer.ReadFile(
+                modelFilePath,
+                aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+        }
+        else
+        {
+            scene = importer.ReadFile(
+                modelFilePath,
+                aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
+        }
+
         if (!scene ||
             scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE ||
             !scene->mMeshes)
@@ -135,46 +149,14 @@ namespace RyuRenderer::Graphics::Scene
             }
 
             // load material
-            std::string trp = textureFileRootPath.string();
-            auto diffuse = GetTexture(material, aiTextureType_DIFFUSE, trp);
-            if (!diffuse)
-            {
-                std::clog << "Model diffuse texture data is invaild." << std::endl;
-                continue;
-            }
-            auto specular = GetTexture(material, aiTextureType_SPECULAR, trp);
-            if (!specular)
-            {
-                std::clog << "Model specular texture data is invaild." << std::endl;
-            }
-            auto emission = GetTexture(material, aiTextureType_EMISSIVE, trp);
-            if (!emission)
-            {
-                std::clog << "Model emission texture data is invaild." << std::endl;
-            }
-
-            // Build dynamic material
             const type_info* materialType = nullptr;
-            std::shared_ptr<IMaterial> newMaterial = nullptr;
             std::any materialData;
-            if (diffuse)
-            {
-                materialType = &typeid(PhongBlinnMaterial);
+            std::shared_ptr<IMaterial> newMaterial = nullptr;
+            std::string trp = textureFileRootPath.string();
 
-                newMaterial = std::make_shared<PhongBlinnMaterial>();
-
-                PhongBlinnMaterialData d = PhongBlinnMaterialData();
-                d.Diffuse = diffuse;
-                d.Specular = specular;
-                d.Emission = emission;
-                d.DirectionLight = &DirectionLight;
-                d.PointLights = &PointLights;
-                d.SpotLights = &SpotLights;
-                materialData = d;
-
-                newMaterial->SetData(materialData);
-            }
+            LoadMaterial(sceneMaterialType, material, trp, materialType, materialData, newMaterial);
             if (!materialType ||
+                !materialData.has_value() ||
                 !newMaterial)
                 continue;
 
@@ -200,6 +182,7 @@ namespace RyuRenderer::Graphics::Scene
                         if (md0 != md1)
                             continue;
                     }
+                    // TODO: Add PBR Support
                     else
                     {
                         continue;
@@ -236,6 +219,100 @@ namespace RyuRenderer::Graphics::Scene
         }
 
         return true;
+    }
+
+    void Scene::LoadMaterial(
+        const SceneMaterialTypeEnum& sceneMaterialType,
+        const aiMaterial* const material,
+        const std::string& textureFileRootPath,
+        const type_info*& outMaterialType,
+        std::any& outMaterialData,
+        std::shared_ptr<IMaterial>& outNewMaterial)
+    {
+        outMaterialType = nullptr;
+        outNewMaterial = nullptr;
+
+        if (sceneMaterialType == SceneMaterialTypeEnum::PBR)
+        {
+            LoadMaterialPBR(material, textureFileRootPath, outMaterialType, outMaterialData, outNewMaterial);
+        }
+        else if (sceneMaterialType == SceneMaterialTypeEnum::PHONG_BLINN)
+        {
+            LoadMaterialPhongBlinn(material, textureFileRootPath, outMaterialType, outMaterialData, outNewMaterial);
+        }
+        else if (sceneMaterialType == SceneMaterialTypeEnum::AUTO)
+        {
+            auto basecolor = GetTexture(material, aiTextureType_BASE_COLOR, textureFileRootPath);
+            if (basecolor)
+            {
+                return LoadMaterial(SceneMaterialTypeEnum::PBR, material, textureFileRootPath, outMaterialType, outMaterialData, outNewMaterial);
+            }
+
+            auto diffuse = GetTexture(material, aiTextureType_DIFFUSE, textureFileRootPath);
+            if (diffuse)
+            {
+                return LoadMaterial(SceneMaterialTypeEnum::PHONG_BLINN, material, textureFileRootPath, outMaterialType, outMaterialData, outNewMaterial);
+            }
+
+            std::cerr << "No enough material texture for auto material exploration mode." << std::endl;
+        }
+    }
+
+    void Scene::LoadMaterialPBR(
+        const aiMaterial* const material,
+        const std::string& textureFileRootPath,
+        const type_info*& outMaterialType,
+        std::any& outMaterialData,
+        std::shared_ptr<IMaterial>& outNewMaterial)
+    {
+        outMaterialType = nullptr;
+        outNewMaterial = nullptr;
+
+        // TODO: generate pbr material
+    }
+
+    void Scene::LoadMaterialPhongBlinn(
+        const aiMaterial* const material,
+        const std::string& textureFileRootPath,
+        const type_info*& outMaterialType,
+        std::any& outMaterialData,
+        std::shared_ptr<IMaterial>& outNewMaterial)
+    {
+        outMaterialType = nullptr;
+        outNewMaterial = nullptr;
+
+        if (!material)
+            return;
+
+        auto diffuse = GetTexture(material, aiTextureType_DIFFUSE, textureFileRootPath);
+        if (!diffuse)
+        {
+            std::cerr << "Model diffuse texture data is invaild." << std::endl;
+            return;
+        }
+        auto specular = GetTexture(material, aiTextureType_SPECULAR, textureFileRootPath);
+        if (!specular)
+        {
+            std::clog << "Model specular texture data is invaild." << std::endl;
+        }
+        auto emission = GetTexture(material, aiTextureType_EMISSIVE, textureFileRootPath);
+        if (!emission)
+        {
+            std::clog << "Model emission texture data is invaild." << std::endl;
+        }
+
+        PhongBlinnMaterialData d = PhongBlinnMaterialData();
+        d.Diffuse = diffuse;
+        d.Specular = specular;
+        d.Emission = emission;
+        d.DirectionLight = &DirectionLight;
+        d.PointLights = &PointLights;
+        d.SpotLights = &SpotLights;
+        outMaterialData = d;
+
+        outMaterialType = &typeid(PhongBlinnMaterial);
+        outNewMaterial = std::make_shared<PhongBlinnMaterial>();
+        outNewMaterial->SetData(outMaterialData);
     }
 
     void Scene::Draw() const
