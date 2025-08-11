@@ -34,7 +34,8 @@ Please note that all other third-party C++ libraries required by the project tha
 ### 3. Config Software
 
 #### 3.1 Config Boost
-Add the environment variable **BOOST_ROOT** in Windows, with its value set to the installation directory of Boost on your local machine.
+Add the system environment variable **BOOST_CONFIG_DIR** in Windows, with its value set to the directory of the file BoostConfig.cmake on your local machine.
+eg: C:\public\tools\boost_1_87_0\lib64-msvc-14.3\cmake\Boost-1.87.0
 
 ### 4. Finished!
 Now you should have completed all the environment preparations.
