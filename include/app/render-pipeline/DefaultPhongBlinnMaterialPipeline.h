@@ -72,7 +72,10 @@ namespace RyuRenderer::App::RenderPipeline
             ));
 
             // load model
-            MainScene.Load("res/models/backpack/backpack.obj");
+            MainScene.Load(
+                "res/models/backpack/backpack.obj",
+                true,
+                RyuRenderer::Graphics::Scene::Scene::SceneMaterialTypeEnum::PHONG_BLINN);
 
             // Other settings
             App::GetInstance().EventPublisher.RegisterHandler(this, &DefaultPhongBlinnMaterialPipeline::OnWindowResize);
