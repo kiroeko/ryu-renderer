@@ -77,7 +77,9 @@ add_executable(${PROJECT_NAME})
 # Find related libraries
 list(INSERT CMAKE_MODULE_PATH 0 ${PROJECT_SOURCE_DIR}/third-party/cmake-module)
 
-find_package(Boost REQUIRED)
+set(Boost_DIR "$ENV{BOOST_ROOT}/lib64-msvc-14.3/cmake/Boost-1.88.0")
+
+find_package(Boost CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(Glad REQUIRED)
 find_package(GLFW REQUIRED)
