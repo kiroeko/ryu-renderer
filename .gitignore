@@ -1,6 +1,5 @@
 # Compiled Object files
 *.o
-*.obj
 
 # CMake
 CMakeLists.txt.user
