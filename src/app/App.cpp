@@ -2,7 +2,6 @@
 
 #include "glad/gl.h"
 #include "stb/stb_image.h"
-#include "Eigen/Dense"
 
 #include "app/events/KeyEvent.h"
 #include "app/events/MouseEvent.h"
