@@ -7,14 +7,16 @@ The goal of this project is to use OpenGl to implement most of the important fea
 However, due to the complexity of implementation, ray tracing / global illumination / mesh shaders and more GPU-driven things are not included in the plan.
 
 ## Tech Stack
-- C++ 20
+- C++ 23
+- [Boost 1.88.0](https://www.boost.org/): Used for basic extensions to C++.
 - [OpenGL 4.6](https://registry.khronos.org/OpenGL/specs/gl/glspec46.core.pdf)
 - [GLAD 2](https://gen.glad.sh/): Used to load OpenGL functions.
 - [GLFW 3.4](https://www.glfw.org/): Used to manage OpenGL context.
-- [STB](https://github.com/nothings/stb): Used to handle image.
+- [RapidJSON 1.1.0](https://rapidjson.org/): Used to operate JSON.
+- [Eigen 3.4.0](https://eigen.tuxfamily.org/): Used for mathematical calculations.
 - [GLM 1.0.1](https://github.com/g-truc/glm): Used to support mathematical geometric operations.
-- [Boost 1.87.0](https://www.boost.org/): Used for basic extensions to C++.
-- [Assimp](https://www.assimp.org/): Used to import and parse 3d models.
+- [STBImage 2.3](https://github.com/nothings/stb): Used to handle image.
+- [Assimp 5.4.3](https://www.assimp.org/): Used to import and parse 3d models.
 
 ## Environment Preparation
 
@@ -36,7 +38,7 @@ Please note that all other third-party C++ libraries required by the project tha
 #### 3.1 Config Boost
 Set a new system environment variable **BOOST_CONFIG_DIR** in Windows to the directory containing BoostConfig.cmake on your local machine.
 
-Example: C:\public\tools\boost_1_87_0\lib64-msvc-14.3\cmake\Boost-1.87.0
+Example: C:\public\tools\boost_1_88_0\lib64-msvc-14.3\cmake\Boost-1.88.0
 
 ### 4. Finished!
 Now you should have completed all the environment preparations.
