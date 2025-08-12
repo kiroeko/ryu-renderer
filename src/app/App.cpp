@@ -25,6 +25,7 @@ namespace RyuRenderer::App
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_SAMPLES, settings.MSAA);
 
         window = glfwCreateWindow(settings.WindowWidth, settings.WindowHeight, settings.WindowName.c_str(), NULL, NULL);
         if (window == nullptr)
@@ -54,6 +55,7 @@ namespace RyuRenderer::App
         glEnable(GL_STENCIL_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_MULTISAMPLE);
 
         glfwSwapInterval(settings.VSyncInterval);
 

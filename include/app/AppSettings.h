@@ -15,6 +15,7 @@ namespace RyuRenderer::App
         int WindowWidth = 1920;
         int WindowHeight = 1080;
         int VSyncInterval = 1;
+        int MSAA = 4;
         bool HideCursor = false;
         bool LockCursorToCenter = false;
     private:

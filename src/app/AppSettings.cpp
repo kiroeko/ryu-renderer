@@ -56,6 +56,11 @@ namespace RyuRenderer::App
             VSyncInterval = doc["VSyncInterval"].GetInt();
         }
 
+        if (doc.HasMember("MSAA") && doc["MSAA"].IsInt())
+        {
+            MSAA = doc["MSAA"].GetInt();
+        }
+
         if (doc.HasMember("HideCursor") && doc["HideCursor"].IsBool())
         {
             HideCursor = doc["HideCursor"].GetBool();
