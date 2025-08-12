@@ -34,7 +34,7 @@ namespace RyuRenderer::Graphics::Scene
             PHONG_BLINN = 2
         };
 
-        Scene();
+        Scene() = default;
 
         bool Load(
             const std::string& modelFilePath,
@@ -80,11 +80,15 @@ namespace RyuRenderer::Graphics::Scene
         static GLint GetTextureUnitIdxByType(aiTextureType t);
 
         Camera Camera;
+
         DirectionalLight DirectionLight;
         std::vector<PointLight> PointLights;
         std::vector<SpotLight> SpotLights;
 
         std::list<MeshObjectBatch> MeshObjectBatches;
+
+        std::list<Graphics::Mesh> LightMeshes;
+        std::shared_ptr<Graphics::Shader> LightShader = nullptr;
     private:
         void LoadMaterial(
             const SceneMaterialTypeEnum& sceneMaterialType,
@@ -110,9 +114,6 @@ namespace RyuRenderer::Graphics::Scene
 
         std::shared_ptr<Graphics::Texture2d> GetTexture(
             const aiMaterial* mat, aiTextureType t, const std::string& textureFileRootPath) const;
-
-        std::list<Graphics::Mesh> lightMeshes;
-        std::shared_ptr<Graphics::Shader> lightShader;
 
         inline static std::unordered_map<aiTextureType, GLint> textureTypeUnitIdxMap = {
             { aiTextureType_DIFFUSE, 0 },

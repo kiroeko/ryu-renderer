@@ -14,6 +14,7 @@
 #include "app/events/KeyEvent.h"
 #include "app/render-pipeline/IRenderPipeline.h"
 #include "graphics/scene/Scene.h"
+#include "graphics/ShaderManager.h"
 
 namespace RyuRenderer::App::RenderPipeline
 {
@@ -76,6 +77,43 @@ namespace RyuRenderer::App::RenderPipeline
                 "res/models/backpack/backpack.obj",
                 true,
                 RyuRenderer::Graphics::Scene::Scene::SceneMaterialTypeEnum::PHONG_BLINN);
+
+            // init meshes
+            MainScene.LightMeshes.emplace_back(Graphics::Mesh(
+                std::vector<GLuint>{
+                    // front
+                    0, 1, 2,
+                    2, 3, 0,
+                    // back
+                    4, 5, 6,
+                    6, 7, 4,
+                    // left
+                    0, 3, 7,
+                    7, 4, 0,
+                    // right
+                    1, 5, 6,
+                    6, 2, 1,
+                    // down
+                    0, 1, 5,
+                    5, 4, 0,
+                    // up
+                    3, 2, 6,
+                    6, 7, 3
+                }, // indexes
+                std::vector<std::array<float, 3>>{
+                    {  -0.1f, -0.1f, -0.1f },
+                    { 0.1f, -0.1f, -0.1f },
+                    { 0.1f,  0.1f, -0.1f },
+                    { -0.1f,  0.1f, -0.1f },
+                    { -0.1f, -0.1f,  0.1f },
+                    { 0.1f, -0.1f, 0.1f },
+                    { 0.1f, 0.1f, 0.1f },
+                    { -0.1f,  0.1f,  0.1f },
+                } // Position
+            ));
+
+            // init shaders
+            MainScene.LightShader = Graphics::ShaderManager::GetInstance().FindOrCreate("res/shaders/3d-basic-color.vert", "res/shaders/3d-basic-color.frag");
 
             // Other settings
             App::GetInstance().EventPublisher.RegisterHandler(this, &DefaultPhongBlinnMaterialPipeline::OnWindowResize);

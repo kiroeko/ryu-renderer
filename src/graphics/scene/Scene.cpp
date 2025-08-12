@@ -4,7 +4,6 @@
 #include <iostream>
 #include <typeinfo>
 
-#include "graphics/ShaderManager.h"
 #include "graphics/TextureManager.h"
 #include "graphics/scene/IMaterial.h"
 #include "graphics/scene/PhongBlinnMaterial.h"
@@ -13,46 +12,6 @@
 
 namespace RyuRenderer::Graphics::Scene
 {
-    Scene::Scene()
-    {
-        // init meshes
-        lightMeshes.emplace_back(Graphics::Mesh(
-            std::vector<GLuint>{
-                // front
-                0, 1, 2,
-                2, 3, 0,
-                // back
-                4, 5, 6,
-                6, 7, 4,
-                // left
-                0, 3, 7,
-                7, 4, 0,
-                // right
-                1, 5, 6,
-                6, 2, 1,
-                // down
-                0, 1, 5,
-                5, 4, 0,
-                // up
-                3, 2, 6,
-                6, 7, 3
-            }, // indexes
-            std::vector<std::array<float, 3>>{
-                {  -0.1f, -0.1f, -0.1f },
-                { 0.1f, -0.1f, -0.1f },
-                { 0.1f,  0.1f, -0.1f },
-                { -0.1f,  0.1f, -0.1f },
-                { -0.1f, -0.1f,  0.1f },
-                { 0.1f, -0.1f, 0.1f },
-                { 0.1f, 0.1f, 0.1f },
-                { -0.1f,  0.1f,  0.1f },
-            } // Position
-        ));
-
-        // init shaders
-        lightShader = Graphics::ShaderManager::GetInstance().FindOrCreate("res/shaders/3d-basic-color.vert", "res/shaders/3d-basic-color.frag");
-    }
-
     bool Scene::Load(
         const std::string& modelFilePath,
         bool isFilpUVs,
@@ -321,31 +280,35 @@ namespace RyuRenderer::Graphics::Scene
         glm::mat4 projection = Camera.GetProjection();
 
         /// draw lights
-        lightShader->Use();
-        lightShader->SetUniform("view", view);
-        lightShader->SetUniform("projection", projection);
-
-        // Point lights
-        for (const auto& l : PointLights)
+        if ((LightShader != nullptr && LightShader->IsValid()) ||
+            LightMeshes.size() > 0)
         {
-            lightShader->SetUniform("model", l.Transformer.GetMatrix());
-            lightShader->SetUniform("color", l.Color);
+            LightShader->Use();
+            LightShader->SetUniform("view", view);
+            LightShader->SetUniform("projection", projection);
 
-            for (const auto& lm : lightMeshes)
+            // Point lights
+            for (const auto& l : PointLights)
             {
-                lm.Draw();
+                LightShader->SetUniform("model", l.Transformer.GetMatrix());
+                LightShader->SetUniform("color", l.Color);
+
+                for (const auto& lm : LightMeshes)
+                {
+                    lm.Draw();
+                }
             }
-        }
 
-        // Spot lights
-        for (const auto& l : SpotLights)
-        {
-            lightShader->SetUniform("model", l.Transformer.GetMatrix());
-            lightShader->SetUniform("color", l.Color);
-
-            for (const auto& lm : lightMeshes)
+            // Spot lights
+            for (const auto& l : SpotLights)
             {
-                lm.Draw();
+                LightShader->SetUniform("model", l.Transformer.GetMatrix());
+                LightShader->SetUniform("color", l.Color);
+
+                for (const auto& lm : LightMeshes)
+                {
+                    lm.Draw();
+                }
             }
         }
 
