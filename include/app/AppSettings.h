@@ -5,15 +5,20 @@
 
 namespace RyuRenderer::App
 {
-    struct AppSettings
+    class AppSettings
     {
+    public:
+        AppSettings();
+
         std::string WindowName = "Ryu Renderer";
         std::string WindowIconPath = "res/icons/icon.png";
         int WindowWidth = 1920;
         int WindowHeight = 1080;
         int VSyncInterval = 1;
-        bool HideCursor = true;
-        bool LockCursorToCenter = true;
+        bool HideCursor = false;
+        bool LockCursorToCenter = false;
+    private:
+        const std::string appSettingsJsonFilePath = "res/data/appsettings.json";
     };
 }
 

@@ -82,6 +82,7 @@ find_package(Boost CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(Glad REQUIRED)
 find_package(GLFW REQUIRED)
+find_package(RapidJSON REQUIRED)
 find_package(Eigen REQUIRED)
 find_package(GLM REQUIRED)
 find_package(STBImage REQUIRED)
@@ -133,6 +134,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     OpenGL::GL
     Glad
     GLFW
+    RapidJSON
     Eigen
     GLM
     STBImage
