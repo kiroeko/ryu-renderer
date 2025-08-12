@@ -13,7 +13,7 @@ get_parent_dierectory(${CMAKE_CURRENT_LIST_DIR} 2)
 set(PROJECT_ROOT ${GPD_RESULT})
 unset(GPD_RESULT)
 
-if (NOT TARGET STB)
+if (NOT TARGET STBImage)
     if(WIN32)
         # Set source directory
         set(SOURCE_DIR ${PROJECT_ROOT}/third-party/stb-image-2.3)
@@ -22,10 +22,10 @@ if (NOT TARGET STB)
         # Set source
         set(STB_SRC_LIST
             ${SOURCE_DIR}/src/stb_image.cpp
-            CACHE INTERNAL "STB Source list")
+            CACHE INTERNAL "STBImage Source list")
 
-        add_library(STB INTERFACE IMPORTED)
-        set_target_properties(STB PROPERTIES
+        add_library(STBImage INTERFACE IMPORTED)
+        set_target_properties(STBImage PROPERTIES
             INTERFACE_INCLUDE_DIRECTORIES "${INCLUDE_DIRS}"
         )
     endif()

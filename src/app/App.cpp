@@ -1,7 +1,8 @@
-#include "app/App.h"
+﻿#include "app/App.h"
 
 #include "glad/gl.h"
 #include "stb/stb_image.h"
+#include "Eigen/Dense"
 
 #include "app/events/KeyEvent.h"
 #include "app/events/MouseEvent.h"

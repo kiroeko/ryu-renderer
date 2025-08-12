@@ -82,8 +82,9 @@ find_package(Boost CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(Glad REQUIRED)
 find_package(GLFW REQUIRED)
-find_package(STB REQUIRED)
+find_package(Eigen REQUIRED)
 find_package(GLM REQUIRED)
+find_package(STBImage REQUIRED)
 find_package(ASSIMP REQUIRED)
 
 set(Boost_USE_STATIC_LIBS ON)
@@ -128,12 +129,13 @@ target_sources(${PROJECT_NAME} PRIVATE
 
 # Set linked libs
 target_link_libraries(${PROJECT_NAME} PRIVATE
+    Boost::boost
     OpenGL::GL
     Glad
     GLFW
-    STB
+    Eigen
     GLM
-    Boost::boost
+    STBImage
     ASSIMP
 )
 
