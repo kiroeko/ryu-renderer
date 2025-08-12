@@ -1,4 +1,4 @@
-# <img src="res\icons\icon.png" width="40px" /> Ryu Renderer
+# <img src="res/icons/icon.png" width="40px" /> Ryu Renderer
 
 An OpenGL renderer for Windows 64 bit platform.
 
