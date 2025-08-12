@@ -16,7 +16,7 @@ unset(GPD_RESULT)
 if (NOT TARGET STB)
     if(WIN32)
         # Set source directory
-        set(SOURCE_DIR ${PROJECT_ROOT}/third-party/stb)
+        set(SOURCE_DIR ${PROJECT_ROOT}/third-party/stb-image-2.3)
         # Set include directories
         set(INCLUDE_DIRS ${SOURCE_DIR}/include)
         # Set source
