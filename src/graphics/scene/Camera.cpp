@@ -1,4 +1,4 @@
-#include "graphics/scene/Camera.h"
+﻿#include "graphics/scene/Camera.h"
 
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
@@ -289,10 +289,13 @@ namespace RyuRenderer::Graphics::Scene
     // Controll
     void Camera::OnTick(double deltaTimeInS)
     {
-        float distance = deltaTimeInS * MoveSpeed;
+        float distancePerTick = deltaTimeInS * MoveSpeed;
+        float rotateDegPerTick = deltaTimeInS * RotateSpeed;
 
         constexpr float epsilon = glm::epsilon<float>();
         glm::vec3 moveDir = glm::zero<glm::vec3>();
+        float rotateDeg = 0.f;
+
         if (isWKeyHolding)
         {
             moveDir = Transformer.GetFrontDirection();
@@ -309,9 +312,22 @@ namespace RyuRenderer::Graphics::Scene
         {
             moveDir = Transformer.GetRightDirection();
         }
+        else if (isQKeyHolding)
+        {
+            rotateDeg = rotateDegPerTick;
+        }
+        else if (isEKeyHolding)
+        {
+            rotateDeg = -rotateDegPerTick;
+        }
+
         if (glm::length(moveDir) >= epsilon)
         {
-            Transformer.Move(moveDir, distance);
+            Transformer.Move(moveDir, distancePerTick);
+        }
+        if (std::abs(rotateDeg) >= epsilon)
+        {
+            Transformer.Rotate(Transformer.GetFrontDirection(), rotateDeg);
         }
     }
 
@@ -369,6 +385,14 @@ namespace RyuRenderer::Graphics::Scene
             {
                 isDKeyHolding = true;
             }
+            else if (e.Key == App::Events::KeyEvent::KeyType::KEY_Q)
+            {
+                isQKeyHolding = true;
+            }
+            else if (e.Key == App::Events::KeyEvent::KeyType::KEY_E)
+            {
+                isEKeyHolding = true;
+            }
         }
         else if (e.Action == App::Events::KeyEvent::ActionType::ACTION_RELEASE)
         {
@@ -387,6 +411,14 @@ namespace RyuRenderer::Graphics::Scene
             else if (e.Key == App::Events::KeyEvent::KeyType::KEY_D)
             {
                 isDKeyHolding = false;
+            }
+            else if (e.Key == App::Events::KeyEvent::KeyType::KEY_Q)
+            {
+                isQKeyHolding = false;
+            }
+            else if (e.Key == App::Events::KeyEvent::KeyType::KEY_E)
+            {
+                isEKeyHolding = false;
             }
         }
     }

@@ -1,4 +1,4 @@
-#ifndef __CAMERA_H__
+﻿#ifndef __CAMERA_H__
 #define __CAMERA_H__
 
 #include "glm/glm.hpp"
@@ -110,6 +110,7 @@ namespace RyuRenderer::Graphics::Scene
         Transform Transformer;
 
         float MoveSpeed = 10.f;
+        float RotateSpeed = 2.f;
         float PitchSensitivity = 0.02f;
         float YawSensitivity = 0.05f;
     private:
@@ -142,6 +143,8 @@ namespace RyuRenderer::Graphics::Scene
         bool isSKeyHolding = false;
         bool isAKeyHolding = false;
         bool isDKeyHolding = false;
+        bool isQKeyHolding = false;
+        bool isEKeyHolding = false;
     };
 }
 
