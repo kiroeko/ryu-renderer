@@ -92,11 +92,13 @@ set(Boost_USE_STATIC_LIBS ON)
 
 # Set definitions
 target_compile_definitions(${PROJECT_NAME} PRIVATE
+    _UNICODE
+    UNICODE
     ${GLFW_DEFINITIONS})
 
 # Set complie options
 target_compile_options(${PROJECT_NAME} PRIVATE
-    -D_UNICODE -DUNICODE "/Zc:__cplusplus"
+    "/Zc:__cplusplus"
 )
 
 # Set properties
