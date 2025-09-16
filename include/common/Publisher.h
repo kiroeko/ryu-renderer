@@ -6,7 +6,7 @@
 #include <memory>
 #include <shared_mutex>
 
-namespace XRenderer::Common
+namespace RyuRenderer::Common
 {
     class Publisher
     {
