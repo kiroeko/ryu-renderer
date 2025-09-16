@@ -1,11 +1,12 @@
-#include <unordered_map>
+Ôªø#include <unordered_map>
 #include <functional>
 #include <any>
 #include <typeindex>
 #include <list>
 #include <memory>
+#include <shared_mutex>
 
-namespace RyuRenderer::Common
+namespace XRenderer::Common
 {
     class Publisher
     {
@@ -41,6 +42,8 @@ namespace RyuRenderer::Common
         template <typename EventType>
         bool UnregisterHandler(size_t id)
         {
+            std::unique_lock lock(mutex);
+
             auto key = std::type_index(typeid(EventType));
             auto it = handlers.find(key);
 
@@ -59,10 +62,12 @@ namespace RyuRenderer::Common
             return false;
         }
 
-        // ∑÷∑¢ ¬º˛
+        // ÂàÜÂèë‰∫ã‰ª∂
         template <typename EventType>
         void Dispatch(const EventType& event) const
         {
+            std::shared_lock lock(mutex);
+
             auto key = std::type_index(typeid(EventType));
             auto it = handlers.find(key);
 
@@ -77,6 +82,8 @@ namespace RyuRenderer::Common
 
         void Clear()
         {
+            std::unique_lock lock(mutex);
+
             handlers.clear();
             nextHandlerID = 0;
         }
@@ -84,6 +91,8 @@ namespace RyuRenderer::Common
         template <typename EventType>
         size_t registerHandlerImpl(std::function<void(const EventType&)> handler)
         {
+            std::unique_lock lock(mutex);
+
             auto key = std::type_index(typeid(EventType));
             auto wrapper =
                 [handler = std::move(handler)](const std::any& event)
@@ -102,5 +111,7 @@ namespace RyuRenderer::Common
         > handlers;
 
         size_t nextHandlerID = 0;
+
+        mutable std::shared_mutex mutex;
     };
 }
